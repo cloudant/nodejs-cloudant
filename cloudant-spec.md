@@ -33,3 +33,11 @@ I do not like the synchronous `.use()` function in Nano. First of all, being syn
   * No `_purge`
   * No temporary views
   * No `all_or_nothing`
+
+## Questions
+
+Should the library enforce mandatory https? What if plaintext http required a lesser-used option?
+
+Should the library enforce mandatory authenticated connections? What if anonymous connections required a lesser-used option?
+
+Maybe if they specify a callback during setup, we will ping the server for them.
