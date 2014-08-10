@@ -4,7 +4,7 @@ var specify  = require('specify')
   , nock     = helpers.nock
   ;
 
-var mock = nock(helpers.cloudant, "cloudant/root");
+var mock = nock(helpers.cloudant, "cloudant/connect");
 var Cloudant = require('../..');
 
 specify('cloudant:connect:by_object', timeout, function (assert) {
