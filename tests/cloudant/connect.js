@@ -28,7 +28,11 @@ specify('cloudant:connect:with_url', timeout, function (assert) {
 });
 
 specify('cloudant:connect:authenticated', timeout, function (assert) {
-  var client = Cloudant({account:'nodejs', password:'secret'})
+  var password = process.env.npm_config_cloudant_password || 'secret';
+  if (process.env.NOCK)
+    password = 'secret';
+
+  var client = Cloudant({account:'nodejs', password:password})
   client.request('_session', function (er, body, headers) {
     assert.equal(er, undefined, 'Authenticated session check');
     assert.equal(headers['status-code'], 200, 'Cloudant session check status OK');
