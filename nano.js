@@ -1236,6 +1236,12 @@ module.exports = exports = nano = function database_module(cfg) {
   // clone if cfg object
   if(typeof cfg === 'object') {
     cfg = _.clone(cfg);
+
+    // Configure for Cloudant, either authenticated or anonymous.
+    if (cfg.account && cfg.username && cfg.password)
+      cfg = 'https://' + cfg.username + ':' + cfg.password + '@' + cfg.account + '.cloudant.com';
+    else if (cfg.account)
+      cfg = 'https://' + cfg.account + '.cloudant.com';
   }
 
   // handle different type of configs
