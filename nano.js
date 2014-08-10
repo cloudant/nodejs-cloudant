@@ -1237,9 +1237,14 @@ module.exports = exports = nano = function database_module(cfg) {
   if(typeof cfg === 'object') {
     cfg = _.clone(cfg);
 
+    // An account can be just the username, or the full cloudant URL.
+    var cloudant_acct = cfg.account && cfg.account.match && cfg.account.match(/(\w+)\.cloudant\.com/);
+    if (cloudant_acct)
+      cfg.account = cloudant_acct[1];
+
     // Configure for Cloudant, either authenticated or anonymous.
-    if (cfg.account && cfg.username && cfg.password)
-      cfg = 'https://' + cfg.username + ':' + cfg.password + '@' + cfg.account + '.cloudant.com';
+    if (cfg.account && cfg.password)
+      cfg = 'https://' + cfg.account + ':' + cfg.password + '@' + cfg.account + '.cloudant.com';
     else if (cfg.account)
       cfg = 'https://' + cfg.account + '.cloudant.com';
   }
