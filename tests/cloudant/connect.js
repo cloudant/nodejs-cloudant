@@ -44,6 +44,14 @@ specify('cloudant:connect:authenticated', timeout, function (assert) {
   });
 });
 
+specify('cloudant:connect:callback', timeout, function (assert) {
+  Cloudant({account:'nodejs', password:password()}, function (er, body, headers) {
+    assert.equal(er, undefined, 'Auto ping when a connect callback is provided');
+    assert.ok(body && body.version, 'Auto ping returns the software version');
+    assert.ok(body && body.userCtx, 'Auto ping returns the client user context');
+  });
+});
+
 specify.run(process.argv.slice(2));
 
 function password() {
