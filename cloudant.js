@@ -70,9 +70,9 @@ function generate_api_key(callback) {
   var nano = this;
 
   if (!nano.config.account)
-    throw new Error('Generating an API key requires an "account" parameter during initialization');
+    throw new Error('generate_api_key requires an "account" parameter during Cloudant initialization');
   if (!nano.config.password)
-    throw new Error('Generating an API key requires an "password" parameter during initialization');
+    throw new Error('generate_api_key requires an "password" parameter during Cloudant initialization');
 
   nano.relax({method:'CLOUDANT', path:'generate_api_key'}, callback);
 }
