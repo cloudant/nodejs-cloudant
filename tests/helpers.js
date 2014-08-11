@@ -38,7 +38,9 @@ helpers.admin   = cfg.admin;
 helpers.pixel   = "Qk06AAAAAAAAADYAAAAoAAAAAQAAAP////8BABgAAAAA" + 
                   "AAAAAAATCwAAEwsAAAAAAAAAAAAAWm2CAA==";
 
+helpers.Cloudant = nano;
 helpers.cloudant_url = cfg.cloudant_url;
+helpers.cloudant_auth = cfg.cloudant_auth;
 helpers.cloudant = process.env.NOCK
   ? nano({account:'nodejs', password:'secret'})
   : nano({account:'nodejs', password:process.env.npm_config_cloudant_password || 'secret'});

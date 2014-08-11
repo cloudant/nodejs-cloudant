@@ -3,5 +3,5 @@
 , "admin"   : "http://admin:password@localhost:5984"
 
 , "cloudant_url"  : "https://nodejs.cloudant.com"
-, "cloudant_admin": "https://admin:secret@nodejs.cloudant.com"
+, "cloudant_auth" : "https://cloudant.com"
 }

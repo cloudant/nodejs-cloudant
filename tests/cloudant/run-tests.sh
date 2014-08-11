@@ -14,3 +14,4 @@ fi
 set -e
 set -x
 node tests/cloudant/connect.js
+node tests/cloudant/authorization.js
