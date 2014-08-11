@@ -5,6 +5,7 @@
 , { "path"     : "/"
   , "response" : "{\"ok\": true, \"version\": \"1.1.0\"}"
   }
+
 , { "method"   : "get"
   , "path"     : "/"
   , "status"   : 200
@@ -15,5 +16,16 @@
   , "status"   : 200
   , "response" : "{\"ok\":true,\"info\":{\"authentication_db\":\"_users\",\"authentication_handlers\":[\"cookie\",\"default\"]},\"userCtx\":{\"name\":null,\"roles\":[]}}"
   }
+, { "method"   : "get"
+  , "path"     : "/"
+  , "status"   : 200
+  , "response" : "{\"couchdb\":\"Welcome\",\"version\":\"1.1.0\"}"
+  }
+, { "method"   : "get"
+  , "path"     : "/_session"
+  , "status"   : 200
+  , "response" : "{\"ok\":true,\"info\":{\"authentication_db\":\"_users\",\"authentication_handlers\":[\"cookie\",\"default\"]},\"userCtx\":{\"name\":null,\"roles\":[]}}"
+  }
+
   , {"path": "/_all_dbs", "response": "{}"}
 ]

@@ -40,7 +40,7 @@ try { follow = require('follow'); } catch (err) {}
  * dinosaurs spaceships!
  *
  */
-module.exports = exports = nano = function database_module(cfg) {
+module.exports = exports = nano = function database_module(cfg, couchdb_callback) {
   var public_functions = {}
     , logging
     , path
@@ -1348,11 +1348,16 @@ module.exports = exports = nano = function database_module(cfg) {
 
     cfg.url = u.format(format);
 
-    return document_module(db);
+    var result = document_module(db);
   }
   else
-    return public_functions;
+    var result = public_functions;
 
+  // If the user specified a callback to the database module, try to ping the server.
+  if (couchdb_callback)
+    ping_server(couchdb_callback);
+
+  return result;
 };
 
 /*

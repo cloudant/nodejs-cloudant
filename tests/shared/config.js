@@ -26,6 +26,12 @@ specify("shared_config:ping", timeout, function (assert) {
     assert.ok(pong.version, "Pong version is defined");
     assert.ok(pong.userCtx, "Pong userCtx is defined");
   });
+
+  Nano(helpers.couch, function (err, pong) {
+    assert.equal(err, undefined, "Failed to automatically run ping callback");
+    assert.ok(pong.version, "Pong version is defined");
+    assert.ok(pong.userCtx, "Pong userCtx is defined");
+  });
 });
 
 specify("shared_config:url_parsing", timeout, function (assert) {
