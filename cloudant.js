@@ -1,4 +1,5 @@
 module.exports = { reconfigure: reconfigure
+                 , fix_request     : fix_request
                  , db_functions    : db_functions
                  , server_functions: server_functions
                  };
@@ -38,4 +39,8 @@ function db_functions(db, relax) {
 // Add the Cloudant API for server functions.
 function server_functions(nano) {
   return nano;
+}
+
+
+function fix_request(req, config) {
 }

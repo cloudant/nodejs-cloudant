@@ -254,6 +254,9 @@ module.exports = exports = nano = function database_module(cfg, couchdb_callback
       req.body = qs.stringify(opts.form).toString('utf8');
     }
 
+    // Modify the request if necessary for Cloudant stuff.
+    cloudant.fix_request(req, cfg);
+
     // log our request
     log(req);
 
