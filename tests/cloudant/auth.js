@@ -17,7 +17,7 @@ specify('cloudant:generate_api_key', timeout, function (assert) {
   catch (er) { pw_error = er }
   assert.ok(pw_error, 'Throw an error if a password is not provided');
 
-  client = Cloudant({account:'nodejs', password:password()})
+  client = Cloudant({account:'nodejs', password:helpers.cloudant_pw()})
   client.generate_api_key(function(er, body) {
     assert.equal(er, undefined, 'Hit the generate_api_key endpoint');
     assert.equal(body.ok, true, 'Good response generating API key');
@@ -38,7 +38,7 @@ specify('cloudant:set_permissions', timeout, function (assert) {
   assert.ok(pw_error, 'Throw an error if a password is not provided');
 
   var opts = {database:'third_party_db', username:third_party, roles:['_reader','_writer']};
-  client = Cloudant({account:'nodejs', password:password()})
+  client = Cloudant({account:'nodejs', password:helpers.cloudant_pw()})
   client.set_permissions(opts, function(er, body) {
     assert.equal(er, undefined, 'Hit the generate_api_key endpoint');
     assert.equal(body.ok, true, 'Good response setting permissions');
@@ -46,8 +46,3 @@ specify('cloudant:set_permissions', timeout, function (assert) {
 });
 
 specify.run(process.argv.slice(2));
-
-function password() {
-  var pw = process.env.npm_config_cloudant_password || 'secret';
-  return process.env.NOCK ? 'secret' : pw;
-}
