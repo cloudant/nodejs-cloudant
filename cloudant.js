@@ -95,5 +95,9 @@ function set_permissions(opts, callback) {
   if (!nano.config.password)
     throw new Error('set_permissions requires an "password" parameter during initialization');
 
+  // Add the username prefix that Cloudant wants.
+  var db = opts.database || '';
+  opts.database = nano.config.account + '/' + db;
+
   nano.relax({method:'CLOUDANT', path:'set_permissions', form:opts}, callback);
 }

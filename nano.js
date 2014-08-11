@@ -247,15 +247,15 @@ module.exports = exports = nano = function database_module(cfg, couchdb_callback
       } // json data
     }
 
+    // Modify the request if necessary for Cloudant stuff.
+    cloudant.fix_request(req, cfg);
+
     // if its a form make sure content type is set apropriately
     if(opts.form) {
       req.headers['content-type'] =
         'application/x-www-form-urlencoded; charset=utf-8';
       req.body = qs.stringify(opts.form).toString('utf8');
     }
-
-    // Modify the request if necessary for Cloudant stuff.
-    cloudant.fix_request(req, cfg);
 
     // log our request
     log(req);
