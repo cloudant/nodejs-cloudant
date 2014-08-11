@@ -40,6 +40,7 @@ function db_functions(db, relax) {
 // Add the Cloudant API for server functions.
 function server_functions(nano) {
   nano.generate_api_key = generate_api_key;
+  nano.set_permissions  = set_permissions;
   return nano;
 }
 
@@ -63,6 +64,14 @@ function fix_request(req, config) {
     req.method = 'POST';
     req.uri = 'https://' + config.account + ':' + config.password + '@cloudant.com/api/generate_api_key';
   }
+
+  else if (url.pathname == '/set_permissions') {
+    req.method = 'POST';
+    req.uri = 'https://' + config.account + ':' + config.password + '@cloudant.com/api/set_permissions';
+  }
+
+  else
+    throw new Error('Bad Cloudant request: ' + JSON.stringify(req));
 }
 
 
@@ -75,4 +84,16 @@ function generate_api_key(callback) {
     throw new Error('generate_api_key requires an "password" parameter during Cloudant initialization');
 
   nano.relax({method:'CLOUDANT', path:'generate_api_key'}, callback);
+}
+
+
+function set_permissions(opts, callback) {
+  var nano = this;
+
+  if (!nano.config.account)
+    throw new Error('set_permissions requires an "account" parameter during initialization');
+  if (!nano.config.password)
+    throw new Error('set_permissions requires an "password" parameter during initialization');
+
+  nano.relax({method:'CLOUDANT', path:'set_permissions', form:opts}, callback);
 }
