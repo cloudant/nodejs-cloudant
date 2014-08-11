@@ -1,0 +1,37 @@
+[
+  { "method"   : "put"
+  , "path"     : "/query_db"
+  , "reqheaders": {"authorization":"Basic bm9kZWpzOnNlY3JldA=="}
+  , "response" : "{\"ok\":true}"
+  }
+
+, { "method"   : "post"
+  , "path"     : "/query_db"
+  , "body"     : "*"
+  , "response" : "{\"ok\":true, \"id\":\"69cf679387a676151ec8c5de6d1cb9df\", \"rev\":\"1-d1a0252d7e12b821abc4e4f02002a410\"}"
+  }
+, { "method"   : "post"
+  , "path"     : "/query_db"
+  , "body"     : "*"
+  , "response" : "{\"ok\":true, \"id\":\"61336be02a970cd6c547ae3ce7984e29\", \"rev\":\"1-c7aab454f4e7393f5d684c079a020816\"}"
+  }
+, { "method"   : "post"
+  , "path"     : "/query_db"
+  , "body"     : "*"
+  , "response" : "{\"ok\":true, \"id\":\"96e35c918abfa28d11278751129cfe92\", \"rev\":\"1-a388649f41726446cf736b129b1bf3fe\"}"
+  }
+, { "method"   : "post"
+  , "path"     : "/query_db"
+  , "body"     : "*"
+  , "response" : "{\"ok\":true, \"id\":\"69cf679387a676151ec8c5de6d1cc63a\", \"rev\":\"1-2bbb34d79d04a1fa807bcf9a66356c76\"}"
+  }
+
+, { "method"   : "get"
+  , "path"     : "/query_db/_index"
+  , "response" : "{\"indexes\":[{\"ddoc\":null,\"name\":\"_all_docs\",\"type\":\"special\",\"def\":{\"fields\":[{\"_id\":\"asc\"}]}}]}"
+  }
+, { "method"   : "delete"
+  , "path"     : "/query_db"
+  , "response" : "{\"ok\":true}"
+  }
+]

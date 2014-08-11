@@ -15,3 +15,4 @@ set -e
 set -x
 node tests/cloudant/connect.js
 node tests/cloudant/auth.js
+node tests/cloudant/query.js

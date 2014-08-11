@@ -31,12 +31,6 @@ function reconfigure(config) {
 }
 
 
-// Add the Cloudant API for database functions.
-function db_functions(db, relax) {
-  return db;
-}
-
-
 // Add the Cloudant API for server functions.
 function server_functions(nano) {
   nano.generate_api_key = generate_api_key;
@@ -100,4 +94,18 @@ function set_permissions(opts, callback) {
   opts.database = nano.config.account + '/' + db;
 
   nano.relax({method:'CLOUDANT', path:'set_permissions', form:opts}, callback);
+}
+
+
+// Add the Cloudant API for database functions.
+function db_functions(db, relax) {
+  db.index = {db:db, relax:relax};
+  db.index.list = index_list;
+
+  return db;
+}
+
+function index_list(callback) {
+  var db = this.db;
+  return this.relax({db:db.config.db, path:'_index'}, callback);
 }
