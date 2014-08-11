@@ -66,7 +66,7 @@
   },
   "scripts": {
     "test-cloudant": "env NOCK=on sh tests/cloudant/run-tests.sh",
-    "test-cloudant-remote": "sh tests/cloudant/run-tests.sh",
+    "test-cloudant-live": "sh tests/cloudant/run-tests.sh",
     "test": "node node_modules/specify/bin/specify -e NOCK=on",
     "compact": "node node_modules/specify/bin/specify -e NOCK=on -r compact",
     "nock_off": "node node_modules/specify/bin/specify"
