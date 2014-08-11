@@ -33,12 +33,15 @@ function fake_chain() {
 helpers.timeout = cfg.timeout;
 helpers.nano    = nano(cfg.couch);
 helpers.Nano    = nano;
-helpers.cloudant= cfg.cloudant;
-helpers.Cloudant= nano(cfg.cloudant);
 helpers.couch   = cfg.couch;
 helpers.admin   = cfg.admin;
 helpers.pixel   = "Qk06AAAAAAAAADYAAAAoAAAAAQAAAP////8BABgAAAAA" + 
                   "AAAAAAATCwAAEwsAAAAAAAAAAAAAWm2CAA==";
+
+helpers.cloudant_url = cfg.cloudant_url;
+helpers.cloudant = process.env.NOCK
+  ? nano({account:'nodejs', password:'secret'})
+  : nano({account:'nodejs', password:process.env.npm_config_cloudant_password || 'secret'});
 
 var auth        = require("url").parse(cfg.admin).auth.split(":");
 
