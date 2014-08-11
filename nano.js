@@ -28,6 +28,8 @@ var fs          = require('fs')
   , nano
   ;
 
+var cloudant = require('./cloudant.js');
+
 try { follow = require('follow'); } catch (err) {}
 
 /*

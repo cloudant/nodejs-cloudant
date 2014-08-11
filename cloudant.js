@@ -1,0 +1,8 @@
+module.exports = {
+                 }
+
+//
+// Cloudant functionality
+//
+
+
