@@ -21,9 +21,9 @@ function reconfigure(config) {
 
   // Configure for Cloudant, either authenticated or anonymous.
   if (config.account && config.password)
-    config = 'https://' + config.account + ':' + config.password + '@' + config.account + '.cloudant.com';
+    config.url = 'https://' + config.account + ':' + config.password + '@' + config.account + '.cloudant.com';
   else if (config.account)
-    config = 'https://' + config.account + '.cloudant.com';
+    config.url = 'https://' + config.account + '.cloudant.com';
 
   return config;
 }
