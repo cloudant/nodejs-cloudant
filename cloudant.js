@@ -1,4 +1,6 @@
 module.exports = { reconfigure: reconfigure
+                 , db_functions    : db_functions
+                 , server_functions: server_functions
                  };
 
 //
@@ -24,4 +26,16 @@ function reconfigure(config) {
     config = 'https://' + config.account + '.cloudant.com';
 
   return config;
+}
+
+
+// Add the Cloudant API for database functions.
+function db_functions(db, relax) {
+  return db;
+}
+
+
+// Add the Cloudant API for server functions.
+function server_functions(nano) {
+  return nano;
 }

@@ -1247,6 +1247,7 @@ module.exports = exports = nano = function database_module(cfg, couchdb_callback
       return compact_db(db_name,design_name,cb);
     };
 
+    cloudant.db_functions(public_functions, relax);
     return public_functions;
   }
 
@@ -1344,7 +1345,7 @@ module.exports = exports = nano = function database_module(cfg, couchdb_callback
     var result = document_module(db);
   }
   else
-    var result = public_functions;
+    var result = cloudant.server_functions(public_functions);
 
   // If the user specified a callback to the database module, try to ping the server.
   if (couchdb_callback)
