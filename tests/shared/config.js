@@ -20,6 +20,14 @@ specify("shared_config:root", timeout, function (assert) {
   });
 });
 
+specify("shared_config:ping", timeout, function (assert) {
+  nano.ping(function (err, pong) {
+    assert.equal(err, undefined, "Failed to ping");
+    assert.ok(pong.version, "Pong version is defined");
+    assert.ok(pong.userCtx, "Pong userCtx is defined");
+  });
+});
+
 specify("shared_config:url_parsing", timeout, function (assert) {
   var base_url = 'http://someurl.com';
 

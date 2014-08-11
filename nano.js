@@ -370,6 +370,46 @@ module.exports = exports = nano = function database_module(cfg) {
   }
 
  /***************************************************************************
+  * ping                                                                    *
+  ***************************************************************************/
+  /*
+   * Confirms that CouchDB is up and that access is granted.
+   *
+   * e.g.
+   * nano.ping(function (err, pong) {
+   *   if (err) {
+   *     return console.log('oh noes!')
+   *   }
+   *
+   *   console.log('CouchDB version is ' + pong.version);
+   *   console.log('My user context is ' + JSON.stringify(pong.userCtx));
+   * });
+   */
+  function ping_server(callback) {
+    // Only call back once.
+    var inner_callback = callback;
+    callback = function(er, result) {
+      inner_callback(er, result);
+      inner_callback = function() {};
+    };
+
+    var done = {welcome:false, session:false};
+    session(       function(er, body) { returned('session', er, body) });
+    relax({db:""}, function(er, body) { returned('welcome', er, body) });
+
+    function returned(type, er, body) {
+      if (er)
+        return callback(er);
+      done[type] = body;
+      if (done.welcome && done.session) {
+        // Return the CouchDB "Welcome" body but with the userCtx added in.
+        done.welcome.userCtx = done.session.userCtx;
+        callback(null, done.welcome);
+      }
+    }
+  }
+
+ /***************************************************************************
   * session                                                                 *
   ***************************************************************************/
   /*
@@ -1228,6 +1268,7 @@ module.exports = exports = nano = function database_module(cfg) {
     , relax          : relax             // alias
     , dinosaur       : relax             // alias
     , auth           : auth_server
+    , ping           : ping_server
     , session        : session
     , updates        : updates
     , follow_updates : follow_updates
