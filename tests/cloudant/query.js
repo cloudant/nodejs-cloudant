@@ -8,6 +8,7 @@ var specify  = require('specify')
 var mock = nock(helpers.cloudant_url, "cloudant/query");
 
 var db;
+var last_index_ddoc;
 
 specify("cloudant:query:setup", timeout, function (assert) {
   cloudant.db.create('query_db', function(er) {
@@ -42,7 +43,7 @@ specify('cloudant:query:create', timeout, function(assert) {
   var last  = {name:'last-name' , type:'json', index:{fields:['last']}}
 
   db.index(first, function(er1, body1) {
-    db.index(last, function(er2, body2) {
+    db.index(last, function(er2, body2,H) {
       assert.equal(er1, undefined, 'Create first-name index');
       assert.equal(er2, undefined, 'Create last-name index');
       assert.equal(body1.result, 'created', 'first-name index created');
@@ -58,6 +59,9 @@ specify('cloudant:query:get', timeout, function(assert) {
     assert.equal(body.indexes[0].name, '_all_docs', 'First index is _all_docs');
     assert.equal(body.indexes[1].name, 'first-name', 'Second index is by first name');
     assert.equal(body.indexes[2].name, 'last-name', 'Third index is by last name');
+
+    // Save the last-name index for deletion later.
+    last_index_ddoc = body.indexes[2].ddoc
   });
 });
 
@@ -70,6 +74,13 @@ specify('cloudant:query:find', timeout, function(assert) {
       assert.equal(name.docs.length, 2, 'Found 2 Alice docs');
       assert.equal(last.docs.length, 1, 'Found the Barnham doc');
     });
+  });
+});
+
+specify('cloudant:query:delete', timeout, function(assert) {
+  db.index.del({ddoc:last_index_ddoc, name:'last-name'}, function(er, body) {
+    assert.equal(er, undefined, 'Delete last-name index');
+    assert.equal(body.ok, true, 'Server delete last-name: ok');
   });
 });
 

@@ -124,3 +124,16 @@ function index_create(relax, db, definition, callback) {
 function index_find(relax, db, query, callback) {
   return relax({method:'POST', db:db.config.db, path:'_find', body:query}, callback);
 }
+
+function index_delete(relax, db, spec, callback) {
+  spec = spec || {}
+  if (!spec.ddoc)
+    throw new Error('index.del() must specify a "ddoc" value');
+  if (!spec.name)
+    throw new Error('index.del() must specify a "name" value');
+
+  var type = spec.type || 'json';
+  var path = '_index/' + spec.ddoc + '/' + type + '/' + spec.name;
+
+  return relax({method:'DELETE', db:db.config.db, path:path}, callback);
+}

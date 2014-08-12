@@ -54,6 +54,11 @@
   }
 
 , { "method"   : "delete"
+  , "path"     : "/query_db/_index/_design/9abb3691d4367734ad2ceb99d67287750988f0a8/json/last-name"
+  , "response" : "{\"ok\":true}"
+  }
+
+, { "method"   : "delete"
   , "path"     : "/query_db"
   , "response" : "{\"ok\":true}"
   }
