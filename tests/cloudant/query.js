@@ -41,8 +41,8 @@ specify('cloudant:query:create', timeout, function(assert) {
   var first = {name:'first-name', type:'json', index:{fields:['name']}}
   var last  = {name:'last-name' , type:'json', index:{fields:['last']}}
 
-  db.index.create(first, function(er1, body1) {
-    db.index.create(last, function(er2, body2) {
+  db.index(first, function(er1, body1) {
+    db.index(last, function(er2, body2) {
       assert.equal(er1, undefined, 'Create first-name index');
       assert.equal(er2, undefined, 'Create last-name index');
       assert.equal(body1.result, 'created', 'first-name index created');
@@ -52,7 +52,7 @@ specify('cloudant:query:create', timeout, function(assert) {
 });
 
 specify('cloudant:query:get', timeout, function(assert) {
-  db.index.list(function(er, body) {
+  db.index(function(er, body) {
     assert.equal(er, undefined, 'List indexes works');
     assert.equal(body.indexes.length, 3, 'Two custom indexes + _all_docs');
     assert.equal(body.indexes[0].name, '_all_docs', 'First index is _all_docs');
@@ -62,8 +62,8 @@ specify('cloudant:query:get', timeout, function(assert) {
 });
 
 specify('cloudant:query:find', timeout, function(assert) {
-  db.index.find({selector:{name:'Alice'}}, function(er1, name) {
-    db.index.find({selector:{last:'Barnham'}}, function(er2, last) {
+  db.find({selector:{name:'Alice'}}, function(er1, name) {
+    db.find({selector:{last:'Barnham'}}, function(er2, last) {
       assert.equal(er1, undefined, 'Create first-name index');
       assert.equal(er2, undefined, 'Create last-name index');
 
