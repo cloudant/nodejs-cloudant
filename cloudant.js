@@ -99,30 +99,28 @@ function set_permissions(opts, callback) {
 
 // Add the Cloudant API for database functions.
 function db_functions(db, relax) {
-  db._cloudant_relax = relax;
-  db.index = db_index;
-  db.find = index_find;
+  db.index     = function(def , cb) { db_index    (relax, db, def , cb) };
+  db.index.del = function(spec, cb) { index_delete(relax, db, spec, cb) };
+  db.find      = function(qry , cb) { index_find  (relax, db, qry , cb) };
 
   return db;
 }
 
-function db_index(definition, callback) {
-  var db = this;
+function db_index(relax, db, definition, callback) {
   if (!callback && typeof definition == 'function')
-    return index_list(db, definition); // "definition" is in fact the callback.
+    return index_list(relax, db, definition); // "definition" is in fact the callback.
   else
-    return index_create(db, definition, callback);
+    return index_create(relax, db, definition, callback);
 }
 
-function index_list(db, callback) {
-  return db._cloudant_relax({db:db.config.db, path:'_index'}, callback);
+function index_list(relax, db, callback) {
+  return relax({db:db.config.db, path:'_index'}, callback);
 }
 
-function index_create(db, definition, callback) {
-  return db._cloudant_relax({method:'POST', db:db.config.db, path:'_index', body:definition}, callback);
+function index_create(relax, db, definition, callback) {
+  return relax({method:'POST', db:db.config.db, path:'_index', body:definition}, callback);
 }
 
-function index_find(query, callback) {
-  var db = this;
-  return db._cloudant_relax({method:'POST', db:db.config.db, path:'_find', body:query}, callback);
+function index_find(relax, db, query, callback) {
+  return relax({method:'POST', db:db.config.db, path:'_find', body:query}, callback);
 }
