@@ -39,7 +39,18 @@
 
 , { "method"   : "get"
   , "path"     : "/query_db/_index"
-  , "response" : "{\"indexes\":[{\"ddoc\":null,\"name\":\"_all_docs\",\"type\":\"special\",\"def\":{\"fields\":[{\"_id\":\"asc\"}]}}]}"
+  , "response" : "{\"indexes\":[{\"ddoc\":null,\"name\":\"_all_docs\",\"type\":\"special\",\"def\":{\"fields\":[{\"_id\":\"asc\"}]}},{\"ddoc\":\"_design/862f3b5321a1987df6d36dc8607fc678879210b5\",\"name\":\"first-name\",\"type\":\"json\",\"def\":{\"fields\":[{\"name\":\"asc\"}]}},{\"ddoc\":\"_design/9abb3691d4367734ad2ceb99d67287750988f0a8\",\"name\":\"last-name\",\"type\":\"json\",\"def\":{\"fields\":[{\"last\":\"asc\"}]}}]}"
+  }
+
+, { "method"   : "post"
+  , "path"     : "/query_db/_find"
+  , "body"     : "{\"selector\":{\"name\":\"Alice\"}}"
+  , "response" : "{\"docs\":[{\"_id\":\"9b7095b7afc2c2306092499b1759584d\",\"_rev\":\"1-d1a0252d7e12b821abc4e4f02002a410\",\"name\":\"Alice\",\"last\":\"Cooper\",\"score\":15},{\"_id\":\"e3246fdbd7128ebaba0a09114cddcb59\",\"_rev\":\"1-c7aab454f4e7393f5d684c079a020816\",\"name\":\"Alice\",\"last\":\"Barnham\",\"score\":12}]}"
+  }
+, { "method"   : "post"
+  , "path"     : "/query_db/_find"
+  , "body"     : "{\"selector\":{\"last\":\"Barnham\"}}"
+  , "response" : "{\"docs\":[{\"_id\":\"e3246fdbd7128ebaba0a09114cddcb59\",\"_rev\":\"1-c7aab454f4e7393f5d684c079a020816\",\"name\":\"Alice\",\"last\":\"Barnham\",\"score\":12}]}"
   }
 
 , { "method"   : "delete"

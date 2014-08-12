@@ -54,11 +54,22 @@ specify('cloudant:query:create', timeout, function(assert) {
 specify('cloudant:query:get', timeout, function(assert) {
   db.index.list(function(er, body) {
     assert.equal(er, undefined, 'List indexes works');
-
     assert.equal(body.indexes.length, 3, 'Two custom indexes + _all_docs');
     assert.equal(body.indexes[0].name, '_all_docs', 'First index is _all_docs');
     assert.equal(body.indexes[1].name, 'first-name', 'Second index is by first name');
     assert.equal(body.indexes[2].name, 'last-name', 'Third index is by last name');
+  });
+});
+
+specify('cloudant:query:find', timeout, function(assert) {
+  db.index.find({selector:{name:'Alice'}}, function(er1, name) {
+    db.index.find({selector:{last:'Barnham'}}, function(er2, last) {
+      assert.equal(er1, undefined, 'Create first-name index');
+      assert.equal(er2, undefined, 'Create last-name index');
+
+      assert.equal(name.docs.length, 2, 'Found 2 Alice docs');
+      assert.equal(last.docs.length, 1, 'Found the Barnham doc');
+    });
   });
 });
 
