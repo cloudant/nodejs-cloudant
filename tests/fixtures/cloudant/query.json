@@ -26,10 +26,22 @@
   , "response" : "{\"ok\":true, \"id\":\"69cf679387a676151ec8c5de6d1cc63a\", \"rev\":\"1-2bbb34d79d04a1fa807bcf9a66356c76\"}"
   }
 
+, { "method"   : "post"
+  , "path"     : "/query_db/_index"
+  , "body"     : "{\"name\":\"first-name\",\"type\":\"json\",\"index\":{\"fields\":[\"name\"]}}"
+  , "response" : "{\"result\":\"created\"}"
+  }
+, { "method"   : "post"
+  , "path"     : "/query_db/_index"
+  , "body"     : "{\"name\":\"last-name\",\"type\":\"json\",\"index\":{\"fields\":[\"last\"]}}"
+  , "response" : "{\"result\":\"created\"}"
+  }
+
 , { "method"   : "get"
   , "path"     : "/query_db/_index"
   , "response" : "{\"indexes\":[{\"ddoc\":null,\"name\":\"_all_docs\",\"type\":\"special\",\"def\":{\"fields\":[{\"_id\":\"asc\"}]}}]}"
   }
+
 , { "method"   : "delete"
   , "path"     : "/query_db"
   , "response" : "{\"ok\":true}"

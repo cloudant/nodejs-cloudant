@@ -101,6 +101,7 @@ function set_permissions(opts, callback) {
 function db_functions(db, relax) {
   db.index = {db:db, relax:relax};
   db.index.list = index_list;
+  db.index.create = index_create;
 
   return db;
 }
@@ -108,4 +109,9 @@ function db_functions(db, relax) {
 function index_list(callback) {
   var db = this.db;
   return this.relax({db:db.config.db, path:'_index'}, callback);
+}
+
+function index_create(opts, callback) {
+  var db = this.db;
+  return this.relax({method:'POST', db:db.config.db, path:'_index', body:opts}, callback);
 }
