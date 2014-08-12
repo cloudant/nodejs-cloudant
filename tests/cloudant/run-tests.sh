@@ -12,7 +12,11 @@ fi
 
 # Since npm ran, it is safe to assume the current working directory is the project root.
 set -e
-set -x
-node tests/cloudant/connect.js
-node tests/cloudant/auth.js
-node tests/cloudant/query.js
+
+if [ "$cloudant_test" ]; then
+  node "tests/cloudant/$cloudant_test.js"
+else
+  for file in tests/cloudant/*.js ; do
+    node "$file"
+  done
+fi
