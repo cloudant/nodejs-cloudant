@@ -1352,7 +1352,12 @@ module.exports = exports = nano = function database_module(cfg, couchdb_callback
 
   // If the user specified a callback to the database module, try to ping the server.
   if (couchdb_callback)
-    ping_server(couchdb_callback);
+    ping_server(function(er, pong, headers) {
+      if (er)
+        couchdb_callback(er);
+      else
+        couchdb_callback(null, result, pong, headers);
+    });
 
   return result;
 };

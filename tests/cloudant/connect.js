@@ -45,8 +45,9 @@ specify('cloudant:connect:authenticated', timeout, function (assert) {
 });
 
 specify('cloudant:connect:callback', timeout, function (assert) {
-  Cloudant({account:'nodejs', password:helpers.cloudant_pw()}, function (er, body, headers) {
+  Cloudant({account:'nodejs', password:helpers.cloudant_pw()}, function (er, cloudant, body) {
     assert.equal(er, undefined, 'Auto ping when a connect callback is provided');
+    assert.equal(typeof cloudant.relax, 'function', 'Auto ping returns initialized Cloudant client');
     assert.ok(body && body.version, 'Auto ping returns the software version');
     assert.ok(body && body.userCtx, 'Auto ping returns the client user context');
   });
