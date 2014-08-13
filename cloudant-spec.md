@@ -6,6 +6,8 @@ Rather than supply a full URL, do we just ask for your username?
 
 Should we permit plaintext HTTP? Should we permit it for unauthenticated requests but not for authenticated ones?
 
+Audit all the code where users have to specify "_design/foo" in some places but just "foo" in others (e.g. db.search).
+
 I do not like the synchronous `.use()` function in Nano. First of all, being synchronous makes it a rarity. But also, basically it is just appending a string in memory, making a "namespace"; however, that is a good opportunity to reach out and confirm
 1. That the database exists
 2. That it can be read by us (in other words, if it exists but we are not authorized, we would not want that error to show up when we try to write a document, but earler)
