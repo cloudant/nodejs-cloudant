@@ -1,9 +1,9 @@
 {
-  "name": "nano",
+  "name": "cloudant",
   "description": "minimalistic couchdb driver for node.js",
   "license": "Apache 2.0",
-  "homepage": "http://github.com/dscape/nano",
-  "repository": "git://github.com/dscape/nano",
+  "homepage": "http://github.com/cloudant/nodejs-cloudant",
+  "repository": "git://github.com/cloudant/nodejs-cloudant",
   "version": "5.10.1",
   "author": "Nuno Job <nunojobpinto@gmail.com> (http://nunojob.com)",
   "contributors": [
@@ -44,6 +44,7 @@
     "Alex Schenkman <alex@schenkman.info>"
   ],
   "keywords": [
+    "cloudant",
     "couchdb",
     "data",
     "request",
