@@ -1,0 +1,18 @@
+[
+  { "method"   : "put"
+  , "path"     : "/search_db"
+  , "reqheaders": {"authorization":"Basic bm9kZWpzOnNlY3JldA=="}
+  , "response" : "{\"ok\":true}"
+  }
+
+, { "method"   : "post"
+  , "path"     : "/search_db/_bulk_docs"
+  , "body"     : "*"
+  , "response" : "[{\"id\":\"3d68bd1be24220ab36d0ad6a97ec5f9d\",\"rev\":\"1-3e1f4ff28eaa99dc471ff994051f30ab\"},{\"id\":\"3d68bd1be24220ab36d0ad6a97ec699a\",\"rev\":\"1-35c7c65df2cbb9a5f501717e78c508ee\"},{\"id\":\"_design/library\",\"rev\":\"1-81f3eca990862b9771b971d7a9ccada3\"}]"
+  }
+
+, { "method"   : "delete"
+  , "path"     : "/search_db"
+  , "response" : "{\"ok\":true}"
+  }
+]
