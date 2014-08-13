@@ -14,6 +14,10 @@
   , "path"     : "/search_db/_design/library/_search/books?q=author%3Acharles"
   , "response" : "{\"total_rows\":1,\"bookmark\":\"g2wAAAABaANkAB1kYmNvcmVAZGI2LnNsaW5nLmNsb3VkYW50Lm5ldGwAAAACbgQAAAAAgG4EAP___79qaAJGP8iMWIAAAABhAGo\",\"rows\":[{\"id\":\"a_tale\",\"order\":[0.19178301095962524,0],\"fields\":{}}]}"
   }
+, { "method"   : "get"
+  , "path"     : "/search_db/_design/library/_search/books?q=title%3Atwo"
+  , "response" : "{\"total_rows\":2,\"bookmark\":\"g1AAAACIeJzLYWBgYMpgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASlLcgCSSfX____PymBysz_RE9EAFEhkIFJ7HguQZGgAUkAT9oONOLy4igFsRBYAPRQqlQ\",\"rows\":[{\"id\":\"towers\",\"order\":[0.19178301095962524,0],\"fields\":{}},{\"id\":\"a_tale\",\"order\":[0.1534264087677002,0],\"fields\":{}}]}"
+  }
 
 , { "method"   : "delete"
   , "path"     : "/search_db"

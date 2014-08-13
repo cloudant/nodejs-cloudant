@@ -27,7 +27,7 @@ specify('cloudant:search:data', timeout, function(assert) {
   });
 });
 
-specify('cloudant:search:queries', timeout, function(assert) {
+specify('cloudant:search:query', timeout, function(assert) {
   var db = cloudant.use('search_db');
   db.search('library', 'books', {q:'author:charles'}, function(er1, author) {
     db.search('library', 'books', {q:'title:two'}, function(er2, title) {
