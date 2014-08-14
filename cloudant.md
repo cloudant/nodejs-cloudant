@@ -180,6 +180,62 @@ db.find({selector:{name:'Alice'}}, function(er, result) {
 })
 ```
 
+## Search
+
+This feature interfaces with [Cloudant Search][search].
+
+As with Nano, when working with a database (as opposed to the root server), run the `.use()` method.
+
+```js
+var db = cloudant.use('my_db')
+```
+
+To create a Lucene index, create a design document the normal way you would with Nano, the database `.insert()` method.
+
+To see all the indexes in a database, call the database `.index()` method with a callback function.
+             , {_id: '_design/library', indexes:{books:{analyzer:{name:'standard'}, index:index}}}
+
+```js
+// Note, you can make a normal JavaScript function. It is not necessary
+// for you to convert it to a string as with other languages and tools.
+var book_indexer = function(doc) {
+  // Index the title and author of books.
+  if (doc.type == 'book') {
+    index('title', doc.title)
+    index('author', doc.author)
+  }
+}
+
+var ddoc = { _id: '_design/library'
+           , indexes:
+             { books:
+               { analyzer: {name: 'standard'}
+               , index   : book_indexer
+               }
+             }
+           }
+
+db.insert(doc, function (er, result) {
+  if (er)
+    throw er
+  else
+    console.log('Created design document with books index')
+})
+```
+
+To query this index, use the database `.search()` method. The first argument is the design document name, followed by the index name, and finally an object with your search parameters.
+
+```js
+db.search('library', 'books', {q:'author:dickens'}, function(er, result) {
+  if (er)
+    throw er
+
+  console.log('Showing %d out of a total %d books by Dickens', result.rows.length, result.total_rows)
+  for (var i = 0; i < result.rows.length; i++)
+    console.log('Document id: %s', result.rows.id)
+})
+```
+
 ## Development
 
 To join the effort developing this project, start from our GitHub page: https://github.com/cloudant/nodejs-cloudant
