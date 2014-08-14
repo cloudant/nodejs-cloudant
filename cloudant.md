@@ -75,11 +75,11 @@ Output:
     I am jhs and my roles are ["_admin","_reader","_writer"]
     All my databases: example_db, jasons_stuff, scores
 
-Notes:
+Upper-case `Cloudant` is the package you required, while lower-case `cloudant` represents an authenticated, confirmed connection to your Cloudant service. If you have a better suggestion, let me know or [submit an issue][issues].
 
-* Upper-case `Cloudant` is the package you required, while lower-case `cloudant` represents an authenticated, confirmed connection to your Cloudant service. If you have a better suggestion, let me know or [submit an issue][issues].
-* The `.ping()` call is for clarity. In fact, when you initialize your conneciton, you implicitly ping Cloudant, and the "pong" value is passed to you as an optional extra argument: `Cloudant({account:"A", password:"P"}, function(er, cloudant, pong_reply) { ... })`
-* To use this code as-is, you must first type ` export cloudant_password="<whatever>"` in your shell. This is inconvenient, and you can invent your own alternative technique; but **DO NOT hard-code your password and commit it to Git**. Storing your password directly in your source code (even in old, long-deleted commits) is a serious security risk to your data. Whoever gains access to your software will now also have access read, write, and delete permission to your data. Think about GitHub security bugs, or contractors, or disgruntled employees, or lost laptops at a conference. If you check in your password, all of these situations become major liabilities. (Also, note that if you follow these instructions, the `export` command with your password will likely be in your `.bash_history` now, which is kind of bad. However, if you input a space before typing the command, it will not be stored in your history.)
+The `.ping()` call is for clarity. In fact, when you initialize your conneciton, you implicitly ping Cloudant, and the "pong" value is passed to you as an optional extra argument: `Cloudant({account:"A", password:"P"}, function(er, cloudant, pong_reply) { ... })`
+
+To use this code as-is, you must first type ` export cloudant_password="<whatever>"` in your shell. This is inconvenient, and you can invent your own alternative technique; but **DO NOT hard-code your password and commit it to Git**. Storing your password directly in your source code (even in old, long-deleted commits) is a serious security risk to your data. Whoever gains access to your software will now also have access read, write, and delete permission to your data. Think about GitHub security bugs, or contractors, or disgruntled employees, or lost laptops at a conference. If you check in your password, all of these situations become major liabilities. (Also, note that if you follow these instructions, the `export` command with your password will likely be in your `.bash_history` now, which is kind of bad. However, if you input a space before typing the command, it will not be stored in your history.)
 
 ## Development
 
