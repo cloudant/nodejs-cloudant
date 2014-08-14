@@ -6,7 +6,7 @@ This is an alpha version of the Cloudant Node.js client.
 
 This client supports the following features:
 
-* Everything that Apache CouchDB can do (which is a lot)
+* Everything that Apache CouchDB can do, the [Nano API][nano-doc].
 * [Cloudant Query][query]
 * [Cloudant Search][search] using Lucene
 * [Authorization][auth], i.e. creating API keys and restricting access
@@ -167,3 +167,4 @@ Now your project has the dependency in place, however you can work on both of th
 [search]: http://docs.cloudant.com/api/search.html
 [auth]: http://docs.cloudant.com/api/authz.html
 [issues]: https://github.com/cloudant/nodejs-cloudant/issues
+[nano-doc]: README.md
