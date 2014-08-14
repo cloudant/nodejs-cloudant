@@ -77,9 +77,49 @@ Output:
 
 Upper-case `Cloudant` is the package you required, while lower-case `cloudant` represents an authenticated, confirmed connection to your Cloudant service. If you have a better suggestion, let me know or [submit an issue][issues].
 
+If you omit the "password" field, you will get an "anonymous" connection: a client that sends no authentication information (no passwords, no cookies, etc.)
+
 The `.ping()` call is for clarity. In fact, when you initialize your conneciton, you implicitly ping Cloudant, and the "pong" value is passed to you as an optional extra argument: `Cloudant({account:"A", password:"P"}, function(er, cloudant, pong_reply) { ... })`
 
 To use this code as-is, you must first type ` export cloudant_password="<whatever>"` in your shell. This is inconvenient, and you can invent your own alternative technique; but **DO NOT hard-code your password and commit it to Git**. Storing your password directly in your source code (even in old, long-deleted commits) is a serious security risk to your data. Whoever gains access to your software will now also have access read, write, and delete permission to your data. Think about GitHub security bugs, or contractors, or disgruntled employees, or lost laptops at a conference. If you check in your password, all of these situations become major liabilities. (Also, note that if you follow these instructions, the `export` command with your password will likely be in your `.bash_history` now, which is kind of bad. However, if you input a space before typing the command, it will not be stored in your history.)
+
+That's it! Good luck! Nearly everything you will want to do is (for now) in the [Nano documentation][nano-doc]. However, the next sections explore Cloudant-specific funtionality.
+
+## Authorization
+
+This feature interfaces with the Cloudant [authorization API][auth].
+
+Use the authorization feature to generate new API keys to access your data. An API key is basically a username/password pair for granting others access to your data, without giving them the keys to the castle.
+
+Generate an API key.
+
+```js
+cloudant.generate_api_key(function(er, api) {
+  if (er)
+    throw er // You probably want wiser behavior than this.
+
+  console.log('API key: %s', api.key)
+  console.log('Password for this key: %s', api.password)
+```
+
+Output:
+
+    API key: isdaingialkyciffestontsk
+    Password for this key: XQiDHmwnkUu4tknHIjjs2P64
+
+Next, set access roles for this API key:
+
+```js
+  // Set read-only access for this key.
+  var db = "my_database"
+  cloudant.set_permissions({database:db, username:api.key, roles:['_reader']}, function(er, result) {
+    if (er)
+      throw er
+
+    console.log('%s now has read-only access to %s', api.key, db)
+  })
+})
+```
 
 ## Development
 
