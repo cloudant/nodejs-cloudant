@@ -121,6 +121,65 @@ Next, set access roles for this API key:
 })
 ```
 
+## Query
+
+This feature interfaces with [Cloudant Query][query].
+
+As with Nano, when working with a database (as opposed to the root server), run the `.use()` method.
+
+```js
+var db = cloudant.use('my_db')
+```
+
+To see all the indexes in a database, call the database `.index()` method with a callback function.
+
+```js
+db.index(function(er, result) {
+  if (er)
+    throw er
+
+  console.log('The database has %d indexes', result.indexes.length)
+  for (var i = 0; i < result.indexes.length; i++)
+    console.log('  %s (%s): %j', result.indexes[i].name, result.indexes[i].type, result.indexes[i].def)
+})
+```
+
+Example output:
+
+    The database has 3 indexes
+      _all_docs (special): {"fields":[{"_id":"asc"}]}
+      first-name (json): {"fields":[{"name":"asc"}]}
+      last-name (json): {"fields":[{"name":"asc"}]}
+
+To create an index, use the same `.index()` method but with an extra initial argument: the index definition. For example, to make an index on middle names in the data set:
+
+```js
+var middle_name = {name:'middle-name', type:'json', index:{fields:['middle']}}
+db.index(middle_name, function(er, response) {
+  if (er)
+    throw er
+
+  console.log('Index creation result: %s', response.result)
+})
+```
+
+Output:
+
+    Index creation result: created
+
+To query using the index, use the `.find()` method.
+
+```js
+db.find({selector:{name:'Alice'}}, function(er, result) {
+  if (er)
+    throw er
+
+  console.log('Found %d documents with name Alice')
+  for (var i = 0; i < result.docs.length; i++)
+    console.log('  Doc id: %s', result.docs[i]._id)
+})
+```
+
 ## Development
 
 To join the effort developing this project, start from our GitHub page: https://github.com/cloudant/nodejs-cloudant
