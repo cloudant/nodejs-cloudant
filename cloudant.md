@@ -2,6 +2,17 @@
 
 This is an alpha version of the Cloudant Node.js client.
 
+* [Getting Started](#getting-started)
+* [Resources](#resources)
+* API Reference
+  * [Initialization](#initialization)
+  * [Authorization](#authorization)
+  * [Cloudant Query](#query)
+  * [Cloudant Search](#search)
+* [Development](#development)
+  * [Test Suite](#test-suite)
+  * [Using in Other Projects](#using-in-other-projects)
+
 ## Project Status
 
 This client supports the following features:
@@ -301,7 +312,7 @@ Get the password from Jason somehow, and set it as an npm variable.
     $ npm run test-cloudant-live
     <...cut successful test suite run...>
 
-## Use with Other Projects
+## Using in Other Projects
 
 If you work on this project plus another one, your best bet is to *link* this project to your other one. With linking, your other project depends on this one; but instead of a proper install, npm basically symlinks this project into the right place.
 
