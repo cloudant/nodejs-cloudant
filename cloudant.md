@@ -316,12 +316,14 @@ Get the password from Jason somehow, and set it as an npm variable.
 
 If you work on this project plus another one, your best bet is to *link* this project to your other one. With linking, your other project depends on this one; but instead of a proper install, npm basically symlinks this project into the right place.
 
-    # Go to this project and "link" it into the global namespace (sort of an "export")
+Go to this project and "link" it into the global namespace (sort of an "export").
+
     $ cd cloudant
     $ npm link
     /Users/jhs/.nvm/v0.10.25/lib/node_modules/cloudant -> /Users/jhs/src/cloudant/nodejs-cloudant
 
-    # Go to your project and "link" it into there (sort of an "import")
+Go to your project and "link" it into there (sort of an "import").
+
     $ cd ../my-project
     $ npm link cloudant
     /Users/jhs/src/my-project/node_modules/cloudant -> /Users/jhs/.nvm/v0.10.25/lib/node_modules/cloudant -> /Users/jhs/src/cloudant/nodejs-cloudant
