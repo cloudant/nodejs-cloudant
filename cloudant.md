@@ -201,7 +201,7 @@ As with Nano, when working with a database (as opposed to the root server), run 
 var db = cloudant.use('my_db')
 ```
 
-To create a Lucene index, create a design document the normal way you would with Nano, the database `.insert()` method.
+To create a Cloudant Search index, create a design document the normal way you would with Nano, the database `.insert()` method.
 
 To see all the indexes in a database, call the database `.index()` method with a callback function.
              , {_id: '_design/library', indexes:{books:{analyzer:{name:'standard'}, index:index}}}
