@@ -8,6 +8,7 @@ This is the official Cloudant library for Node.js.
 * [Development](#development)
   * [Test Suite](#test-suite)
   * [Using in Other Projects](#using-in-other-projects)
+  * [License](#license)
 
 ## Installation and Usage
 
