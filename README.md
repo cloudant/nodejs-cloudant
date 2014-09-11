@@ -885,11 +885,11 @@ Please check [request] for more information on the defaults. They support featur
 
 ### Pool size and open sockets
 
-A very important configuration parameter if you have a high traffic website and are using Cloudant is setting up the `pool.size`. by default, the node.js http global agent (client) has a certain size of active connections that can run simultaneously, while others are kept in a queue. pooling can be disabled by setting the `agent` property in `request_defaults` to false, or adjust the global pool size using:
+A very important configuration parameter if you have a high traffic website and are using Cloudant is setting up the `pool.size`. By default, the node.js https global agent (client) has a certain size of active connections that can run simultaneously, while others are kept in a queue. Pooling can be disabled by setting the `agent` property in `request_defaults` to false, or adjust the global pool size using:
 
 ~~~ js
-var http = require('http')
-http.globalAgent.maxSockets = 20
+var https = require('https')
+https.globalAgent.maxSockets = 20
 ~~~
 
 You can also increase the size in your calling context using `request_defaults` if this is problematic. refer to the [request] documentation and examples for further clarification.
@@ -909,7 +909,6 @@ Cloudant({account:"me", password:"secret", request_defaults:{agent:myagent}}, fu
   // Using Cloudant with myagent...
 })
 ~~~
-
 
 ## Advanced Features
 
