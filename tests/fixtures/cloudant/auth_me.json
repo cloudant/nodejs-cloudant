@@ -1,0 +1,13 @@
+[
+  { "method"   : "get"
+  , "path"     : "/"
+  , "status"   : 200
+  , "response" : "{\"couchdb\":\"Welcome\",\"version\":\"1.0.2\",\"cloudant_build\":\"1996\"}"
+  }
+, { "method"   : "get"
+  , "path"     : "/_session"
+  , "reqheaders": {"authorization":"Basic aXNkYWluZ2lhbGt5Y2lmZmVzdG9udHNrOk9RRURIZGdieUF3MGJhcEtZT1FHaVA2NA=="}
+  , "status"   : 200
+  , "response" : "{\"ok\":true,\"info\":{\"authentication_db\":\"_users\",\"authentication_handlers\":[\"cookie\",\"default\"],\"authenticated\":\"default\"},\"userCtx\":{\"name\":\"isdaingialkyciffestontsk\",\"roles\":[]}}"
+  }
+]

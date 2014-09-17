@@ -116,7 +116,7 @@ If you run this example, you will see:
 
 - [Initialization](#initialization)
 - [Callback Signature](#callback-signature)
-- [Authorization](#authorization)
+- [Authorization and API Keys](#authorization-and-api-keys)
 - [Database Functions](#database-functions)
 	- [cloudant.db.create(name, [callback])](#Cloudantdbcreatename-callback)
 	- [cloudant.db.get(name, [callback])](#Cloudantdbgetname-callback)
@@ -206,13 +206,13 @@ After initialization, in general, callback functions receive three arguments:
 
 The `ping()` function is the only exception to this rule. It does not return headers since a "ping" is made from multiple requests to gather various bits of information.
 
-## Authorization
+## Authorization and API Keys
 
 This feature interfaces with the Cloudant [authorization API][auth].
 
 Use the authorization feature to generate new API keys to access your data. An API key is basically a username/password pair for granting others access to your data, without giving them the keys to the castle.
 
-Generate an API key.
+### Generate an API key
 
 ~~~ js
 cloudant.generate_api_key(function(er, api) {
@@ -239,6 +239,19 @@ Next, set access roles for this API key:
 
     console.log('%s now has read-only access to %s', api.key, db)
   })
+})
+~~~
+
+### Use an API Key
+
+To use an API key, initialize a new Cloudant connection, and provide an additional "key" option when you initialize Cloudant. This will connect to your account, but using the "key" as the authenticated user. (And of course, use the appropriate password associated with the API key.)
+
+~~~ js
+Cloudant({account:"me", key:api.key, password:api.password}, function(er, cloudant, reply) {
+  if (er)
+    throw er
+
+  console.log('Connected with API key %s', reply.userCtx.name)
 })
 ~~~
 

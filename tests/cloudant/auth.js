@@ -5,7 +5,8 @@ var specify  = require('specify')
   , Cloudant = helpers.Cloudant
   ;
 
-var mock = nock(helpers.cloudant_auth, "cloudant/auth");
+var auth_mock = nock(helpers.cloudant_auth, "cloudant/auth");
+var serv_mock = nock(helpers.cloudant_url , "cloudant/auth_me");
 
 var third_party = {key:null, password:null};
 
@@ -28,6 +29,14 @@ specify('cloudant:generate_api_key', timeout, function (assert) {
     third_party.key = body.key;
     third_party.password = body.password;
   });
+});
+
+specify('cloudant:third_party_access', timeout, function (assert) {
+  Cloudant({account:'nodejs', key:third_party.key, password:third_party.password}, function(er, cloudant, body) {
+    assert.equal(er, undefined, 'Connect and authenticate using the new API key');
+    assert.ok(body && body.userCtx, 'Third-party connect got a good pong');
+    assert.equal(body.userCtx.name, third_party.key, 'Third-party correctly identified by Cloudant server');
+  })
 });
 
 specify('cloudant:set_permissions', timeout, function (assert) {

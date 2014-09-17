@@ -21,9 +21,12 @@ function reconfigure(config) {
   if (match)
     config.account = match[1];
 
+  // The username is the account ("foo" for "foo.cloudant.com") or the third-party API key.
+  var username = config.key || config.account;
+
   // Configure for Cloudant, either authenticated or anonymous.
   if (config.account && config.password)
-    config.url = 'https://' + config.account + ':' + config.password + '@' + config.account + '.cloudant.com';
+    config.url = 'https://' + username + ':' + config.password + '@' + config.account + '.cloudant.com';
   else if (config.account)
     config.url = 'https://' + config.account + '.cloudant.com';
 
