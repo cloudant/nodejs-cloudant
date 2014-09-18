@@ -33,33 +33,18 @@ var Cloudant = require('cloudant')
 var me = 'jhs' // Set this to your own account
 var password = process.env.cloudant_password
 
-Cloudant({account:me, password:password}, function(er, cloudant) {
-  if (er)
-    return console.log('Error connecting to Cloudant account %s: %s', me, er.message)
+Cloudant({account:me, password:password}, function(err, cloudant) {
+  console.log('Connected to Cloudant')
 
-  console.log('Connected to cloudant')
-  cloudant.ping(function(er, reply) {
-    if (er)
-      return console.log('Failed to ping Cloudant. Did the network just go down?')
-
-    console.log('Server version = %s', reply.version)
-    console.log('I am %s and my roles are %j', reply.userCtx.name, reply.userCtx.roles)
-
-    cloudant.db.list(function(er, all_dbs) {
-      if (er)
-        return console.log('Error listing databases: %s', er.message)
-
-      console.log('All my databases: %s', all_dbs.join(', '))
-    })
+  cloudant.db.list(function(err, all_dbs) {
+    console.log('All my databases: %s', all_dbs.join(', '))
   })
 })
 ~~~
 
 Output:
 
-    Connected to cloudant
-    Server version = 1.0.2
-    I am jhs and my roles are ["_admin","_reader","_writer"]
+    Connected to Cloudant
     All my databases: example_db, jasons_stuff, scores
 
 Upper-case `Cloudant` is this package you load using `require()`, while lower-case `cloudant` represents an authenticated, confirmed connection to your Cloudant service.
