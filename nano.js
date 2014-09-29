@@ -189,7 +189,7 @@ module.exports = exports = nano = function database_module(cfg, couchdb_callback
     // these need to be encoded
     if(!_.isEmpty(opts.params)) {
       try {
-        ['startkey', 'endkey', 'key', 'keys'].forEach(function (key) {
+        ['startkey', 'endkey', 'sort', 'key', 'keys'].forEach(function (key) {
           if (key in opts.params) {
             try { params[key] = JSON.stringify(opts.params[key]); }
             catch (err) {
