@@ -16,7 +16,7 @@ The best way to use the Cloudant client is to begin with your own Node.js projec
 
     $ npm install --save cloudant
 
-Notice that your package.json will now reflect this package. Everyting is working if you can run this command with no errors:
+Notice that your package.json will now reflect this package. Everything is working if you can run this command with no errors:
 
     $ node -e 'require("cloudant"); console.log("Cloudant works");'
     Cloudant works
@@ -25,7 +25,7 @@ Notice that your package.json will now reflect this package. Everyting is workin
 
 Now it's time to begin doing real work with Cloudant and Node.js.
 
-Initialize your Cloudant connection by supplying your *account* and *password*, and supplying a callback function to run when eveything is ready.
+Initialize your Cloudant connection by supplying your *account* and *password*, and supplying a callback function to run when everything is ready.
 
 ~~~ js
 var Cloudant = require('cloudant')
