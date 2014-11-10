@@ -74,7 +74,7 @@ Cloudant({account:"me", password:password}, function(er, cloudant) {
     // Create a new database.
     cloudant.db.create('alice', function() {
       // specify the database we are going to use
-      var alice = Cloudant.use('alice')
+      var alice = cloudant.db.use('alice')
       // and insert a document in it
       alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
         if (err)
