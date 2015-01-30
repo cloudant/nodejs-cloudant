@@ -166,6 +166,23 @@ Cloudant({account:me, password:password}, function(er, cloudant) {
 })
 ~~~
 
+If you would prefer, you can also initialize Cloudant synchronously by omitting the callback.
+
+This can help avoid messy code if you are requiring the Cloudant library in many places in your app. You should note that this method does not verify that your Cloudant credentials are correct - you would have to use the [ping](#cloudantpingcallback) for that.
+
+A simple example of initializing sychronously is:
+~~~ js
+var Cloudant = require('cloudant')({account:me, password:password});
+
+var db = Cloudant.use("animals");
+
+db.get("dog", function(err, data) {
+  
+  // rest of your code goes here
+  
+});
+~~~
+
 ### cloudant.ping([callback])
 
 Ping Cloudant. If this succeeds, then you have a good connection to Cloudant, and if you provided authentication credentials, they are valid.
