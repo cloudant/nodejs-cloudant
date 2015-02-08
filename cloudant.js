@@ -141,6 +141,7 @@ function set_security(db, security, callback) {
 
 
 function set_permissions(opts, callback) {
+  console.warn("DEPRECATED: set_permissions has been replaced by set_security");
   var nano = this;
 
   if (!nano.config.account)
