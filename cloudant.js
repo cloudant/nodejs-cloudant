@@ -38,6 +38,8 @@ function reconfigure(config) {
 function server_functions(nano) {
   nano.generate_api_key = generate_api_key;
   nano.set_permissions  = set_permissions;
+  nano.view_security = view_security;
+  nano.set_security = set_security;
   return nano;
 }
 
@@ -56,19 +58,47 @@ function fix_request(req, config) {
   if (req.method != 'CLOUDANT')
     return;
 
-  var url = URL.parse(req.uri);
-  if (url.pathname == '/generate_api_key') {
-    req.method = 'POST';
-    req.uri = 'https://' + config.account + ':' + config.password + '@cloudant.com/api/generate_api_key';
+  var url = URL.parse(req.uri),
+    pathname = null,
+    db = null,
+    match = url.pathname.match(/\/(.*)(\/.*)$/); // extract /db/path
+  if (match) {
+    db = match[1];
+    pathname=match[2];
+  } else {
+    pathname = url.pathname
   }
 
-  else if (url.pathname == '/set_permissions') {
-    req.method = 'POST';
-    req.uri = 'https://' + config.account + ':' + config.password + '@cloudant.com/api/set_permissions';
+  switch (pathname) {
+    
+    case '/generate_api_key':
+    
+      req.method = 'POST';
+      req.uri = 'https://' + config.account + ':' + config.password + '@cloudant.com/api/generate_api_key';
+      break;
+      
+    case '/set_permissions':
+      
+      req.method = 'POST';
+      req.uri = 'https://' + config.account + ':' + config.password + '@cloudant.com/api/set_permissions';
+      break;
+      
+    case '/view_security':
+      
+      req.method = 'GET';
+      req.uri = 'https://' + config.account + ':' + config.password + '@' + encodeURIComponent(config.account) + '.cloudant.com/_api/v2/db/' + encodeURIComponent(db) + '/_security';    
+      break;
+      
+    case '/set_security':
+      
+      req.method = 'PUT';
+      req.uri = 'https://' + config.account + ':' + config.password + '@' + encodeURIComponent(config.account) + '.cloudant.com/_api/v2/db/' + encodeURIComponent(db) + '/_security';
+      break;  
+      
+    default:
+      throw new Error('Bad Cloudant request: ' + JSON.stringify(req));
   }
-
-  else
-    throw new Error('Bad Cloudant request: ' + JSON.stringify(req));
+    
 }
 
 
@@ -81,6 +111,32 @@ function generate_api_key(callback) {
     throw new Error('generate_api_key requires an "password" parameter during Cloudant initialization');
 
   nano.relax({method:'CLOUDANT', path:'generate_api_key'}, callback);
+}
+
+function view_security(db, callback) {
+  var nano = this;
+  if(!db)
+    throw new Error('view_security requires a "db" parameter');
+  if (!nano.config.account)
+    throw new Error('view_security requires an "account" parameter during Cloudant initialization');
+  if (!nano.config.password)
+    throw new Error('view_security requires an "password" parameter during Cloudant initialization');
+
+  nano.relax({method:'CLOUDANT', path:'view_security', db:db }, callback);
+}
+
+function set_security(db, security, callback) {
+  var nano = this;
+  if(!db)
+    throw new Error('set_security requires a "db" parameter');
+  if(!security)
+    throw new Error('set_security requires a "security" parameter');
+  if (!nano.config.account)
+    throw new Error('set_security requires an "account" parameter during Cloudant initialization');
+  if (!nano.config.password)
+    throw new Error('set_security requires an "password" parameter during Cloudant initialization');
+
+  nano.relax({method:'CLOUDANT', path:'set_security', db:db , body:security}, callback);
 }
 
 
