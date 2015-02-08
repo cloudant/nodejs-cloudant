@@ -233,14 +233,18 @@ Output:
 Next, set access roles for this API key:
 
 ~~~ js
-  // Set read-only access for this key.
-  var db = "my_database"
-  cloudant.set_permissions({database:db, username:api.key, roles:['_reader']}, function(er, result) {
+
+  
+  // Set the security for three users.
+  var db = "my_database",
+    roles = [ '_reader', '_writer' ];
+
+  cloudant.set_security( db, 'isdaingialkyciffestontsk', roles, function(er, result) {
     if (er)
       throw er
 
-    console.log('%s now has read-only access to %s', api.key, db)
-  })
+    console.log(result);
+  });
 })
 ~~~
 
