@@ -26,9 +26,9 @@ function reconfigure(config) {
 
   // Configure for Cloudant, either authenticated or anonymous.
   if (config.account && config.password)
-    config.url = 'https://' + username + ':' + config.password + '@' + config.account + '.cloudant.com';
+    config.url = 'https://' + encodeURIComponent(username) + ':' + encodeURIComponent(config.password) + '@' + encodeURIComponent(config.account) + '.cloudant.com';
   else if (config.account)
-    config.url = 'https://' + config.account + '.cloudant.com';
+    config.url = 'https://' + encodeURIComponent(config.account) + '.cloudant.com';
 
   return config;
 }
@@ -59,12 +59,12 @@ function fix_request(req, config) {
   var url = URL.parse(req.uri);
   if (url.pathname == '/generate_api_key') {
     req.method = 'POST';
-    req.uri = 'https://' + config.account + ':' + config.password + '@cloudant.com/api/generate_api_key';
+    req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@cloudant.com/api/generate_api_key';
   }
 
   else if (url.pathname == '/set_permissions') {
     req.method = 'POST';
-    req.uri = 'https://' + config.account + ':' + config.password + '@cloudant.com/api/set_permissions';
+    req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@cloudant.com/api/set_permissions';
   }
 
   else
