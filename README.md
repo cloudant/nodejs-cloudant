@@ -304,6 +304,36 @@ Cloudant({account:"me", key:api.key, password:api.password}, function(er, clouda
 })
 ~~~
 
+## CORS
+
+If you need to access your Cloudant database from a web application that is served from a domain other than your Cloudant account, you will need to enable CORS (Cross-origin resource sharing). 
+
+e.g. enable CORS from any domain:
+
+~~~ js
+   cloudant.cors({ enable_cors: true, allow_credentials: true, origins: ["*"]}, function(err, data) {
+     console.log(err, data);
+   };
+~~~
+
+or enable access from a list of specified domains:
+
+~~~ js
+   cloudant.cors({ enable_cors: true, allow_credentials: true, origins: [ "https://mydomain.com","https://mysubdomain.mydomain.com"]}, function(err, data) {
+     console.log(err, data);
+   };
+~~~
+
+or disable CORS access
+
+~~~ js
+   cloudant.cors({ enable_cors: false }, function(err, data) {
+     console.log(err, data);
+   };
+~~~
+
+See <https://docs.cloudant.com/api.html#cors> for further details.
+
 ## Database Functions
 
 Once Cloudant is initialized without errors, your callback has a `cloudant` object representing your connection to the server. To work with databases, use these database functions. (To work with data *inside* the databases, see below.)

@@ -40,6 +40,7 @@ function server_functions(nano) {
   nano.set_permissions  = set_permissions;
   nano.view_security = view_security;
   nano.set_security = set_security;
+  nano.cors = cors;  
   return nano;
 }
 
@@ -94,8 +95,14 @@ function fix_request(req, config) {
       req.method = 'PUT';
       req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@' + encodeURIComponent(config.account) + '.cloudant.com/_api/v2/db/' + encodeURIComponent(db) + '/_security';
       break;  
-      
+    
+    case '/cors':
+      req.method = 'PUT';
+      req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@' + encodeURIComponent(config.account) + '.cloudant.com/_api/v2/user/config/cors';  
+      break;  
+    
     default:
+    
       throw new Error('Bad Cloudant request: ' + JSON.stringify(req));
   }
     
@@ -154,6 +161,17 @@ function set_permissions(opts, callback) {
   opts.database = nano.config.account + '/' + db;
 
   nano.relax({method:'CLOUDANT', path:'set_permissions', form:opts}, callback);
+}
+
+function cors(opts, callback) {
+  var nano = this;
+  
+  if (!nano.config.account)
+    throw new Error('cors requires an "account" parameter during initialization');
+  if (!nano.config.password)
+    throw new Error('cors requires an "password" parameter during initialization');
+  
+  nano.relax({method:'CLOUDANT', path:'cors', body: opts}, callback)
 }
 
 
