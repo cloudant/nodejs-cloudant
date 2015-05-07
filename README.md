@@ -116,7 +116,7 @@ If you run this example, you will see:
 	- [Cloudant.updates([params], [callback])](#Cloudantupdatesparams-callback)
 	- [Cloudant.follow_updates([params], [callback])](#Cloudantfollow_updatesparams-callback)
 - [Document Functions](#document-functions)
-	- [db.insert(doc, [params], [callback])](#dbinsertdoc-params-callback)
+	- [db.insert(doc, doc_id, [callback])](#dbinsertdoc-doc_id-callback)
 	- [db.destroy(doc_id, rev, [callback])](#dbdestroydoc_id-rev-callback)
 	- [db.get(doc_id, [params], [callback])](#dbgetdoc_id-params-callback)
 	- [db.head(doc_id, [callback])](#dbheaddoc_id-callback)
