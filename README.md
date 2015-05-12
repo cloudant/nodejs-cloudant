@@ -65,7 +65,7 @@ var Cloudant = require('Cloudant')
 var me = 'jhs' // Set this to your own account
 var password = process.env.cloudant_password
 
-Cloudant({account:"me", password:password}, function(er, cloudant) {
+Cloudant({account:me, password:password}, function(er, cloudant) {
   if (er)
     return console.log('Error connecting to Cloudant account %s: %s', me, er.message)
 
