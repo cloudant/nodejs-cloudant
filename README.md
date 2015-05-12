@@ -233,16 +233,63 @@ Output:
 Next, set access roles for this API key:
 
 ~~~ js
-  // Set read-only access for this key.
-  var db = "my_database"
-  cloudant.set_permissions({database:db, username:api.key, roles:['_reader']}, function(er, result) {
+
+  
+  // Set the security for three users.
+  var db = "my_database",
+    security = { 
+                cloudant: {
+                   nobody: []
+                   fred : [ '_reader', '_writer', '_admin', '_replicator' ],
+                   isdaingialkyciffestontsk: [ '_reader', '_writer' ]
+                 }
+               }; 
+
+  cloudant.set_security( database, security, function(er, result) {
     if (er)
       throw er
 
-    console.log('%s now has read-only access to %s', api.key, db)
-  })
-})
+    console.log(result);
+  });
+  
 ~~~
+
+or read the security settings for a database
+
+~~~ js
+
+ var db = "my_database",
+
+ cloudant.view_security( database, function(er, result) {
+   if (er)
+     throw er
+
+   console.log(result);
+ });
+
+~~~
+
+Output:
+
+```
+{
+  "cloudant": {
+    "nobody": [],
+    "fred": [
+      "_reader",
+      "_writer",
+      "_admin",
+      "_replicator"
+    ],
+    "isdaingialkyciffestontsk": [
+      "_reader",
+      "_writer"
+    ]
+  }
+}
+```
+
+See the Cloudant API for full details](https://docs.cloudant.com/api.html#authorization)
 
 ### Use an API Key
 
@@ -256,6 +303,36 @@ Cloudant({account:"me", key:api.key, password:api.password}, function(er, clouda
   console.log('Connected with API key %s', reply.userCtx.name)
 })
 ~~~
+
+## CORS
+
+If you need to access your Cloudant database from a web application that is served from a domain other than your Cloudant account, you will need to enable CORS (Cross-origin resource sharing). 
+
+e.g. enable CORS from any domain:
+
+~~~ js
+   cloudant.cors({ enable_cors: true, allow_credentials: true, origins: ["*"]}, function(err, data) {
+     console.log(err, data);
+   };
+~~~
+
+or enable access from a list of specified domains:
+
+~~~ js
+   cloudant.cors({ enable_cors: true, allow_credentials: true, origins: [ "https://mydomain.com","https://mysubdomain.mydomain.com"]}, function(err, data) {
+     console.log(err, data);
+   };
+~~~
+
+or disable CORS access
+
+~~~ js
+   cloudant.cors({ enable_cors: false }, function(err, data) {
+     console.log(err, data);
+   };
+~~~
+
+See <https://docs.cloudant.com/api.html#cors> for further details.
 
 ## Database Functions
 
