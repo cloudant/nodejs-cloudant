@@ -134,8 +134,6 @@ If you run this example, you will see:
 	- [db.attachment.destroy(doc_id, attname, rev, [callback])](#dbattachmentdestroydoc_id-attname-rev-callback)
 - [Design Document Functions](#design-document-functions)
 	- [db.view(designname, viewname, [params], [callback])](#dbviewdesignname-viewname-params-callback)
-	- [db.show(designname, showname, doc_id, [params], [callback])](#dbshowdesignname-showname-doc_id-params-callback)
-	- [db.atomic(designname, updatename, doc_id, [body], [callback])](#dbatomicdesignname-updatename-doc_id-body-callback)
 	- [db.search(designname, viewname, [params], [callback])](#dbsearchdesignname-searchname-params-callback)
 - [Cloudant Search](#cloudant-search)
 - [Cloudant Query](#cloudant-query)
@@ -707,55 +705,6 @@ alice.view('characters', 'crazy_ones', function(err, body) {
       console.log(doc.value)
     })
 })
-~~~
-
-### db.view_with_list(designname, viewname, listname, [params], [callback])
-
-Call a list function feeded by the given view of the specified design document.
-
-~~~ js
-alice.view_with_list('characters', 'crazy_ones', 'my_list', function(err, body) {
-  if (!err)
-    console.log(body)
-})
-~~~
-
-### db.show(designname, showname, doc_id, [params], [callback])
-
-Call a show function of the specified design for the document specified by doc_id with
-optional query string additions `params`.
-
-~~~ js
-alice.show('characters', 'format_doc', '3621898430', function(err, doc) {
-  if (!err)
-    console.log(doc)
-})
-~~~
-
-Take a look at the [CouchDB Show function documentation](http://docs.couchdb.org/en/latest/api/ddoc/render.html) for possible query paramaters and more information on show functions.
-
-### db.atomic(designname, updatename, doc_id, [body], [callback])
-
-Call the design's update function with the specified doc in input.
-
-~~~ js
-db.atomic("update", "inplace", "foobar", {field: "foo", value: "bar"}, function (error, response) {
-  assert.equal(error, undefined, "failed to update")
-  assert.equal(response.foo, "bar", "update worked")
-})
-~~~
-
-Note that the data is sent in the body of the request.  An example update handler follows:
-
-~~~ js
-"updates": {
-  "in-place" : "function(doc, req) {
-      var field = req.form.field;
-      var value = req.form.value;
-      var message = 'set '+field+' to '+value;
-      doc[field] = value;
-      return [doc, message];
-  }"
 ~~~
 
 ### db.search(designname, searchname, [params], [callback])
