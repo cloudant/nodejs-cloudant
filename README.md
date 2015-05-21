@@ -555,7 +555,7 @@ alice.copy('rabbit', 'rabbit2', { overwrite: true }, function(err, _, headers) {
 ### db.bulk(docs, [params], [callback])
 
 Bulk operations(update/delete/insert) on the database, refer to the
-[Documentation](http://wiki.apache.org/couchdb/HTTP_Bulk_Document_API).
+[Documentation](http://docs.couchdb.org/en/latest/api/database/bulk-api.html).
 
 ### db.list([params], [callback])
 
@@ -574,14 +574,14 @@ alice.list(function(err, body) {
 ### db.fetch(doc_ids, [params], [callback])
 
 Bulk fetch of the database documents, `doc_ids` are specified as per
-[CouchDB doc](http://wiki.apache.org/couchdb/HTTP_Bulk_Document_API).
+[CouchDB doc](http://docs.couchdb.org/en/latest/api/database/bulk-api.html#post--db-_all_docs).
 Additional query string `params` can be specified, `include_docs` is always set
 to `true`.
 
 ### db.fetch_revs(doc_ids, [params], [callback])
 
 Bulk fetch of the revisions of the database documents, `doc_ids` are specified as per
-[CouchDB doc](http://wiki.apache.org/couchdb/HTTP_Bulk_Document_API).
+[CouchDB doc](http://docs.couchdb.org/en/latest/api/database/bulk-api.html#post--db-_all_docs).
 Additional query string `params` can be specified, this is the same method as fetch but
  `include_docs` is not automatically set to `true`.
 
@@ -591,7 +591,7 @@ The multipart functions are for efficiently working with documents and attachmen
 
 ### db.multipart.insert(doc, attachments, doc_id, [callback])
 
-Insert a `doc` together with `attachments` and optional `params`.  Refer to the [CouchDB multipart documentation](http://wiki.apache.org/couchdb/HTTP_Document_API#Multiple_Attachments) for more details.
+Insert a `doc` together with `attachments` and optional `params`.  Refer to the [CouchDB multipart documentation](http://docs.couchdb.org/en/latest/api/document/common.html?highlight=multipart#creating-multiple-attachments) for more details.
 
 `attachments` must be an array of objects with `name`, `data` and `content_type` properties. For example:
 
@@ -613,7 +613,7 @@ fs.readFile('rabbit.png', function(err, data) {
 ### db.multipart.get(doc_id, [params], [callback])
 
 Get `doc_id` together with its attachments via `multipart/related` request with optional query string additions
-`params`. Refer to the [doc](http://wiki.apache.org/Cloudant/HTTP_Document_API#Getting_Attachments_With_a_Document) for more details. The multipart response body is a `Buffer`.
+`params`. Refer to the [doc](http://docs.couchdb.org/en/latest/api/document/common.html?highlight=multipart#efficient-multiple-attachments-retrieving) for more details. The multipart response body is a `Buffer`.
 
 ~~~ js
 alice.multipart.get('rabbit', function(err, buffer) {
@@ -626,7 +626,7 @@ alice.multipart.get('rabbit', function(err, buffer) {
 
 ### db.attachment.insert(doc_id, attname, att, contenttype, [params], [callback])
 
-Inserts an attachment `attname` to `doc_id`. In most cases `params.rev` is required. Refer to the [doc](http://wiki.apache.org/Cloudant/HTTP_Document_API) for more details.
+Inserts an attachment `attname` to `doc_id`. In most cases `params.rev` is required. Refer to the [doc](http://docs.couchdb.org/en/latest/api/document/common.html?highlight=multipart#retrieving-attachments-content) for more details.
 
 ~~~ js
 var fs = require('fs')
@@ -732,7 +732,7 @@ alice.show('characters', 'format_doc', '3621898430', function(err, doc) {
 })
 ~~~
 
-Take a look at the [CouchDB wiki](http://wiki.apache.org/couchdb/Formatting_with_Show_and_List#Showing_Documents) for possible query paramaters and more information on show functions.
+Take a look at the [CouchDB Show function documentation](http://docs.couchdb.org/en/latest/api/ddoc/render.html) for possible query paramaters and more information on show functions.
 
 ### db.atomic(designname, updatename, doc_id, [body], [callback])
 
