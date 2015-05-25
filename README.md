@@ -814,7 +814,7 @@ var ddoc = { _id: '_design/library'
              }
            }
 
-db.insert(doc, function (er, result) {
+db.insert(ddoc, function (er, result) {
   if (er)
     throw er
   else
