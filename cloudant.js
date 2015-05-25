@@ -21,14 +21,17 @@ function reconfigure(config) {
   if (match)
     config.account = match[1];
 
+  // The hostname is typically "foo.cloudant.com" however the user may override that ot use a local CouchDB system such as Cloudant Local.
+  var hostname = config.hostname || (encodeURIComponent(config.account) + '.cloudant.com');
+
   // The username is the account ("foo" for "foo.cloudant.com") or the third-party API key.
   var username = config.key || config.username || config.account;
 
   // Configure for Cloudant, either authenticated or anonymous.
   if (config.account && config.password)
-    config.url = 'https://' + encodeURIComponent(username) + ':' + encodeURIComponent(config.password) + '@' + encodeURIComponent(config.account) + '.cloudant.com';
+    config.url = 'https://' + encodeURIComponent(username) + ':' + encodeURIComponent(config.password) + '@' + hostname;
   else if (config.account)
-    config.url = 'https://' + encodeURIComponent(config.account) + '.cloudant.com';
+    config.url = 'https://' + hostname;
 
   return config;
 }

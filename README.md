@@ -105,6 +105,7 @@ If you run this example, you will see:
 - [Initialization](#initialization)
 - [Callback Signature](#callback-signature)
 - [Password Authentication](#password-authentication)
+- [Cloudant Local](#cloudant-local)
 - [Authorization and API Keys](#authorization-and-api-keys)
   - [Generate an API Key](#generate-an-api-key)
   - [Use an API Key](#use-an-api-key)
@@ -218,6 +219,19 @@ By default, when you connect to your cloudant account (i.e. "me.cloudant.com"), 
 
 ~~~ js
 Cloudant({account:"me", username:"somebody", password:"somebody's secret"}, function(er, cloudant, reply) {
+  if (er)
+    throw er
+
+  console.log('Connected with username: %s', reply.userCtx.name)
+})
+~~~
+
+### Cloudant Local
+
+If you use Cloudant Local, everything works exactly the same, except you provide a *hostname* parameter to indicate which server to use:
+
+~~~ js
+Cloudant({hostname:"companycloudant.local", username:"somebody", password:"somebody's secret"}, function(er, cloudant, reply) {
   if (er)
     throw er
 
