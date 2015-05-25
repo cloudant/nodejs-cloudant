@@ -55,7 +55,7 @@ To use this code as-is, you must first type ` export cloudant_password="<whateve
 
 ### Security Note
 
-**DO NOT hard-code your password and commit it to Git**. Storing your password directly in your source code (even in old commits) is a serious security risk to your data. Whoever gains access to your software will now also have read, write, and delete access to your data. Think about GitHub security bugs, or contractors, or disgruntled employees, or lost laptops at a conference. If you check in your password, all of these situations become major liabilities. (Also, note that if you follow these instructions, the `export` command with your password will likely be in your `.bash_history` now, which is kind of bad. However, if you input a space before typing the command, it will not be stored in your history.)
+**DO NOT hard-code your password and commit it to Git**. Storing your password directly in your source code (even in old commits) is a serious security risk to your data. Whoever gains access to your software will now also have read, write, and delete access to your data. Think about GitHub security bugs, or contractors, or disgruntled employees, or lost laptops at a conference. If you check in your password, all of these situations become major liabilities. Also, note that if you follow these instructions, the `export` command with your password will likely be in your `.bash_history` now, which is bad. However, if you type a space before typing the command, and you have `$HISTCONTROL` set to `"ignorespace"`, then the command will not be stored in your history.
 
 Here is simple but complete example of working with data:
 
@@ -1060,6 +1060,7 @@ Unfortunately you need to know the password.
 Get the password from Jason somehow, and set it as an npm variable.
 
     # Note the leading space to keep this command out of the Bash history.
+    $ HISTCONTROL="$HISTCONTROL:ignorespace"
     $  npm config set cloudant_password "ask jason for the password" # <- Not the real password
     $ npm run test-cloudant-live
     <...cut successful test suite run...>
