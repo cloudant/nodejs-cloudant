@@ -39,6 +39,14 @@ specify('cloudant:third_party_access', timeout, function (assert) {
   })
 });
 
+specify('cloudant:access_with_username', timeout, function (assert) {
+  Cloudant({account:'nodejs', username:third_party.key, password:third_party.password}, function(er, cloudant, body) {
+    assert.equal(er, undefined, 'Connect and authenticate using a username');
+    assert.ok(body && body.userCtx, 'Connect with a username got a good pong');
+    assert.equal(body.userCtx.name, third_party.key, 'Username correctly identified by Cloudant server');
+  })
+});
+
 specify('cloudant:set_permissions', timeout, function (assert) {
   var client = Cloudant({account:'nodejs'}) // No password
 

@@ -99,6 +99,7 @@ If you run this example, you will see:
 
 - [Initialization](#initialization)
 - [Callback Signature](#callback-signature)
+- [Password Authentication](#password-authentication)
 - [Authorization and API Keys](#authorization-and-api-keys)
   - [Generate an API Key](#generate-an-api-key)
   - [Use an API Key](#use-an-api-key)
@@ -205,6 +206,19 @@ After initialization, in general, callback functions receive three arguments:
 * `header` - the http _response header_ from Cloudant, if no error
 
 The `ping()` function is the only exception to this rule. It does not return headers since a "ping" is made from multiple requests to gather various bits of information.
+
+### Password Authentication
+
+By default, when you connect to your cloudant account (i.e. "me.cloudant.com"), you authenticate as the account owner (i.e. "me"). However, you can use Cloudant with any username and password. Just provide an additional "username" option when you initialize Cloudant. This will connect to your account, but using the username as the authenticated user. (And of course, use the appropriate password.)
+
+~~~ js
+Cloudant({account:"me", username:"somebody", password:"somebody's secret"}, function(er, cloudant, reply) {
+  if (er)
+    throw er
+
+  console.log('Connected with username: %s', reply.userCtx.name)
+})
+~~~
 
 ## Authorization and API Keys
 
