@@ -55,9 +55,9 @@ To use the example code as-is, you must first install the `dotenv` package from 
 
 ~~~
 npm install dotenv                               # Install ./node_modules/dotenv
-echo "/.env"                       >> .gitignore # Do not track .env in the revision history.
+echo "/.env"                       >> .gitignore # Do not track .env in the revision history
 echo "cloudant_username=myaccount" >  .env       # Replace myaccount with your account name
-echo "cloudant_password='secret'   >> .env       # Replace secret with your password
+echo "cloudant_password='secret'"  >> .env       # Replace secret with your password
 ~~~
 
 Here is simple but complete example of working with data:
