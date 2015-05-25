@@ -51,18 +51,23 @@ Upper-case `Cloudant` is this package you load using `require()`, while lower-ca
 
 If you omit the "password" field, you will get an "anonymous" connection: a client that sends no authentication information (no passwords, no cookies, etc.)
 
-To use this code as-is, you must first type ` export cloudant_password="<whatever>"` in your shell. This is inconvenient, and you can invent your own alternative technique.
+To use the example code as-is, you must first install the `dotenv` package from npm, then create a `.env` file with your Cloudant credentials. For example:
 
-### Security Note
-
-**DO NOT hard-code your password and commit it to Git**. Storing your password directly in your source code (even in old commits) is a serious security risk to your data. Whoever gains access to your software will now also have read, write, and delete access to your data. Think about GitHub security bugs, or contractors, or disgruntled employees, or lost laptops at a conference. If you check in your password, all of these situations become major liabilities. Also, note that if you follow these instructions, the `export` command with your password will likely be in your `.bash_history` now, which is bad. However, if you type a space before typing the command, and you have `$HISTCONTROL` set to `"ignorespace"`, then the command will not be stored in your history.
+~~~
+npm install dotenv                               # Install ./node_modules/dotenv
+echo "/.env"                       >> .gitignore # Do not track .env in the revision history.
+echo "cloudant_username=myaccount" >  .env       # Replace myaccount with your account name
+echo "cloudant_password='secret'   >> .env       # Replace secret with your password
+~~~
 
 Here is simple but complete example of working with data:
 
 ~~~ js
+require('dotenv').load()
+
 var Cloudant = require('Cloudant')
 
-var me = 'jhs' // Set this to your own account
+var me       = process.env.cloudant_username
 var password = process.env.cloudant_password
 
 Cloudant({account:me, password:password}, function(er, cloudant) {
