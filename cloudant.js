@@ -40,7 +40,7 @@ function server_functions(nano) {
   nano.set_permissions  = set_permissions;
   nano.view_security = view_security;
   nano.set_security = set_security;
-  nano.cors = cors;  
+  nano.cors = cors;
   return nano;
 }
 
@@ -71,41 +71,41 @@ function fix_request(req, config) {
   }
 
   switch (pathname) {
-    
+
     case '/generate_api_key':
-    
+
       req.method = 'POST';
       req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@cloudant.com/api/generate_api_key';
       break;
-      
+
     case '/set_permissions':
-      
+
       req.method = 'POST';
       req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@cloudant.com/api/set_permissions';
       break;
-      
+
     case '/view_security':
-      
+
       req.method = 'GET';
-      req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@' + encodeURIComponent(config.account) + '.cloudant.com/_api/v2/db/' + encodeURIComponent(db) + '/_security';    
+      req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@' + encodeURIComponent(config.account) + '.cloudant.com/_api/v2/db/' + encodeURIComponent(db) + '/_security';
       break;
-      
+
     case '/set_security':
-      
+
       req.method = 'PUT';
       req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@' + encodeURIComponent(config.account) + '.cloudant.com/_api/v2/db/' + encodeURIComponent(db) + '/_security';
-      break;  
-    
+      break;
+
     case '/cors':
       req.method = 'PUT';
-      req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@' + encodeURIComponent(config.account) + '.cloudant.com/_api/v2/user/config/cors';  
-      break;  
-    
+      req.uri = 'https://' + encodeURIComponent(config.account) + ':' + encodeURIComponent(config.password) + '@' + encodeURIComponent(config.account) + '.cloudant.com/_api/v2/user/config/cors';
+      break;
+
     default:
-    
+
       throw new Error('Bad Cloudant request: ' + JSON.stringify(req));
   }
-    
+
 }
 
 
@@ -165,12 +165,12 @@ function set_permissions(opts, callback) {
 
 function cors(opts, callback) {
   var nano = this;
-  
+
   if (!nano.config.account)
     throw new Error('cors requires an "account" parameter during initialization');
   if (!nano.config.password)
     throw new Error('cors requires an "password" parameter during initialization');
-  
+
   nano.relax({method:'CLOUDANT', path:'cors', body: opts}, callback)
 }
 
