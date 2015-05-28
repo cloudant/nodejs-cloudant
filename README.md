@@ -109,47 +109,48 @@ If you run this example, you will see:
 - [Authorization and API Keys](#authorization-and-api-keys)
   - [Generate an API Key](#generate-an-api-key)
   - [Use an API Key](#use-an-api-key)
-- [Database Functions](#database-functions)
-	- [cloudant.db.create(name, [callback])](#Cloudantdbcreatename-callback)
-	- [cloudant.db.get(name, [callback])](#Cloudantdbgetname-callback)
-	- [cloudant.db.destroy(name, [callback])](#Cloudantdbdestroyname-callback)
-	- [cloudant.db.list([callback])](#Cloudantdblistcallback)
-	- [cloudant.db.replicate(source, target, [opts], [callback])](#Cloudantdbreplicatesource-target-opts-callback)
-	- [cloudant.db.changes(name, [params], [callback])](#Cloudantdbchangesname-params-callback)
-	- [cloudant.db.follow(name, [params], [callback])](#Cloudantdbfollowname-params-callback)
-	- [Cloudant.use(name)](#Cloudantusename)
-	- [Cloudant.request(opts, [callback])](#Cloudantrequestopts-callback)
-	- [Cloudant.config](#Cloudantconfig)
-	- [Cloudant.updates([params], [callback])](#Cloudantupdatesparams-callback)
-	- [Cloudant.follow_updates([params], [callback])](#Cloudantfollow_updatesparams-callback)
+  - [Database Functions](#database-functions)
+  - [cloudant.db.create(name, [callback])](#Cloudantdbcreatename-callback)
+  - [cloudant.db.get(name, [callback])](#Cloudantdbgetname-callback)
+  - [cloudant.db.destroy(name, [callback])](#Cloudantdbdestroyname-callback)
+  - [cloudant.db.list([callback])](#Cloudantdblistcallback)
+  - [cloudant.db.compact(name, [designname], [callback])](#Cloudantdbcompactname-designname-callback)
+  - [cloudant.db.replicate(source, target, [opts], [callback])](#Cloudantdbreplicatesource-target-opts-callback)
+  - [cloudant.db.changes(name, [params], [callback])](#Cloudantdbchangesname-params-callback)
+  - [cloudant.db.follow(name, [params], [callback])](#Cloudantdbfollowname-params-callback)
+  - [Cloudant.use(name)](#Cloudantusename)
+  - [Cloudant.request(opts, [callback])](#Cloudantrequestopts-callback)
+  - [Cloudant.config](#Cloudantconfig)
+  - [Cloudant.updates([params], [callback])](#Cloudantupdatesparams-callback)
+  - [Cloudant.follow_updates([params], [callback])](#Cloudantfollow_updatesparams-callback)
 - [Document Functions](#document-functions)
-	- [db.insert(doc, doc_id, [callback])](#dbinsertdoc-doc_id-callback)
-	- [db.destroy(doc_id, rev, [callback])](#dbdestroydoc_id-rev-callback)
-	- [db.get(doc_id, [params], [callback])](#dbgetdoc_id-params-callback)
-	- [db.head(doc_id, [callback])](#dbheaddoc_id-callback)
-	- [db.copy(src_doc, dest_doc, opts, [callback])](#dbcopysrc_doc-dest_doc-opts-callback)
-	- [db.bulk(docs, [params], [callback])](#dbbulkdocs-params-callback)
-	- [db.list([params], [callback])](#dblistparams-callback)
-	- [db.fetch(doc_ids, [params], [callback])](#dbfetchdoc_ids-params-callback)
+  - [db.insert(doc, doc_id, [callback])](#dbinsertdoc-doc_id-callback)
+  - [db.destroy(doc_id, rev, [callback])](#dbdestroydoc_id-rev-callback)
+  - [db.get(doc_id, [params], [callback])](#dbgetdoc_id-params-callback)
+  - [db.head(doc_id, [callback])](#dbheaddoc_id-callback)
+  - [db.copy(src_doc, dest_doc, opts, [callback])](#dbcopysrc_doc-dest_doc-opts-callback)
+  - [db.bulk(docs, [params], [callback])](#dbbulkdocs-params-callback)
+  - [db.list([params], [callback])](#dblistparams-callback)
+  - [db.fetch(doc_ids, [params], [callback])](#dbfetchdoc_ids-params-callback)
   - [db.fetch_revs(doc_ids, [params], [callback])](#dbfetch_revsdoc_ids-params-callback)
 - [Multipart Functions](#multipart-functions)
-	- [db.multipart.insert(doc, attachments, [params], [callback])](#dbmultipartinsertdoc-attachments-params-callback)
-	- [db.multipart.get(doc_id, [params], [callback])](#dbmultipartgetdoc_id-params-callback)
+  - [db.multipart.insert(doc, attachments, [params], [callback])](#dbmultipartinsertdoc-attachments-params-callback)
+  - [db.multipart.get(doc_id, [params], [callback])](#dbmultipartgetdoc_id-params-callback)
 - [Attachment Functions](#attachments-functions)
-	- [db.attachment.insert(doc_id, attname, att, contenttype, [params], [callback])](#dbattachmentinsertdoc_id-attname-att-contenttype-params-callback)
-	- [db.attachment.get(doc_id, attname, [params], [callback])](#dbattachmentgetdoc_id-attname-params-callback)
-	- [db.attachment.destroy(doc_id, attname, rev, [callback])](#dbattachmentdestroydoc_id-attname-rev-callback)
-- [Design Document Functions](#design-document-functions)
-	- [db.view(designname, viewname, [params], [callback])](#dbviewdesignname-viewname-params-callback)
-	- [db.search(designname, viewname, [params], [callback])](#dbsearchdesignname-searchname-params-callback)
+  - [db.attachment.insert(doc_id, attname, att, contenttype, [params], [callback])](#dbattachmentinsertdoc_id-attname-att-contenttype-params-callback)
+  - [db.attachment.get(doc_id, attname, [params], [callback])](#dbattachmentgetdoc_id-attname-params-callback)
+  - [db.attachment.destroy(doc_id, attname, rev, [callback])](#dbattachmentdestroydoc_id-attname-rev-callback)
+  - [Design Document Functions](#design-document-functions)
+  - [db.view(designname, viewname, [params], [callback])](#dbviewdesignname-viewname-params-callback)
+  - [db.search(designname, viewname, [params], [callback])](#dbsearchdesignname-searchname-params-callback)
 - [Cloudant Search](#cloudant-search)
 - [Cloudant Query](#cloudant-query)
 - [Cookie Authentication](#cookie-authentication)
 - [Advanced Configuration](#advanced-configuration)
 - [Advanced Features](#advanced-features)
-	- [Extending the Cloudant Library](#extending-the-cloudant-library)
-	- [Pipes](#pipes)
-- [tests](#tests)
+  - [Extending the Cloudant Library](#extending-the-cloudant-library)
+  - [Pipes](#pipes)
+- [Tests](#tests)
 
 ### Initialization
 
@@ -477,7 +478,7 @@ Make a custom request to Cloudant, the available `opts` are:
   `opts.att`
 * `opts.doc` – the document name
 * `opts.att` – the attachment name
-* `opts.params` – query string parameters, appended after any existing `opts.path`, `opts.doc`, or `opts.att`
+* `opts.qs` – query string parameters, appended after any existing `opts.path`, `opts.doc`, or `opts.att`
 * `opts.content_type` – the content type of the request, default to `json`
 * `opts.headers` – additional http headers, overrides existing ones
 * `opts.body` – the document or attachment body
@@ -502,14 +503,14 @@ Listen to db updates, the available `params` are:
 * `params.timeout` – Number of seconds until CouchDB closes the connection. Default is 60.
 * `params.heartbeat` – Whether CouchDB will send a newline character (\n) on timeout. Default is true.
 
-### Cloudant.follow_updates([params], [callback])
+### Cloudant.followUpdates([params], [callback])
 
 Uses [follow](https://github.com/iriscouch/follow) to create a solid
 [`_db_updates`](http://docs.couchdb.org/en/latest/api/server/common.html?highlight=db_updates#get--_db_updates) feed.
 please consult follow documentation for more information as this is a very complete api on it's own
 
-~~~js
-var feed = Cloudant.follow_updates({since: "now"})
+~~~ js
+var feed = Cloudant.followUpdates({since: "now"})
 feed.on('change', function (change) {
   console.log("change: ", change)
 })
@@ -609,7 +610,7 @@ Bulk fetch of the database documents, `doc_ids` are specified as per
 Additional query string `params` can be specified, `include_docs` is always set
 to `true`.
 
-### db.fetch_revs(doc_ids, [params], [callback])
+### db.fetchRevs(doc_ids, [params], [callback])
 
 Bulk fetch of the revisions of the database documents, `doc_ids` are specified as per
 [CouchDB doc](http://docs.couchdb.org/en/latest/api/database/bulk-api.html#post--db-_all_docs).
@@ -620,9 +621,9 @@ Additional query string `params` can be specified, this is the same method as fe
 
 The multipart functions are for efficiently working with documents and attachments, by using a special feature of HTTP: the "multipart/related" content type. Requests that use multipart/related separate the content into different pieces, with each piece encoded in a different way. In practice, this means sending a JSON document plus binary attachments to Cloudant in a single, efficient, request.
 
-### db.multipart.insert(doc, attachments, doc_id, [callback])
+### db.multipart.insert(doc, attachments, params, [callback])
 
-Insert a `doc` together with `attachments` and optional `params`.  Refer to the [CouchDB multipart documentation](http://docs.couchdb.org/en/latest/api/document/common.html?highlight=multipart#creating-multiple-attachments) for more details.
+Insert a `doc` together with `attachments` and optional `params`. If params is a string, its assumed as the intended document name. if params is an object, its passed as query string parameters and `docName` is checked for defining the document name. Refer to the [CouchDB multipart documentation](http://docs.couchdb.org/en/latest/api/document/common.html?highlight=multipart#creating-multiple-attachments) for more details.
 
 `attachments` must be an array of objects with `name`, `data` and `content_type` properties. For example:
 
@@ -709,13 +710,13 @@ var attachment = alice.attachment.get('rabbit', 'rabbit.png')
 attachment.pipe(img_stream)
 ~~~
 
-### db.attachment.destroy(doc_id, attname, rev, [callback])
+### db.attachment.destroy(docname, attname, [params], [callback])
 
-Destroy attachment `attname` of `doc_id`'s revision `rev`.
+Destroy attachment `attname` of `docname`'s revision `rev`.
 
 ~~~ js
 var rev = '1-4701d73a08ce5c2f2983bf7c9ffd3320'
-alice.attachment.destroy('rabbit', 'rabbit.png', rev, function(err, body) {
+alice.attachment.destroy('rabbit', 'rabbit.png', {'rev':rev}, function(err, body) {
   if (!err)
     console.log(body)
 })
@@ -932,13 +933,13 @@ Cloudant.session(function(err, session) {
   }
 
   console.log('user is %s and has these roles: %j',
-    session.userCtx.user, session.userCtx.roles);
+    session.userCtx.name, session.userCtx.roles);
 });
 ~~~
 
 ### Advanced Configuration
 
-Besides the account and password options, you can add an optionsl `request_defaults` value, which will initialize Request (the underlying HTTP library) as you need it.
+Besides the account and password options, you can add an optionsl `requestDefaults` value, which will initialize Request (the underlying HTTP library) as you need it.
 
 ~~~ js
 var Cloudant = require('Cloudant')
@@ -947,7 +948,7 @@ var Cloudant = require('Cloudant')
 var options =
   { "account"         : "my_account"
   , "password"        : "secret"
-  , "request_defaults": { "proxy": "http://localhost:8080" }
+  , "requestDefaults": { "proxy": "http://localhost:8080" }
   }
 
 Cloudant(options, function(err, cloudant) {
@@ -959,14 +960,14 @@ Please check [request] for more information on the defaults. They support featur
 
 ### Pool size and open sockets
 
-A very important configuration parameter if you have a high traffic website and are using Cloudant is setting up the `pool.size`. By default, the node.js https global agent (client) has a certain size of active connections that can run simultaneously, while others are kept in a queue. Pooling can be disabled by setting the `agent` property in `request_defaults` to false, or adjust the global pool size using:
+A very important configuration parameter if you have a high traffic website and are using Cloudant is setting up the `pool.size`. By default, the node.js https global agent (client) has a certain size of active connections that can run simultaneously, while others are kept in a queue. Pooling can be disabled by setting the `agent` property in `requestDefaults` to false, or adjust the global pool size using:
 
 ~~~ js
 var https = require('https')
 https.globalAgent.maxSockets = 20
 ~~~
 
-You can also increase the size in your calling context using `request_defaults` if this is problematic. refer to the [request] documentation and examples for further clarification.
+You can also increase the size in your calling context using `requestDefaults` if this is problematic. refer to the [request] documentation and examples for further clarification.
 
 Here is an example of explicitly using the keep alive agent (installed using `npm install agentkeepalive`), especially useful to limit your open sockets when doing high-volume access to Cloudant:
 
@@ -979,7 +980,7 @@ var myagent = new agentkeepalive({
   })
 
 var Cloudant = require('cloudant')
-Cloudant({account:"me", password:"secret", request_defaults:{agent:myagent}}, function(err, cloudant) {
+Cloudant({account:"me", password:"secret", requestDefaults:{agent:myagent}}, function(err, cloudant) {
   // Using Cloudant with myagent...
 })
 ~~~

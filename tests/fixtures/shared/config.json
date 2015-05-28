@@ -1,5 +1,10 @@
 [
-  { "path"     : "/"
+  { "method"   : "put"
+  , "path"     : "/shared_config"
+  , "status"   : 201
+  , "response" : "{ \"ok\": true }"
+  }
+, { "path"     : "/"
   , "response" : "{\"ok\": true, \"version\": \"1.1.0\"}"
   }
 , { "path"     : "/"
@@ -27,5 +32,11 @@
   , "response" : "{\"ok\":true,\"info\":{\"authentication_db\":\"_users\",\"authentication_handlers\":[\"cookie\",\"default\"]},\"userCtx\":{\"name\":null,\"roles\":[]}}"
   }
 
-  , {"path": "/_all_dbs", "response": "{}"}
+, { "path"     : "/_all_dbs"
+  , "response" : "{}"
+  }
+, { "method"   : "delete"
+  , "path"     : "/shared_config"
+  , "response" : "{ \"ok\": true }"
+  }
 ]
