@@ -52,6 +52,7 @@ helpers.teardown = function() {
 
 helpers.harness = function(name, setup, teardown) {
   var parent = name || module.parent.filename;
+  var is_cloudant = !!name.match(/cloudant/);
   var fileName = path.basename(parent).split('.')[0];
   var parentDir = path.dirname(parent)
     .split(path.sep).reverse()[0];
@@ -59,11 +60,12 @@ helpers.harness = function(name, setup, teardown) {
   var log = debug(path.join('nano', 'tests', 'integration', shortPath));
   var dbName = shortPath.replace('/', '_');
   var nanoLog = nano({
-    url: cfg.couch,
+    url: is_cloudant ? cfg.cloudant_url : cfg.couch,
     log: log
   });
 
-  var mock = helpers.nock(helpers.couch, shortPath, log);
+  var mocked_url = is_cloudant ? helpers.cloudant_url : helpers.couch;
+  var mock = helpers.nock(mocked_url, shortPath, log);
   var db   = nanoLog.use(dbName);
   var locals = {
     mock: mock,
