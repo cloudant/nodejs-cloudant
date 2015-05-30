@@ -39,7 +39,9 @@ helpers.cloudant_auth = cfg.cloudant_auth;
 helpers.cloudant = nano({account:'nodejs', password:cloudant_password()});
 helpers.cloudant_pw = cloudant_password;
 function cloudant_password() {
-  return helpers.mocked ? 'secret' : (process.env.npm_config_cloudant_password || 'secret');
+  return (process.env.NOCK_OFF === 'true') ?
+    (process.env.npm_config_cloudant_password || 'secret') :
+    'secret';
 }
 
 helpers.loadFixture = function helpersLoadFixture(filename, json) {
