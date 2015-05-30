@@ -59,10 +59,17 @@ helpers.harness = function(name, setup, teardown) {
   var shortPath = path.join(parentDir, fileName);
   var log = debug(path.join('nano', 'tests', 'integration', shortPath));
   var dbName = shortPath.replace('/', '_');
-  var nanoLog = nano({
-    url: is_cloudant ? cfg.cloudant_url : cfg.couch,
-    log: log
-  });
+
+  var nanoLog = is_cloudant ?
+    nano({
+      account: 'nodejs',
+      password: helpers.cloudant_pw(),
+      log: log
+    }) :
+    nano({
+      url: cfg.couch,
+      log: log
+    });
 
   var mocked_url = is_cloudant ? helpers.cloudant_url : helpers.couch;
   var mock = helpers.nock(mocked_url, shortPath, log);
