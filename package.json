@@ -32,8 +32,8 @@
     "pre-commit": "0.0.9"
   },
   "scripts": {
-    "test-cloudant": "env NOCK=on sh tests/cloudant/run-tests.sh",
-    "test-cloudant-live": "sh tests/cloudant/run-tests.sh",
+    "test-cloudant": "tape tests/integration/cloudant/*.js",
+    "test-cloudant-live": "tape tests/integration/cloudant/*.js",
     "test": "DEBUG=* NOCK_OFF=true istanbul cover tape tests/*/*/*.js",
     "unmocked": "NOCK_OFF=true tape tests/*/*/*.js",
     "mocked": "tape tests/*/*/*.js",
