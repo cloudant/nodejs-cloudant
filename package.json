@@ -15,7 +15,7 @@
     "database"
   ],
   "dependencies": {
-    "nano": "6.1.2"
+    "nano": "6.1.3"
   },
   "devDependencies": {
     "async": "^0.9.0",
