@@ -28,24 +28,20 @@ Now it's time to begin doing real work with Cloudant and Node.js.
 Initialize your Cloudant connection by supplying your *account* and *password*, and supplying a callback function to run when everything is ready.
 
 ~~~ js
-var Cloudant = require('cloudant')
 
 var me = 'jhs' // Set this to your own account
 var password = process.env.cloudant_password
 
-Cloudant({account:me, password:password}, function(err, cloudant) {
-  console.log('Connected to Cloudant')
+var cloudant = require('cloudant')({account:me, password:password});
 
-  cloudant.db.list(function(err, all_dbs) {
-    console.log('All my databases: %s', all_dbs.join(', '))
-  })
+cloudant.db.list(function(err, all_dbs) {
+  console.log('All my databases: %s', all_dbs.join(', '))
 })
 ~~~
 
 Output:
 
-    Connected to Cloudant
-    All my databases: example_db, jasons_stuff, scores
+     All my databases: example_db, jasons_stuff, scores
 
 Upper-case `Cloudant` is this package you load using `require()`, while lower-case `cloudant` represents an authenticated, confirmed connection to your Cloudant service.
 
@@ -67,30 +63,23 @@ require('dotenv').load()
 
 var Cloudant = require('Cloudant')
 
-var me       = process.env.cloudant_username
-var password = process.env.cloudant_password
+// Clean up the database we created previously.
+cloudant.db.destroy('alice', function() {
+  // Create a new database.
+  cloudant.db.create('alice', function() {
+    // specify the database we are going to use
+    var alice = cloudant.use('alice')
+    // and insert a document in it
+    alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
+      if (err)
+        return console.log('[alice.insert] ', err.message)
 
-Cloudant({account:me, password:password}, function(er, cloudant) {
-  if (er)
-    return console.log('Error connecting to Cloudant account %s: %s', me, er.message)
-
-  // Clean up the database we created previously.
-  cloudant.db.destroy('alice', function() {
-    // Create a new database.
-    cloudant.db.create('alice', function() {
-      // specify the database we are going to use
-      var alice = cloudant.use('alice')
-      // and insert a document in it
-      alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
-        if (err)
-          return console.log('[alice.insert] ', err.message)
-
-        console.log('you have inserted the rabbit.')
-        console.log(body)
-      })
+      console.log('you have inserted the rabbit.')
+      console.log(body)
     })
   })
 })
+
 ~~~
 
 If you run this example, you will see:
@@ -157,24 +146,16 @@ If you run this example, you will see:
 To use Cloudant, `require('cloudant')` in your code. That will return the initialization function. Run that function, passing your account name and password, and a callback. (And see the [security note](#security-note) about placing your password into your source code.
 
 ~~~ js
-var Cloudant = require('cloudant')
-
-// Connect to Cloudant.
-Cloudant({account:me, password:password}, function(er, cloudant) {
-  if (er)
-    return console.log('Error connecting to Cloudant account %s: %s', me, er.message)
-
-  console.log('Connected to cloudant')
-
-  /*
-   * The rest of my code goes here.
-   */
-})
+var Cloudant = require('cloudant')({account:me, password:password});
 ~~~
 
-If you would prefer, you can also initialize Cloudant synchronously by omitting the callback.
+If you would prefer, you can also initialize Cloudant with a URL:
 
-This can help avoid messy code if you are requiring the Cloudant library in many places in your app. You should note that this method does not verify that your Cloudant credentials are correct - you would have to use the [ping](#cloudantpingcallback) for that.
+~~~ js
+var Cloudant = require('cloudant')("https://MYUSERNAME:MYPASSWORD@MYACCOUNT.cloudant.com");
+~~~
+
+This can help avoid messy code if you are requiring the Cloudant library in many places in your app. 
 
 A simple example of initializing sychronously is:
 ~~~ js
@@ -187,20 +168,6 @@ db.get("dog", function(err, data) {
   // rest of your code goes here
   
 });
-~~~
-
-### cloudant.ping([callback])
-
-Ping Cloudant. If this succeeds, then you have a good connection to Cloudant, and if you provided authentication credentials, they are valid.
-
-~~~ js
-cloudant.ping(function(er, reply) {
-  if (er)
-    return console.log('Failed to ping Cloudant')
-
-  console.log('Server version = %s', reply.version)
-  console.log('I am %s and my roles are %j', reply.userCtx.name, reply.userCtx.roles)
-})
 ~~~
 
 ### Callback Signature
@@ -328,12 +295,7 @@ See the Cloudant API for full details](https://docs.cloudant.com/api.html#author
 To use an API key, initialize a new Cloudant connection, and provide an additional "key" option when you initialize Cloudant. This will connect to your account, but using the "key" as the authenticated user. (And of course, use the appropriate password associated with the API key.)
 
 ~~~ js
-Cloudant({account:"me", key:api.key, password:api.password}, function(er, cloudant, reply) {
-  if (er)
-    throw er
-
-  console.log('Connected with API key %s', reply.userCtx.name)
-})
+var cloudant = require('cloudant')({account:"me", key:api.key, password:api.password});
 ~~~
 
 ## CORS
@@ -343,7 +305,7 @@ If you need to access your Cloudant database from a web application that is serv
 e.g. enable CORS from any domain:
 
 ~~~ js
-   cloudant.cors({ enable_cors: true, allow_credentials: true, origins: ["*"]}, function(err, data) {
+   cloudant.set_cors({ enable_cors: true, allow_credentials: true, origins: ["*"]}, function(err, data) {
      console.log(err, data);
    };
 ~~~
@@ -351,7 +313,7 @@ e.g. enable CORS from any domain:
 or enable access from a list of specified domains:
 
 ~~~ js
-   cloudant.cors({ enable_cors: true, allow_credentials: true, origins: [ "https://mydomain.com","https://mysubdomain.mydomain.com"]}, function(err, data) {
+   cloudant.set_cors_({ enable_cors: true, allow_credentials: true, origins: [ "https://mydomain.com","https://mysubdomain.mydomain.com"]}, function(err, data) {
      console.log(err, data);
    };
 ~~~
@@ -359,9 +321,19 @@ or enable access from a list of specified domains:
 or disable CORS access
 
 ~~~ js
-   cloudant.cors({ enable_cors: false }, function(err, data) {
+   cloudant.set_cors({ enable_cors: false }, function(err, data) {
      console.log(err, data);
    };
+~~~
+
+or to fetch the current CORS configuration
+
+~~~ js
+// get CORS configuration
+cloudant.get_cors(function(err, data) {
+  console.log(data);
+});
+// { enable_cors: true, allow_credentials: true, origins: [ '*' ] }
 ~~~
 
 See <https://docs.cloudant.com/api.html#cors> for further details.
@@ -881,22 +853,20 @@ var userpass = 'pass'
 // A global variable to store the cookies. This can be on the filesystem or some other cache, too.
 var cookies = {}
 
-Cloudant({account:username, password:userpass}, function(err, cloudant) {
+
+var cloudant = require('cloudant)({account:username, password:userpass});
+
+// In this example, we authenticate using the same username/userpass as above.
+// However, you can use a different combination to authenticate as other users
+// in your database. This can be useful for using a less-privileged account.
+cloudant.auth(username, userpass, function(err, body, headers) {
   if (err)
-    return console.log('Failed to connect to Cloudant: ' + err.message)
+    return console.log('Error authenticating: ' + err.message)
 
-  // In this example, we authenticate using the same username/userpass as above.
-  // However, you can use a different combination to authenticate as other users
-  // in your database. This can be useful for using a less-privileged account.
-  cloudant.auth(username, userpass, function(err, body, headers) {
-    if (err)
-      return console.log('Error authenticating: ' + err.message)
+  console.log('Got cookie for %s: %s', username, headers['set-cookie'])
 
-    console.log('Got cookie for %s: %s', username, headers['set-cookie'])
-
-    // Store the authentication cookie for later.
-    cookies[username] = headers['set-cookie']
-  })
+  // Store the authentication cookie for later.
+  cookies[username] = headers['set-cookie']
 })
 ~~~
 
@@ -904,30 +874,27 @@ To reuse a cookie:
 
 ~~~ js
 // Make a new connection with the cookie.
-Cloudant({account:username, cookie:cookies[username]}, function(err, other_cloudant) {
+
+var cloudant = require('cloudant)({account:username, cookie:cookies[username]});
+
+var alice = other_cloudant.use('alice')
+alice.insert({_id:"my_doc"}, function (err, body, headers) {
   if (err)
-    return console.log('Failed to connect to Cloudant: ' + err.message)
+    return console.log('Failed to insert into alice database: ' + err.message)
 
-  console.log('Connected to Cloudant using a cookie!')
-
-  var alice = other_cloudant.use('alice')
-  alice.insert({_id:"my_doc"}, function (err, body, headers) {
-    if (err)
-      return console.log('Failed to insert into alice database: ' + err.message)
-
-    // Change the cookie if Cloudant tells us to.
-    if (headers && headers['set-cookie'])
-      cookies[username] = headers['set-cookie']
-  })
+  // Change the cookie if Cloudant tells us to.
+  if (headers && headers['set-cookie'])
+    cookies[username] = headers['set-cookie']
 })
+
 ~~~
 
 Getting current session:
 
 ~~~javascript
-var Cloudant = require('Cloudant')({url: 'http://localhost:5984', cookie: 'AuthSession=' + auth});
+var cloudant = require('cloudant')({url: 'http://localhost:5984', cookie: 'AuthSession=' + auth});
 
-Cloudant.session(function(err, session) {
+cloudant.session(function(err, session) {
   if (err) {
     return console.log('oh noes!')
   }
@@ -942,7 +909,6 @@ Cloudant.session(function(err, session) {
 Besides the account and password options, you can add an optionsl `requestDefaults` value, which will initialize Request (the underlying HTTP library) as you need it.
 
 ~~~ js
-var Cloudant = require('Cloudant')
 
 // Use an HTTP proxy to connect to Cloudant.
 var options =
@@ -950,10 +916,9 @@ var options =
   , "password"        : "secret"
   , "requestDefaults": { "proxy": "http://localhost:8080" }
   }
+var cloudant = require('cloudant')(opts);
+// Now using the HTTP proxy...
 
-Cloudant(options, function(err, cloudant) {
-  // Now using the HTTP proxy...
-})
 ~~~
 
 Please check [request] for more information on the defaults. They support features like cookie jar, proxies, ssl, etc.
@@ -979,10 +944,8 @@ var myagent = new agentkeepalive({
   , maxKeepAliveTime: 30000
   })
 
-var Cloudant = require('cloudant')
-Cloudant({account:"me", password:"secret", requestDefaults:{agent:myagent}}, function(err, cloudant) {
-  // Using Cloudant with myagent...
-})
+var cloudant = require('cloudant')({account:"me", password:"secret", request_defaults:{agent:myagent}});
+// Using Cloudant with myagent...
 ~~~
 
 ## Advanced Features
