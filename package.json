@@ -26,7 +26,6 @@
     "nock": "^0.48.1",
     "endswith": "^0.0.0",
     "tape-it": "^0.3.1",
-    "pre-commit": "0.0.9"
   },
   "scripts": {
     "test-cloudant": "tape tests/integration/cloudant/*.js",
@@ -42,12 +41,5 @@
   "main": "./cloudant.js",
   "engines": {
     "node": ">=0.8.0"
-  },
-  "pre-commit": [
-    "jshint",
-    "codestyle",
-    "mocked",
-    "test",
-    "checkcoverage"
-  ]
+  }
 }
