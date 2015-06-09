@@ -1,5 +1,3 @@
-'use strict';
-
 var nano = null;
 
 // https://docs.cloudant.com/api.html#creating-api-keys
