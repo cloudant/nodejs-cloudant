@@ -43,7 +43,7 @@ describe('Initialization', function() {
     nock(SERVER).get('/_session').reply(200, {ok:true, userCtx:{name:null,roles:[]}});
     nock(SERVER).get('/')        .reply(200, {couchdb:'Welcome', version:'1.0.2'});
 
-    var db = Cloudant({account:'nodejs'}, function(er, cloudant, body) {
+    Cloudant({account:'nodejs'}, function(er, cloudant, body) {
       should(er).equal(null, 'No problem pinging Cloudant');
 
       cloudant.should.be.type('object', 'Cloudant client object returned');
