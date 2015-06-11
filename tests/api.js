@@ -13,16 +13,44 @@
 // Cloudant client API tests
 
 var should = require('should');
+var nock = require('./nock.js');
 
 var Cloudant = require('../cloudant.js');
+
+
+// These globals may potentially be parameterized.
+var SERVER = 'https://nodejs.cloudant.com'
+var ME     = 'nodejs'
 
 
 describe('Cloudant API', function() {
   it('is a function', function() {
     Cloudant.should.be.type('function');
   });
-
   it('has arity 2: options, callback', function() {
     Cloudant.should.have.lengthOf(2);
+  });
+});
+
+describe('Initialization', function() {
+  it('runs synchronously with one argument', function() {
+    (function() {
+      var db = Cloudant({account:'nodejs'});
+    }).should.not.throw();
+  });
+
+  it('supports a ping callback', function(done) {
+    nock(SERVER).get('/_session').reply(200, {ok:true, userCtx:{name:null,roles:[]}});
+    nock(SERVER).get('/')        .reply(200, {couchdb:'Welcome', version:'1.0.2'});
+
+    var db = Cloudant({account:'nodejs'}, function(er, cloudant, body) {
+      should(er).equal(null, 'No problem pinging Cloudant');
+
+      cloudant.should.be.type('object', 'Cloudant client object returned');
+      (body && body.version).should.be.ok;
+      (body && body.userCtx).should.be.ok;
+
+      done();
+    });
   });
 });

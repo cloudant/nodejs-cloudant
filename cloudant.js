@@ -1,4 +1,19 @@
-var nano = null;
+module.exports = Cloudant;
+
+// Licensed under the Apache License, Version 2.0 (the 'License'); you may not
+// use this file except in compliance with the License. You may obtain a copy of
+// the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+
+var Nano = require('nano');
+var debug = require('debug')('cloudant');
 
 // https://docs.cloudant.com/api.html#creating-api-keys
 var generate_api_key = function(callback) {
@@ -51,9 +66,10 @@ var reconfigure = function(config) {
   return config.url;
 };
 
-// this IS the Cloudant library. It's nano + a few functions
-module.exports = function(credentials, couchdbcallback) {
-  
+// This IS the Cloudant API. It is mostly nano, with a few functions.
+function Cloudant(credentials, callback) {
+  debug('Initialize', credentials);
+
   // keep a copy of the credentials
   var pkg = require('./package.json');
   var useragent = "nodejs-cloudant/" + pkg.version + " (Node.js " + process.version + ")";
@@ -64,12 +80,10 @@ module.exports = function(credentials, couchdbcallback) {
     }
     credentials = reconfigure(credentials);
   }
-  
-  // create a nano instance
-  nano = require('nano')({ url: credentials, 
-                           requestDefaults: requestDefaults}, 
-                          couchdbcallback || null);  
-  
+
+  debug('Create underlying Nano instance, credentials=%j requestDefaults=%j', credentials, requestDefaults);
+  var nano = Nano({url:credentials, requestDefaults: requestDefaults});
+
   // our own implementation of 'use' e.g. nano.use or nano.db.use
   // it includes all db-level functions
   var use = function(db) {
@@ -140,18 +154,56 @@ module.exports = function(credentials, couchdbcallback) {
     
     return obj;
   };
-  
+
   // intercept calls to 'nano.use' to plugin our extensions
   nano._use = nano.use;
-  delete nano.use;
-  delete nano.db.use;
   nano.use = nano.db.use = use;
 
   // add top-level Cloudant-specific functions
-  nano.generate_api_key = generate_api_key;
+  nano.ping = ping;
   nano.get_cors = get_cors;
   nano.set_cors = set_cors;
   nano.set_permissions = set_permissions;
-  
+  nano.generate_api_key = generate_api_key;
+
+  if (callback) {
+    debug('Automatic ping');
+    nano.ping(function(er, pong, headers) {
+      if (er) {
+        callback(er);
+      } else {
+        callback(null, nano, pong, headers);
+      }
+    });
+  }
+
   return nano;
-};
+}
+
+function ping(callback) {
+  var nano = this;
+
+  // Only call back once.
+  var inner_callback = callback;
+  callback = function(er, result) {
+    inner_callback(er, result);
+    inner_callback = function() {};
+  };
+
+  var done = {welcome:false, session:false};
+  nano.session(       function(er, body) { returned('session', er, body); });
+  nano.relax({db:""}, function(er, body) { returned('welcome', er, body); });
+
+  function returned(type, er, body) {
+    if (er)
+      return callback(er);
+
+    debug('Pong/%s %j', type, body);
+    done[type] = body;
+    if (done.welcome && done.session) {
+      // Return the CouchDB "Welcome" body but with the userCtx added in.
+      done.welcome.userCtx = done.session.userCtx;
+      callback(null, done.welcome);
+    }
+  }
+}
