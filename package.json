@@ -6,7 +6,9 @@
   "repository": "git://github.com/cloudant/nodejs-cloudant",
   "version": "2.0.0",
   "author": "Jason Smith <jason@cloudant.com>",
-  "contributors": [ "Glynn Bird <glynn.bird@gmail.com>"],
+  "contributors": [
+    "Glynn Bird <glynn.bird@gmail.com>"
+  ],
   "keywords": [
     "cloudant",
     "couchdb",
@@ -18,7 +20,9 @@
     "nano": "6.1.3"
   },
   "devDependencies": {
-    "nock": "^0.48.1"
+    "mocha": "^2.2.5",
+    "nock": "^0.48.1",
+    "should": "^6.0.3"
   },
   "scripts": {
     "test-cloudant": "tape tests/integration/cloudant/*.js",
