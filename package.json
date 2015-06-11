@@ -27,7 +27,7 @@
   "scripts": {
     "test-cloudant": "tape tests/integration/cloudant/*.js",
     "test-cloudant-live": "NOCK_OFF=true tape tests/integration/cloudant/*.js",
-    "test": "DEBUG=* NOCK_OFF=true istanbul cover tape tests/*/*/*.js",
+    "test": "DEBUG=* mocha tests/*.js",
     "unmocked": "NOCK_OFF=true tape tests/*/*/*.js",
     "mocked": "tape tests/*/*/*.js"
   },
