@@ -49,7 +49,7 @@ describe('Initialization', function() {
       body.should.be.an.Object;
       body.should.have.a.property("couchdb").and.not.be.empty;
       body.should.have.a.property("version").and.not.be.empty;
-      body.should.have.a.property("userCtx").and.be.an.Objet;
+      body.should.have.a.property("userCtx").and.be.an.Object;
       body.userCtx.should.have.a.property("name");
       body.userCtx.should.have.a.property("roles").and.be.an.Array;
       done();
