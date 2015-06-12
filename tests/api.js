@@ -45,11 +45,13 @@ describe('Initialization', function() {
 
     Cloudant({account:'nodejs'}, function(er, cloudant, body) {
       should(er).equal(null, 'No problem pinging Cloudant');
-
-      cloudant.should.be.type('object', 'Cloudant client object returned');
-      (body && body.version).should.be.ok;
-      (body && body.userCtx).should.be.ok;
-
+      cloudant.should.be.an.Object;
+      body.should.be.an.Object;
+      body.should.have.a.property("couchdb").and.not.be.empty;
+      body.should.have.a.property("version").and.not.be.empty;
+      body.should.have.a.property("userCtx").and.be.an.Objet;
+      body.userCtx.should.have.a.property("name");
+      body.userCtx.should.have.a.property("roles").and.be.an.Array;
       done();
     });
   });
