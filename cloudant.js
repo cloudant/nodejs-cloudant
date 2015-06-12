@@ -15,29 +15,6 @@ module.exports = Cloudant;
 var Nano = require('nano');
 var debug = require('debug')('cloudant');
 
-// https://docs.cloudant.com/api.html#creating-api-keys
-var generate_api_key = function(callback) {
-  nano.request({path: "_api/v2/api_keys", method: "post" }, callback);
-};
-
-// https://docs.cloudant.com/api.html#reading-the-cors-configuration
-var get_cors = function(callback) {
-  nano.request({path: "_api/v2/user/config/cors" }, callback);
-};
-
-// https://docs.cloudant.com/api.html#setting-the-cors-configuration
-var set_cors = function(configuration, callback) {
-  nano.request({path: "_api/v2/user/config/cors", 
-                method: "put", 
-                body: configuration }, callback);
-};
-
-// the /set_permissions API call is deprecated
-var set_permissions = function(opts, callback) {
-  console.error("set_permissions is deprecated. use set_security instead");
-  callback(null, null);
-};
-
 // function from the old Cloudant library to 
 // parse an object { account: "myaccount", password: "mypassword"}
 var reconfigure = function(config) {
@@ -143,7 +120,7 @@ function Cloudant(credentials, callback) {
                       method: "post", 
                       body: query}, callback);
     };
-  
+
     // add Cloudant special functions
     var obj = nano._use(db);
     obj.get_security = get_security;
@@ -158,6 +135,30 @@ function Cloudant(credentials, callback) {
   // intercept calls to 'nano.use' to plugin our extensions
   nano._use = nano.use;
   nano.use = nano.db.use = use;
+
+
+  // https://docs.cloudant.com/api.html#creating-api-keys
+  var generate_api_key = function(callback) {
+    nano.request({path: "_api/v2/api_keys", method: "post" }, callback);
+  };
+
+  // https://docs.cloudant.com/api.html#reading-the-cors-configuration
+  var get_cors = function(callback) {
+    nano.request({path: "_api/v2/user/config/cors" }, callback);
+  };
+
+  // https://docs.cloudant.com/api.html#setting-the-cors-configuration
+  var set_cors = function(configuration, callback) {
+    nano.request({path: "_api/v2/user/config/cors", 
+                  method: "put", 
+                  body: configuration }, callback);
+  };
+
+  // the /set_permissions API call is deprecated
+  var set_permissions = function(opts, callback) {
+    console.error("set_permissions is deprecated. use set_security instead");
+    callback(null, null);
+  };
 
   // add top-level Cloudant-specific functions
   nano.ping = ping;

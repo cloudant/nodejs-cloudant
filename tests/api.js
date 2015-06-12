@@ -69,17 +69,42 @@ describe('Initialization', function() {
     done();
   });
   
+});
+
+describe('Authentication', function() {
+  
   it('supports Authentication API - POST /_api/v2/api_keys', function(done) {
     done();
   });
   
+  
+});
+
+describe('CORS', function() {
+   
   it('supports CORS API - GET /_api/v2/user/config/cors', function(done) {
-    done();
+    nock(SERVER).get('/_api/v2/user/config/cors').reply(200, { "enable_cors": true, "allow_credentials": true, "origins": ["*"]});
+    var c = Cloudant({account:'nodejs'});
+    c.get_cors(function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("enable_cors");
+      d.enable_cors.should.be.a.Boolean;
+      d.should.have.a.property("allow_credentials");
+      d.allow_credentials.should.be.a.Boolean;
+      d.should.have.a.property("origins");
+      d.origins.should.be.an.Array;
+      done();
+    });
   });
   
   it('supports CORS API - PUT /_api/v2/user/config/cors', function(done) {
     done();
   });
+  
+});
+
+describe('Authorization', function() {
   
   it('supports Authorization API GET _api/v2/db/<db/_security', function(done) {
     done();
@@ -88,6 +113,10 @@ describe('Initialization', function() {
   it('supports Authorization API - PUT _api/v2/db/<db/_security', function(done) {
     done();
   });
+  
+});
+
+describe('Cloudant Query', function() {
   
   it('supports Cloudant Query get indexes - GET /<db/_index', function(done) {
     done();
