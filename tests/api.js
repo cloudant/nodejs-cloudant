@@ -24,6 +24,8 @@ var SERVER = 'https://' + ME + '.cloudant.com';
 var MYDB = 'mydb';
 var mydb = null;
 var cc = null;
+var ddoc = null;
+var viewname = null;
 
 
 describe('Cloudant API', function() {
@@ -172,26 +174,119 @@ describe('Authorization', function() {
       cc = null;
       done();
     })
-  })
+  });
   
 });
 
 describe('Cloudant Query', function() {
   
-  it('supports Cloudant Query get indexes - GET /<db/_index', function(done) {
-    done();
+  before(function(done) {
+    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    cc = Cloudant({account:ME});
+    cc.db.create(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = cc.db.use("mydb");
+      ddoc = viewname = null;
+      done();
+    });
   });
+
+  it('create some dummy data', function(done) {
+    nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{"id":"f400bde9395b9116d108ebc89aa816b8","rev":"1-23202479633c2b380f79507a776743d5"},{"id":"f400bde9395b9116d108ebc89aa81bb8","rev":"1-3975759ccff3842adf690a5c10caee42"},{"id":"f400bde9395b9116d108ebc89aa82127","rev":"1-027467bd0efec85f21c822a8eb537073"}]);
+    mydb.bulk({docs: [ {a:1},{a:2}, {a:3} ]}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Array;
+      for (var i in d) {
+        d[i].should.be.an.Object;
+        d[i].should.have.a.property("id");
+        d[i].should.have.a.property("rev");
+      }
+      done();
+    })
+  });
+
+
   
   it('supports Cloudant Query create indexes - POST /<db/_index API call', function(done) {
-    done();
+    nock(SERVER).post('/' + MYDB + '/_index').reply(200, {"result":"created","id":"_design/32372935e14bed00cc6db4fc9efca0f1537d34a8","name":"32372935e14bed00cc6db4fc9efca0f1537d34a8"});
+    mydb.index( { "index": {}, "type": "text"}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("result");
+      d.result.should.be.a.String;
+      d.result.should.be.equal("created");
+      d.should.have.a.property("id");
+      d.should.have.a.property("name");
+      ddoc = d.id.replace(/_design\//,"");
+      viewname = d.name;  
+      done();
+    });
+
+  });
+  
+  
+  it('supports Cloudant Query get indexes - GET /<db/_index', function(done) {
+    nock(SERVER).get('/' + MYDB + '/_index').reply(200, {"indexes":[{"ddoc":null,"name":"_all_docs","type":"special","def":{"fields":[{"_id":"asc"}]}},{"ddoc":"_design/32372935e14bed00cc6db4fc9efca0f1537d34a8","name":"32372935e14bed00cc6db4fc9efca0f1537d34a8","type":"text","def":{"default_analyzer":"keyword","default_field":{},"selector":{},"fields":[]}}]} );
+    mydb.index(function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("indexes");
+      d.indexes.should.be.an.Array;
+      for (var i in d.indexes) {
+        d.indexes[i].should.be.an.Object;
+        d.indexes[i].should.have.a.property("ddoc");
+        if (typeof d.indexes[i].ddoc == "string" && d.indexes[i].ddoc.indexOf("_design") === 0) {
+          d.indexes[i].should.have.a.property("type");
+          d.indexes[i].type.should.equal("text");
+        }
+      }
+      done();
+    });
   });
   
   it('supports Cloudant Query search - POST /<db/_find API call', function(done) {
-    done();
+    var query = { "selector": { "a": { "$gt": 2 }}};
+    nock(SERVER).post('/' + MYDB + '/_find', query).reply(200, {"docs":[ {"_id":"f400bde9395b9116d108ebc89aa82127","_rev":"1-027467bd0efec85f21c822a8eb537073","a":3}],"bookmark": "g2wAAAABaANkABxkYmNvcmVAZGIyLm1lYWQuY2xvdWRhbnQubmV0bAAAAAJhAGI_____amgCRj_wAAAAAAAAYQFq"} );  
+    mydb.find( query, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("docs");
+      d.docs.should.be.an.Array;
+      d.docs.should.have.a.length(1);
+      d.docs[0].should.have.a.property("a");
+      d.docs[0].a.should.be.a.Number
+      d.docs[0].a.should.be.equal(3);
+      done();
+    });
   });
   
-  it('supports deleting a Cloudant Query index - DELETE /db/_design/name/type/index', function(done) {
-    done();
+  it('supports deleting a Cloudant Query index - DELETE /db/_design/ddocname/type/viewname', function(done) {
+    var path = '/' + MYDB + '/_index/' + ddoc + '/text/' + viewname;
+    nock(SERVER).delete(path).reply(200, {"ok":true} ); 
+    mydb.index.del({ ddoc: ddoc, name: viewname, type:"text"}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      done();
+    }); 
+  });
+  
+  after(function(done) {
+    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    cc.db.destroy(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = null;
+      cc = null;
+      ddoc = viewname = null;
+      done();
+    })
   });
   
 });
