@@ -77,9 +77,20 @@ describe('Initialization', function() {
 describe('Authentication', function() {
   
   it('supports Authentication API - POST /_api/v2/api_keys', function(done) {
-    done();
+    nock(SERVER).post('/_api/v2/api_keys').reply(200, { "password": "Eivln4jPiLS8BoTxjXjVukDT", "ok": true, "key": "thandoodstrenterprourete" });
+    var c = Cloudant({account:ME});
+    c.generate_api_key(function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("password");
+      d.password.should.be.a.String;
+      d.should.have.a.property("ok");
+      d.ok.should.be.a.Boolean;
+      d.should.have.a.property("key");
+      d.key.should.be.a.String;
+      done();
+    });
   });
-  
   
 });
 
