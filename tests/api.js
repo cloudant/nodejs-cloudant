@@ -19,8 +19,8 @@ var Cloudant = require('../cloudant.js');
 
 
 // These globals may potentially be parameterized.
-var SERVER = 'https://nodejs.cloudant.com'
 var ME     = 'nodejs'
+var SERVER = 'https://' + ME + '.cloudant.com'
 
 
 describe('Cloudant API', function() {
@@ -35,7 +35,7 @@ describe('Cloudant API', function() {
 describe('Initialization', function() {
   it('runs synchronously with one argument', function() {
     (function() {
-      var db = Cloudant({account:'nodejs'});
+      var db = Cloudant({account:ME});
     }).should.not.throw();
   });
 
@@ -43,7 +43,7 @@ describe('Initialization', function() {
     nock(SERVER).get('/_session').reply(200, {ok:true, userCtx:{name:null,roles:[]}});
     nock(SERVER).get('/')        .reply(200, {couchdb:'Welcome', version:'1.0.2'});
 
-    Cloudant({account:'nodejs'}, function(er, cloudant, body) {
+    Cloudant({account:ME}, function(er, cloudant, body) {
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
       body.should.be.an.Object;
@@ -59,7 +59,7 @@ describe('Initialization', function() {
   });
   
   it('supports instantiation without a callback', function(done) {
-    var c = Cloudant({account:'nodejs'});
+    var c = Cloudant({account:ME});
     // check we get a Nano object back
     c.should.be.an.Object;
     c.should.have.property("use");
@@ -84,7 +84,7 @@ describe('CORS', function() {
    
   it('supports CORS API - GET /_api/v2/user/config/cors', function(done) {
     nock(SERVER).get('/_api/v2/user/config/cors').reply(200, { "enable_cors": true, "allow_credentials": true, "origins": ["*"]});
-    var c = Cloudant({account:'nodejs'});
+    var c = Cloudant({account:ME});
     c.get_cors(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -99,7 +99,15 @@ describe('CORS', function() {
   });
   
   it('supports CORS API - PUT /_api/v2/user/config/cors', function(done) {
-    done();
+    nock(SERVER).put('/_api/v2/user/config/cors').reply(200, { "ok": true });
+    var c = Cloudant({account:ME});
+    c.set_cors({ "enable_cors": true, "allow_credentials": true, "origins": ["*"]}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      done();
+    });
   });
   
 });
