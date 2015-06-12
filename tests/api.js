@@ -57,4 +57,16 @@ describe('Initialization', function() {
       done();
     });
   });
+  
+  it('supports instantiation without a callback', function(done) {
+    var c = Cloudant({account:'nodejs'});
+    // check we get a Nano object back
+    c.should.be.an.Object;
+    c.should.have.property("use");
+    c.should.have.property("config");
+    c.should.have.property("db");    
+    c.should.have.property("relax"); 
+    done();
+  });
+  
 });
