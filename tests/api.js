@@ -20,7 +20,10 @@ var Cloudant = require('../cloudant.js');
 
 // These globals may potentially be parameterized.
 var ME     = 'nodejs'
-var SERVER = 'https://' + ME + '.cloudant.com'
+var SERVER = 'https://' + ME + '.cloudant.com';
+var MYDB = 'mydb';
+var mydb = null;
+var cc = null;
 
 
 describe('Cloudant API', function() {
@@ -113,14 +116,52 @@ describe('CORS', function() {
 });
 
 describe('Authorization', function() {
+  before(function(done) {
+    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    cc = Cloudant({account:ME});
+    cc.db.create(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = cc.db.use("mydb");
+      done();
+    });
+  });
   
-  it('supports Authorization API GET _api/v2/db/<db/_security', function(done) {
-    done();
+  it('supports Authorization API GET _api/v2/db/<db>/_security', function(done) {
+    nock(SERVER).get('/_api/v2/db/' + MYDB + '/_security').reply(200, { });
+    mydb.get_security(function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.be.empty
+      done();
+    });
   });
   
   it('supports Authorization API - PUT _api/v2/db/<db/_security', function(done) {
-    done();
+    nock(SERVER).put('/_api/v2/db/' + MYDB + '/_security').reply(200, { "ok": true });
+    mydb.set_security({ "nobody": ["_reader"]}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      done();
+    });
   });
+  
+  after(function(done) {
+    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    cc.db.destroy(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = null;
+      cc = null;
+      done();
+    })
+  })
   
 });
 
