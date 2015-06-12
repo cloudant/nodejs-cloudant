@@ -47,11 +47,13 @@ describe('Initialization', function() {
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
       body.should.be.an.Object;
-      body.should.have.a.property("couchdb").and.not.be.empty;
-      body.should.have.a.property("version").and.not.be.empty;
-      body.should.have.a.property("userCtx").and.be.an.Object;
+      body.should.have.a.property("couchdb");
+      body.should.have.a.property("version");
+      body.should.have.a.property("userCtx");
+      body.userCtx.should.be.an.Object;
       body.userCtx.should.have.a.property("name");
-      body.userCtx.should.have.a.property("roles").and.be.an.Array;
+      body.userCtx.should.have.a.property("roles");
+      body.userCtx.roles.should.be.an.Array;
       done();
     });
   });
