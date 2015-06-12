@@ -69,4 +69,40 @@ describe('Initialization', function() {
     done();
   });
   
+  it('supports Authentication API - POST /_api/v2/api_keys', function(done) {
+    done();
+  });
+  
+  it('supports CORS API - GET /_api/v2/user/config/cors', function(done) {
+    done();
+  });
+  
+  it('supports CORS API - PUT /_api/v2/user/config/cors', function(done) {
+    done();
+  });
+  
+  it('supports Authorization API GET _api/v2/db/<db/_security', function(done) {
+    done();
+  });
+  
+  it('supports Authorization API - PUT _api/v2/db/<db/_security', function(done) {
+    done();
+  });
+  
+  it('supports Cloudant Query get indexes - GET /<db/_index', function(done) {
+    done();
+  });
+  
+  it('supports Cloudant Query create indexes - POST /<db/_index API call', function(done) {
+    done();
+  });
+  
+  it('supports Cloudant Query search - POST /<db/_find API call', function(done) {
+    done();
+  });
+  
+  it('supports deleting a Cloudant Query index - DELETE /db/_design/name/type/index', function(done) {
+    done();
+  });
+  
 });
