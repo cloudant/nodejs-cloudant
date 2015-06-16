@@ -189,7 +189,7 @@ describe('Cloudant Query', function() {
     });
   });
 
-  it('create some dummy data', function(done) {
+  it('create query dummy data', function(done) {
     nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{"id":"f400bde9395b9116d108ebc89aa816b8","rev":"1-23202479633c2b380f79507a776743d5"},{"id":"f400bde9395b9116d108ebc89aa81bb8","rev":"1-3975759ccff3842adf690a5c10caee42"},{"id":"f400bde9395b9116d108ebc89aa82127","rev":"1-027467bd0efec85f21c822a8eb537073"}]);
     mydb.bulk({docs: [ {a:1},{a:2}, {a:3} ]}, function(er, d) {
       should(er).equal(null);
@@ -263,6 +263,106 @@ describe('Cloudant Query', function() {
       d.should.be.an.Object;
       d.should.have.a.property("ok");
       d.ok.should.be.equal(true);
+      done();
+    });
+  });
+
+  after(function(done) {
+    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    cc.db.destroy(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = null;
+      cc = null;
+      ddoc = viewname = null;
+      done();
+    });
+  });
+});
+
+describe('Cloudant Search', function() {
+  before(function(done) {
+    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    cc = Cloudant({account:ME, password:PASSWORD});
+    cc.db.create(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = cc.db.use("mydb");
+      ddoc = viewname = null;
+      done();
+    });
+  });
+
+  it('create search dummy data', function(done) {
+    nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{id:'a_tale',rev:'1-3e1f4ff28eaa99dc471ff994051f30ab'},{id:'towers',rev:'1-35c7c65df2cbb9a5f501717e78c508ee'},{id:'_design/library',rev:'1-1f87108fd3f9969a5d47600d6aa5034b'}]);
+
+    var index = function(doc) {
+      index('title', doc.title);
+      index('author', doc.author);
+    };
+
+    var docs = [
+      {_id:'a_tale', title:'A Tale of Two Cities', author:'Charles Dickens'},
+      {_id:'towers', title:'The Two Towers'      , author:'J. R. R. Tolkien'},
+      { _id: '_design/library',
+        indexes: {
+          books: {
+            analyzer: {
+              name:'standard'
+            },
+            index: index
+          }
+        }
+      }
+    ];
+
+    mydb.bulk({docs:docs}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Array;
+      for (var i in d) {
+        d[i].should.be.an.Object;
+        d[i].should.have.a.property("id");
+        d[i].should.have.a.property("rev");
+      }
+      done();
+    });
+  });
+
+  it('searches test data: author:charles', function(done) {
+    nock(SERVER).get('/' + MYDB + '/_design/library/_search/books?q=author%3Acharles').reply(200, { total_rows: 1, bookmark: 'g2wAAAABaANkAB1kYmNvcmVAZGI2LnNsaW5nLmNsb3VkYW50Lm5ldGwAAAACbgQAAAAAgG4EAP___79qaAJGP8iMWIAAAABhAGo', rows: [ { id: 'a_tale', order: [Object], fields: {} } ] })
+
+    mydb.search('library', 'books', {q:'author:charles'}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("total_rows").which.is.equal(1);
+      d.bookmark.should.be.a.String;
+      d.rows.should.be.instanceOf(Array).and.have.lengthOf(1);
+      d.rows[0].should.be.an.Object;
+      d.rows[0].should.have.a.property('id').which.is.equal('a_tale');
+      d.rows[0].should.have.a.property('order').which.is.instanceOf(Array);
+      done();
+    });
+  });
+
+  it('searches test data: title:two', function(done) {
+    nock(SERVER).get('/' + MYDB + '/_design/library/_search/books?q=title%3Atwo').reply(200,{total_rows:2,bookmark:'g1AAAACIeJzLYWBgYMpgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASlLcgCSSfX____PymBysz_RE9EAFEhkIFJ7HguQZGgAUkAT9oONOLy4igFsRBYAPRQqlQ',rows:[{id:'towers',order:[Object],fields:{}},{id:'a_tale',order:[Object],fields:{}}]})
+
+    mydb.search('library', 'books', {q:'title:two'}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("total_rows").which.is.equal(2);
+      d.bookmark.should.be.a.String;
+      d.rows.should.be.instanceOf(Array).and.have.lengthOf(2);
+      d.rows[0].should.be.an.Object;
+      d.rows[0].should.have.a.property('id').which.is.equal('towers');
+      d.rows[0].should.have.a.property('order').which.is.instanceOf(Array);
+      d.rows[1].should.be.an.Object;
+      d.rows[1].should.have.a.property('id').which.is.equal('a_tale');
+      d.rows[1].should.have.a.property('order').which.is.instanceOf(Array);
       done();
     });
   });
