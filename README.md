@@ -654,10 +654,12 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 ## Reference
 
-[nano]: https://github.com/dscape/nano
-[query]: http://docs.cloudant.com/api/cloudant-query.html
-[search]: http://docs.cloudant.com/api/search.html
-[auth]: http://docs.cloudant.com/api/authz.html
-[issues]: https://github.com/cloudant/nodejs-cloudant/issues
-[follow]: https://github.com/iriscouch/follow
-[request]:  https://github.com/mikeal/request
+* [Nano Library](https://github.com/dscape/nano)
+* [Cloudant Documentation](https://docs.cloudant.com/)
+* [Cloudant Query](https://docs.cloudant.com/cloudant_query.html)
+* [Cloudant Search](https://docs.cloudant.com/search.html)
+* [Authentication](https://docs.cloudant.com/authentication.html)
+* [Authorization](https://docs.cloudant.com/authorization.html)
+* [CORS](https://docs.cloudant.com/cors.html)
+* [Issues](https://github.com/cloudant/nodejs-cloudant/issues)
+* [Follow library](https://github.com/iriscouch/follow)
