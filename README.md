@@ -4,7 +4,7 @@ This is the official Cloudant library for Node.js.
 
 * [Installation and Usage](#installation-and-usage)
 * [Getting Started](#getting-started)
-  * [Initialization](#nitialization)
+  * [Initialization](#initialization)
   * [Callback Signature](#callback-signature)
   * [Password Authentication](#password-authentication)
   * [Cloudant Local](#cloudant-local)
