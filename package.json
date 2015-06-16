@@ -26,7 +26,8 @@
     "should": "^6.0.3"
   },
   "scripts": {
-    "test": "DEBUG='*,-mocha:*' mocha tests/*.js",
+    "test": "mocha tests/*.js",
+    "test-verbose": "DEBUG='*,-mocha:*' mocha tests/*.js",
     "test-live": "NOCK_OFF=true DEBUG='*,-mocha:*' mocha tests/*.js"
   },
   "main": "./cloudant.js",
