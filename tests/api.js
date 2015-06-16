@@ -239,7 +239,7 @@ describe('Cloudant Query', function() {
     });
   });
 
-  it('supports Cloudant Query search - POST /<db/_find API call', function(done) {
+  it('supports Cloudant Query - POST /<db/_find API call', function(done) {
     var query = { "selector": { "a": { "$gt": 2 }}};
     nock(SERVER).post('/' + MYDB + '/_find', query).reply(200, {"docs":[ {"_id":"f400bde9395b9116d108ebc89aa82127","_rev":"1-027467bd0efec85f21c822a8eb537073","a":3}],"bookmark": "g2wAAAABaANkABxkYmNvcmVAZGIyLm1lYWQuY2xvdWRhbnQubmV0bAAAAAJhAGI_____amgCRj_wAAAAAAAAYQFq"} );
     mydb.find( query, function(er, d) {
