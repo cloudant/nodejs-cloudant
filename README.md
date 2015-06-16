@@ -24,6 +24,7 @@ This is the official Cloudant library for Node.js.
 * [Development](#development)
   * [Test Suite](#test-suite)
   * [Using in Other Projects](#using-in-other-projects)
+  * [Security Note](#security-note)
 * [License](#license)
 * [Reference](#reference)
   
@@ -641,6 +642,48 @@ Go to your project and "link" it into there (sort of an "import").
     /Users/jhs/src/my-project/node_modules/cloudant -> /Users/jhs/.nvm/v0.10.25/lib/node_modules/cloudant -> /Users/jhs/src/cloudant/nodejs-cloudant
 
 Now your project has the dependency in place, however you can work on both of them in tandem.
+
+### Security Note
+
+**DO NOT hard-code your password and commit it to Git**. Storing your password directly in your source code (even in old commits) is a serious security risk to your data. Whoever gains access to your software will now also have read, write, and delete access to your data. Think about GitHub security bugs, or contractors, or disgruntled employees, or lost laptops at a conference. If you check in your password, all of these situations become major liabilities. (Also, note that if you follow these instructions, the `export` command with your password will likely be in your `.bash_history` now, which is kind of bad. However, if you input a space before typing the command, it will not be stored in your history.)
+
+Here is simple but complete example of working with data:
+
+~~~ js
+var Cloudant = require('Cloudant')
+
+var me = 'jhs' // Set this to your own account
+var password = process.env.cloudant_password
+
+Cloudant({account:me, password:password}, function(er, cloudant) {
+  if (er)
+    return console.log('Error connecting to Cloudant account %s: %s', me, er.message)
+
+  // Clean up the database we created previously.
+  cloudant.db.destroy('alice', function() {
+    // Create a new database.
+    cloudant.db.create('alice', function() {
+      // specify the database we are going to use
+      var alice = cloudant.use('alice')
+      // and insert a document in it
+      alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
+        if (err)
+          return console.log('[alice.insert] ', err.message)
+
+        console.log('you have inserted the rabbit.')
+        console.log(body)
+      })
+    })
+  })
+})
+~~~
+
+If you run this example, you will see:
+
+    you have inserted the rabbit.
+    { ok: true,
+      id: 'rabbit',
+      rev: '1-6e4cb465d49c0368ac3946506d26335d' }
 
 ## License
 
