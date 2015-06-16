@@ -11,15 +11,17 @@
 // the License.
 
 // Cloudant client API tests
+require('dotenv').config();
 
 var should = require('should');
-var nock = require('./nock.js');
 
+var nock = require('./nock.js');
 var Cloudant = require('../cloudant.js');
 
 
 // These globals may potentially be parameterized.
 var ME     = 'nodejs'
+var PASSWORD = process.env.cloudant_password || null;
 var SERVER = 'https://' + ME + '.cloudant.com';
 var MYDB = 'mydb';
 var mydb = null;
@@ -78,7 +80,7 @@ describe('Initialization', function() {
 describe('Authentication', function() {
   it('supports Authentication API - POST /_api/v2/api_keys', function(done) {
     nock(SERVER).post('/_api/v2/api_keys').reply(200, { "password": "Eivln4jPiLS8BoTxjXjVukDT", "ok": true, "key": "thandoodstrenterprourete" });
-    var c = Cloudant({account:ME});
+    var c = Cloudant({account:ME, password:PASSWORD});
     c.generate_api_key(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -96,7 +98,7 @@ describe('Authentication', function() {
 describe('CORS', function() {
   it('supports CORS API - GET /_api/v2/user/config/cors', function(done) {
     nock(SERVER).get('/_api/v2/user/config/cors').reply(200, { "enable_cors": true, "allow_credentials": true, "origins": ["*"]});
-    var c = Cloudant({account:ME});
+    var c = Cloudant({account:ME, password:PASSWORD});
     c.get_cors(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -112,7 +114,7 @@ describe('CORS', function() {
 
   it('supports CORS API - PUT /_api/v2/user/config/cors', function(done) {
     nock(SERVER).put('/_api/v2/user/config/cors').reply(200, { "ok": true });
-    var c = Cloudant({account:ME});
+    var c = Cloudant({account:ME, password:PASSWORD});
     c.set_cors({ "enable_cors": true, "allow_credentials": true, "origins": ["*"]}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -126,7 +128,7 @@ describe('CORS', function() {
 describe('Authorization', function() {
   before(function(done) {
     nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
-    cc = Cloudant({account:ME});
+    cc = Cloudant({account:ME, password:PASSWORD});
     cc.db.create(MYDB, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -175,7 +177,7 @@ describe('Authorization', function() {
 describe('Cloudant Query', function() {
   before(function(done) {
     nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
-    cc = Cloudant({account:ME});
+    cc = Cloudant({account:ME, password:PASSWORD});
     cc.db.create(MYDB, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -278,5 +280,4 @@ describe('Cloudant Query', function() {
       done();
     });
   });
-
 });
