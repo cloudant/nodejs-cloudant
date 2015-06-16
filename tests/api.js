@@ -142,7 +142,7 @@ describe('Authorization', function() {
     mydb.get_security(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
-      d.should.be.empty
+      d.should.be.empty;
       done();
     });
   });
@@ -168,7 +168,7 @@ describe('Authorization', function() {
       mydb = null;
       cc = null;
       done();
-    })
+    });
   });
 });
 
@@ -198,7 +198,7 @@ describe('Cloudant Query', function() {
         d[i].should.have.a.property("rev");
       }
       done();
-    })
+    });
   });
 
   it('supports Cloudant Query create indexes - POST /<db/_index API call', function(done) {
@@ -247,7 +247,7 @@ describe('Cloudant Query', function() {
       d.docs.should.be.an.Array;
       d.docs.should.have.a.length(1);
       d.docs[0].should.have.a.property("a");
-      d.docs[0].a.should.be.a.Number
+      d.docs[0].a.should.be.a.Number;
       d.docs[0].a.should.be.equal(3);
       done();
     });
@@ -276,7 +276,7 @@ describe('Cloudant Query', function() {
       cc = null;
       ddoc = viewname = null;
       done();
-    })
+    });
   });
 
 });
