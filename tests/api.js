@@ -62,22 +62,20 @@ describe('Initialization', function() {
       done();
     });
   });
-  
+
   it('supports instantiation without a callback', function(done) {
     var c = Cloudant({account:ME});
     // check we get a Nano object back
     c.should.be.an.Object;
     c.should.have.property("use");
     c.should.have.property("config");
-    c.should.have.property("db");    
-    c.should.have.property("relax"); 
+    c.should.have.property("db");
+    c.should.have.property("relax");
     done();
   });
-  
 });
 
 describe('Authentication', function() {
-  
   it('supports Authentication API - POST /_api/v2/api_keys', function(done) {
     nock(SERVER).post('/_api/v2/api_keys').reply(200, { "password": "Eivln4jPiLS8BoTxjXjVukDT", "ok": true, "key": "thandoodstrenterprourete" });
     var c = Cloudant({account:ME});
@@ -93,11 +91,9 @@ describe('Authentication', function() {
       done();
     });
   });
-  
 });
 
 describe('CORS', function() {
-   
   it('supports CORS API - GET /_api/v2/user/config/cors', function(done) {
     nock(SERVER).get('/_api/v2/user/config/cors').reply(200, { "enable_cors": true, "allow_credentials": true, "origins": ["*"]});
     var c = Cloudant({account:ME});
@@ -113,7 +109,7 @@ describe('CORS', function() {
       done();
     });
   });
-  
+
   it('supports CORS API - PUT /_api/v2/user/config/cors', function(done) {
     nock(SERVER).put('/_api/v2/user/config/cors').reply(200, { "ok": true });
     var c = Cloudant({account:ME});
@@ -125,7 +121,6 @@ describe('CORS', function() {
       done();
     });
   });
-  
 });
 
 describe('Authorization', function() {
@@ -141,7 +136,7 @@ describe('Authorization', function() {
       done();
     });
   });
-  
+
   it('supports Authorization API GET _api/v2/db/<db>/_security', function(done) {
     nock(SERVER).get('/_api/v2/db/' + MYDB + '/_security').reply(200, { });
     mydb.get_security(function(er, d) {
@@ -151,7 +146,7 @@ describe('Authorization', function() {
       done();
     });
   });
-  
+
   it('supports Authorization API - PUT _api/v2/db/<db/_security', function(done) {
     nock(SERVER).put('/_api/v2/db/' + MYDB + '/_security').reply(200, { "ok": true });
     mydb.set_security({ "nobody": ["_reader"]}, function(er, d) {
@@ -162,7 +157,7 @@ describe('Authorization', function() {
       done();
     });
   });
-  
+
   after(function(done) {
     nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
     cc.db.destroy(MYDB, function(er, d) {
@@ -175,11 +170,9 @@ describe('Authorization', function() {
       done();
     })
   });
-  
 });
 
 describe('Cloudant Query', function() {
-  
   before(function(done) {
     nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
     cc = Cloudant({account:ME});
@@ -208,8 +201,6 @@ describe('Cloudant Query', function() {
     })
   });
 
-
-  
   it('supports Cloudant Query create indexes - POST /<db/_index API call', function(done) {
     nock(SERVER).post('/' + MYDB + '/_index').reply(200, {"result":"created","id":"_design/32372935e14bed00cc6db4fc9efca0f1537d34a8","name":"32372935e14bed00cc6db4fc9efca0f1537d34a8"});
     mydb.index( { "index": {}, "type": "text"}, function(er, d) {
@@ -221,13 +212,12 @@ describe('Cloudant Query', function() {
       d.should.have.a.property("id");
       d.should.have.a.property("name");
       ddoc = d.id.replace(/_design\//,"");
-      viewname = d.name;  
+      viewname = d.name;
       done();
     });
 
   });
-  
-  
+
   it('supports Cloudant Query get indexes - GET /<db/_index', function(done) {
     nock(SERVER).get('/' + MYDB + '/_index').reply(200, {"indexes":[{"ddoc":null,"name":"_all_docs","type":"special","def":{"fields":[{"_id":"asc"}]}},{"ddoc":"_design/32372935e14bed00cc6db4fc9efca0f1537d34a8","name":"32372935e14bed00cc6db4fc9efca0f1537d34a8","type":"text","def":{"default_analyzer":"keyword","default_field":{},"selector":{},"fields":[]}}]} );
     mydb.index(function(er, d) {
@@ -246,10 +236,10 @@ describe('Cloudant Query', function() {
       done();
     });
   });
-  
+
   it('supports Cloudant Query search - POST /<db/_find API call', function(done) {
     var query = { "selector": { "a": { "$gt": 2 }}};
-    nock(SERVER).post('/' + MYDB + '/_find', query).reply(200, {"docs":[ {"_id":"f400bde9395b9116d108ebc89aa82127","_rev":"1-027467bd0efec85f21c822a8eb537073","a":3}],"bookmark": "g2wAAAABaANkABxkYmNvcmVAZGIyLm1lYWQuY2xvdWRhbnQubmV0bAAAAAJhAGI_____amgCRj_wAAAAAAAAYQFq"} );  
+    nock(SERVER).post('/' + MYDB + '/_find', query).reply(200, {"docs":[ {"_id":"f400bde9395b9116d108ebc89aa82127","_rev":"1-027467bd0efec85f21c822a8eb537073","a":3}],"bookmark": "g2wAAAABaANkABxkYmNvcmVAZGIyLm1lYWQuY2xvdWRhbnQubmV0bAAAAAJhAGI_____amgCRj_wAAAAAAAAYQFq"} );
     mydb.find( query, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -262,19 +252,19 @@ describe('Cloudant Query', function() {
       done();
     });
   });
-  
+
   it('supports deleting a Cloudant Query index - DELETE /db/_design/ddocname/type/viewname', function(done) {
     var path = '/' + MYDB + '/_index/' + ddoc + '/text/' + viewname;
-    nock(SERVER).delete(path).reply(200, {"ok":true} ); 
+    nock(SERVER).delete(path).reply(200, {"ok":true} );
     mydb.index.del({ ddoc: ddoc, name: viewname, type:"text"}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property("ok");
       d.ok.should.be.equal(true);
       done();
-    }); 
+    });
   });
-  
+
   after(function(done) {
     nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
     cc.db.destroy(MYDB, function(er, d) {
@@ -288,5 +278,5 @@ describe('Cloudant Query', function() {
       done();
     })
   });
-  
+
 });
