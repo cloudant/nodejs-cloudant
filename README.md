@@ -87,7 +87,7 @@ cloudant.db.destroy('alice', function() {
   // Create a new database.
   cloudant.db.create('alice', function() {
     // specify the database we are going to use
-    var alice = cloudant.use('alice')
+    var alice = cloudant.db.use('alice')
     // and insert a document in it
     alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
       if (err)
@@ -129,7 +129,7 @@ A simple example of initializing sychronously is:
 ~~~ js
 var Cloudant = require('cloudant')({account:me, password:password});
 
-var db = Cloudant.use("animals");
+var db = Cloudant.db.use("animals");
 
 db.get("dog", function(err, data) {
   
@@ -344,10 +344,10 @@ See <https://docs.cloudant.com/api.html#cors> for further details.
 
 This feature interfaces with Cloudant's query functionality. See the [Cloudant Query documentation][query] for details.
 
-As with Nano, when working with a database (as opposed to the root server), run the `.use()` method.
+As with Nano, when working with a database (as opposed to the root server), run the `.db.use()` method.
 
 ~~~ js
-var db = cloudant.use('my_db')
+var db = cloudant.db.use('my_db')
 ~~~
 
 To see all the indexes in a database, call the database `.index()` method with a callback function.
@@ -407,7 +407,7 @@ This feature interfaces with Cloudant's search functionality. See the [Cloudant 
 First, when working with a database (as opposed to the root server), run the `.use()` method.
 
 ~~~ js
-var db = cloudant.use('my_db')
+var db = cloudant.db.use('my_db')
 ~~~
 
 To create a Cloudant Search index, create a design document the normal way you would with Nano, the database `.insert()` method.
@@ -492,7 +492,7 @@ To reuse a cookie:
 
 var cloudant = require('cloudant)({account:username, cookie:cookies[username]});
 
-var alice = other_cloudant.use('alice')
+var alice = other_cloudant.db.use('alice')
 alice.insert({_id:"my_doc"}, function (err, body, headers) {
   if (err)
     return console.log('Failed to insert into alice database: ' + err.message)
@@ -664,7 +664,7 @@ Cloudant({account:me, password:password}, function(er, cloudant) {
     // Create a new database.
     cloudant.db.create('alice', function() {
       // specify the database we are going to use
-      var alice = cloudant.use('alice')
+      var alice = cloudant.db.use('alice')
       // and insert a document in it
       alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
         if (err)
