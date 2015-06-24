@@ -383,3 +383,37 @@ describe('Cloudant Search', function() {
     });
   });
 });
+
+describe('User Agent tests', function() {
+  var server = null;
+  
+  before(function(done) {
+    server =  require("http").createServer(function(request, response) {
+        response.writeHead(200, {"Content-Type": "application/json"});
+        response.end(JSON.stringify(request.headers));
+    }).listen(8080);
+    done();
+  });
+
+  it('checks that the library is using a custom user-agent', function(done) {
+    var cc = Cloudant("http://localhost:8080");
+    var db = cc.db.use("justtesting");
+    db.get("justtesting2", function(er, data) {
+      should(er).equal(null);
+      data.should.be.an.Object;
+      data.should.have.a.property("user-agent");
+      data["user-agent"].should.be.a.String;
+      var pkg = require("../package.json");
+      data["user-agent"].should.match(/^nodejs-cloudant/);
+      data["user-agent"].should.containEql("Node.js");
+      data["user-agent"].should.containEql(process.version); // node.js version number
+      data["user-agent"].should.containEql(pkg.version); // library version number
+      done();
+    });
+  });
+
+  after(function(done) {
+    server.close();
+    done();
+  });
+});
