@@ -14,8 +14,9 @@ module.exports = Cloudant;
  * and limitations under the License.
  */
 
-var Nano = require('nano');
-var debug = require('debug')('cloudant');
+var Nano = require('nano'),
+  debug = require('debug')('cloudant'),
+  url = require('url');
 
 // function from the old Cloudant library to 
 // parse an object { account: "myaccount", password: "mypassword"}
@@ -58,6 +59,11 @@ function Cloudant(credentials, callback) {
       requestDefaults = credentials.requestDefaults;
     }
     credentials = reconfigure(credentials);
+  } else {
+    var parsed = url.parse(credentials);
+    if (parsed.protocol === "http:" && typeof parsed.auth == "string") {
+      console.warn("WARNING: You are passing your authentication credentials in plaintext over the HTTP protocol. It is highly recommend you use HTTPS instead and future versions of this library will enforce this.");
+    }
   }
 
   debug('Create underlying Nano instance, credentials=%j requestDefaults=%j', credentials, requestDefaults);
