@@ -16,6 +16,7 @@ module.exports = Cloudant;
 
 var Nano = require('nano'),
   debug = require('debug')('cloudant'),
+  nanodebug = require('debug')('nano'),
   url = require('url');
 
 // function from the old Cloudant library to 
@@ -67,7 +68,7 @@ function Cloudant(credentials, callback) {
   }
 
   debug('Create underlying Nano instance, credentials=%j requestDefaults=%j', credentials, requestDefaults);
-  var nano = Nano({url:credentials, requestDefaults: requestDefaults});
+  var nano = Nano({url:credentials, requestDefaults: requestDefaults, log: nanodebug});
 
   // our own implementation of 'use' e.g. nano.use or nano.db.use
   // it includes all db-level functions

@@ -523,6 +523,28 @@ cloudant.session(function(err, session) {
 
 ## Advanced Features
 
+
+### Debugging
+
+If you wish to see further information about what the nodejs-cloudant library is doing, then its debugging output can be sent to the console by simply setting an environement variable:
+
+    export DEBUG=cloudant
+    # then run your Node.js application
+
+Debug messages will be displayed to indicate each of the Cloudant-specific function calls. If you want to see all debug messages, including calls made by the underlying `nano` library, then simply change the environment variable to
+
+    export DEBUG=cloudant,nano
+    # then run your Node.js application
+
+Similarly, if you only want `nano`-level debugging:
+
+    export DEBUG=nano
+    # then run your Node.js application
+
+The environment variable can also be defined on the same line as the Node.js script you are running e.g.:
+
+    DEBUG="*" node myscript.js
+
 ### Advanced Configuration
 
 Besides the account and password options, you can add an optionsl `requestDefaults` value, which will initialize Request (the underlying HTTP library) as you need it.
