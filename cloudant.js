@@ -54,7 +54,7 @@ function Cloudant(credentials, callback) {
   // keep a copy of the credentials
   var pkg = require('./package.json');
   var useragent = "nodejs-cloudant/" + pkg.version + " (Node.js " + process.version + ")";
-  var requestDefaults = { headers: { "User-agent": useragent }};
+  var requestDefaults = { headers: { "User-agent": useragent}, gzip:true  };
   if (typeof credentials == "object") {
     if (credentials.requestDefaults) {
       requestDefaults = credentials.requestDefaults;
