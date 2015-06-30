@@ -306,7 +306,6 @@ describe('Changes follower', function() {
 
     var iterations = 0;
     var feed = mydb.follow(function(er, change) {
-      console.log('Follow callback: %j', change)
       should(er).equal(null);
       iterations += 1;
       change.should.be.an.Object;
