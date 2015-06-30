@@ -176,6 +176,93 @@ describe('Authorization', function() {
   });
 });
 
+describe('Changes', function() {
+  before(function(done) {
+    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    cc = Cloudant({account:ME, password:PASSWORD});
+    cc.db.create(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = cc.db.use("mydb");
+      ddoc = viewname = null;
+      done();
+    });
+  });
+
+  it('create query dummy data', function(done) {
+    nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"}]);
+    mydb.bulk({docs: [ {_id:'doc1'},{_id:'doc2'} ]}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Array;
+      for (var i in d) {
+        d[i].should.be.an.Object;
+        d[i].should.have.a.property("id");
+        d[i].should.have.a.property("rev");
+      }
+      done();
+    });
+  });
+
+  var firstChange = null
+
+  it('gets a simple changes feed', function(done) {
+    nock(SERVER).get('/' + MYDB + '/_changes').reply(200, { results: [ { seq: '1-g1AAAAEJeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPUhPBnMiYy6Qx25uZm5uYJpGSD-RNuSxAEmGBiAFtGQ_hstM8es7ANEH8lEWACBUVnc', id: 'doc2', changes: [ { rev: '1-967a00dff5e02add41819138abb3284d' } ] }, { seq: '2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN0s2MjZLMyVSe5IDkEyqh5rACDbB3Mzc3MA0jUgT8liAJEMDkAIash_hDgPzNJPEZENUU0zxm3IAYgrQLcxQtxilppilGBkTMiMLAAylXs8', id: 'doc1', changes: [ { rev: '1-967a00dff5e02add41819138abb3284d' } ] } ], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN0s2MjZLMyVSe5IDkEyqh5rACDbB3Mzc3MA0jUgT8liAJEMDkAIash_hDgPzNJPEZENUU0zxm3IAYgqSW4xSU8xSjIyzAPAlU1s', pending: 0 });
+
+    mydb.changes(function(er, body) {
+      should(er).equal(null);
+      body.should.have.a.property('last_seq');
+      body.should.have.a.property('results').which.is.instanceOf(Object);
+      body.results.should.have.a.length(2);
+      body.results[0].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
+      body.results[0].should.be.an.Object.and.have.a.property('seq').and.match(/^1-/);
+      body.results[1].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
+      body.results[1].should.be.an.Object.and.have.a.property('seq').and.match(/^2-/);
+
+      // Remember the first change for subsequent tests.
+      firstChange = body.results[0];
+      done();
+    });
+  });
+
+  it('supports the "since" parameter', function(done) {
+    nock(SERVER).get('/' + MYDB + '/_changes?since='+firstChange.seq).reply(200, { results: [ { seq: '2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNKNTBPskTVboZLe5IDkEyqB5vAnMgINsEwKTXVxDKFkH4iHZjHAiQZGoAU0JL9CHemmCVbGqdZkmTKAYgpYN9C3GpiaWhiYmCeBQCL518O', id: 'doc2', changes: [Object] } ], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNKNTBPskTVboZLe5IDkEyqh5rACDbBMCk11cQyhUgH5LEASYYGIAU0ZD_CHSlmyZbGaZYkmXIAYgqSW0wsDU1MDMyzAGgWU5k', pending: 0 });
+
+    mydb.changes({since:firstChange.seq}, function(er, body) {
+      should(er).equal(null);
+      body.results.should.have.a.length(1);
+      body.results[0].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
+      body.results[0].should.be.an.Object.and.have.a.property('seq').and.match(/^2-/);
+      done();
+    });
+  });
+
+  it('supports since="now"', function(done) {
+    nock(SERVER).get('/' + MYDB + '/_changes?since=now').reply(200, { results: [], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNINUkzNCZSe5IDkEyqh5rACDbB1CQpzdI8lUgT8liAJEMDkAIash_hDoMkE7MkAwuSTDkAMQXJLSlpRuaGJiZZADxoU4k', pending: 0 });
+
+    mydb.changes({since:'now'}, function(er, body) {
+      should(er).equal(null);
+      body.results.should.have.a.length(0);
+      done();
+    });
+  });
+
+  after(function(done) {
+    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    cc.db.destroy(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = null;
+      cc = null;
+      ddoc = viewname = null;
+      done();
+    });
+  });
+});
+
 describe('Cloudant Query', function() {
   before(function(done) {
     nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
