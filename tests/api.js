@@ -386,7 +386,7 @@ describe('Cloudant Search', function() {
 
 describe('User Agent tests', function() {
   var server = null;
-  
+
   before(function(done) {
     server =  require("http").createServer(function(request, response) {
         response.writeHead(200, {"Content-Type": "application/json"});
