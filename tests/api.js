@@ -176,7 +176,7 @@ describe('Authorization', function() {
   });
 });
 
-describe('Changes', function() {
+describe('Changes query', function() {
   before(function(done) {
     nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
     cc = Cloudant({account:ME, password:PASSWORD});
@@ -245,6 +245,77 @@ describe('Changes', function() {
       should(er).equal(null);
       body.results.should.have.a.length(0);
       done();
+    });
+  });
+
+  after(function(done) {
+    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    cc.db.destroy(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = null;
+      cc = null;
+      ddoc = viewname = null;
+      done();
+    });
+  });
+});
+
+describe('Changes follower', function() {
+  before(function(done) {
+    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    cc = Cloudant({account:ME, password:PASSWORD});
+    cc.db.create(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = cc.db.use("mydb");
+      ddoc = viewname = null;
+      done();
+    });
+  });
+
+  it('create query dummy data', function(done) {
+    nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"}]);
+    mydb.bulk({docs: [ {_id:'doc1'},{_id:'doc2'} ]}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Array;
+      for (var i in d) {
+        d[i].should.be.an.Object;
+        d[i].should.have.a.property("id");
+        d[i].should.have.a.property("rev");
+      }
+      done();
+    });
+  });
+
+  it('follows changes', function(done) {
+    nock(SERVER).get('/' + MYDB).reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' });
+
+    nock(SERVER).filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '')
+      .get('/' + MYDB + '/_changes').reply(200,
+        '{"seq":"1-g1AAAAEleJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqQCYkMRFqZxwIkGRqAFFDbfoTNhomWaSZJxkTaDDHlAMQUoPuZExnBppgZG6clJ5kSMiMLABOLXCo","id":"doc1","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n' +
+        '{"seq":"2-g1AAAAFTeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqwCcyJjGATEi0NkpOTkgnpJ9KBeSxAkqEBSAEt2Y9wp2GiZZpJkjGR7oSYcgBiCpJbzYyN05KTTAmZkQUA7ZNq0w","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n'
+        )
+
+    var iterations = 0;
+    var feed = mydb.follow(function(er, change) {
+      console.log('Follow callback: %j', change)
+      should(er).equal(null);
+      iterations += 1;
+      change.should.be.an.Object;
+      change.should.have.a.property('id').and.match(/^doc[12]$/);
+
+      // First change should match "1-...", second should match "2-...".
+      change.should.have.a.property('seq').and.match(new RegExp('^' + iterations + '-'));
+
+      if (iterations == 2) {
+        feed.stop();
+        done();
+      }
     });
   });
 
