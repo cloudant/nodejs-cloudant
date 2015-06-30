@@ -205,6 +205,7 @@ describe('Changes query', function() {
     });
   });
 
+  // Remember the first change for subsequent tests.
   var firstChange = null
 
   it('gets a simple changes feed', function(done) {
@@ -220,7 +221,6 @@ describe('Changes query', function() {
       body.results[1].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
       body.results[1].should.be.an.Object.and.have.a.property('seq').and.match(/^2-/);
 
-      // Remember the first change for subsequent tests.
       firstChange = body.results[0];
       done();
     });
@@ -292,14 +292,17 @@ describe('Changes follower', function() {
     });
   });
 
+  // Remember the first change for subsequent tests.
+  var firstChange = null
+
   it('follows changes', function(done) {
     nock(SERVER).get('/' + MYDB).reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' });
 
-    nock(SERVER).filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '')
+    nock(SERVER)
+      .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since=0&feed=continuous&heartbeat=30000
       .get('/' + MYDB + '/_changes').reply(200,
         '{"seq":"1-g1AAAAEleJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqQCYkMRFqZxwIkGRqAFFDbfoTNhomWaSZJxkTaDDHlAMQUoPuZExnBppgZG6clJ5kSMiMLABOLXCo","id":"doc1","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n' +
-        '{"seq":"2-g1AAAAFTeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqwCcyJjGATEi0NkpOTkgnpJ9KBeSxAkqEBSAEt2Y9wp2GiZZpJkjGR7oSYcgBiCpJbzYyN05KTTAmZkQUA7ZNq0w","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n'
-        )
+        '{"seq":"2-g1AAAAFTeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqwCcyJjGATEi0NkpOTkgnpJ9KBeSxAkqEBSAEt2Y9wp2GiZZpJkjGR7oSYcgBiCpJbzYyN05KTTAmZkQUA7ZNq0w","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n')
 
     var iterations = 0;
     var feed = mydb.follow(function(er, change) {
@@ -312,7 +315,9 @@ describe('Changes follower', function() {
       // First change should match "1-...", second should match "2-...".
       change.should.have.a.property('seq').and.match(new RegExp('^' + iterations + '-'));
 
-      if (iterations == 2) {
+      if (iterations == 1) {
+        firstChange = change;
+      } else if (iterations == 2) {
         feed.stop();
         done();
       }
