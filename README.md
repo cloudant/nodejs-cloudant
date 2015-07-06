@@ -245,7 +245,8 @@ Next, set access roles for this API key:
                  }
                }; 
 
-  cloudant.set_security( database, security, function(er, result) {
+  var my_database = cloudant.db.use(db);
+  my_database.set_security(security, function(er, result) {
     if (er)
       throw er
 
@@ -259,8 +260,8 @@ or read the security settings for a database
 ~~~ js
 
  var db = "my_database",
-
- cloudant.view_security( database, function(er, result) {
+ var my_database = cloudant.db.use(db);
+ my_database.get_security(function(er, result) {
    if (er)
      throw er
 
