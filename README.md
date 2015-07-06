@@ -470,7 +470,7 @@ var userpass = 'pass'
 var cookies = {}
 
 
-var cloudant = require('cloudant)({account:username, password:userpass});
+var cloudant = require('cloudant')({account:username, password:userpass});
 
 // In this example, we authenticate using the same username/userpass as above.
 // However, you can use a different combination to authenticate as other users
@@ -491,7 +491,7 @@ To reuse a cookie:
 ~~~ js
 // Make a new connection with the cookie.
 
-var cloudant = require('cloudant)({account:username, cookie:cookies[username]});
+var cloudant = require('cloudant')({account:username, cookie:cookies[username]});
 
 var alice = other_cloudant.db.use('alice')
 alice.insert({_id:"my_doc"}, function (err, body, headers) {

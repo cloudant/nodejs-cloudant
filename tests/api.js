@@ -176,6 +176,216 @@ describe('Authorization', function() {
   });
 });
 
+describe('Changes query', function() {
+  before(function(done) {
+    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    cc = Cloudant({account:ME, password:PASSWORD});
+    cc.db.create(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = cc.db.use("mydb");
+      ddoc = viewname = null;
+      done();
+    });
+  });
+
+  it('create query dummy data', function(done) {
+    nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"}]);
+    mydb.bulk({docs: [ {_id:'doc1'},{_id:'doc2'} ]}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Array;
+      for (var i in d) {
+        d[i].should.be.an.Object;
+        d[i].should.have.a.property("id");
+        d[i].should.have.a.property("rev");
+      }
+      done();
+    });
+  });
+
+  // Remember the first change for subsequent tests.
+  var firstChange = null
+
+  it('gets a simple changes feed', function(done) {
+    nock(SERVER).get('/' + MYDB + '/_changes').reply(200, { results: [ { seq: '1-g1AAAAEJeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPUhPBnMiYy6Qx25uZm5uYJpGSD-RNuSxAEmGBiAFtGQ_hstM8es7ANEH8lEWACBUVnc', id: 'doc2', changes: [ { rev: '1-967a00dff5e02add41819138abb3284d' } ] }, { seq: '2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN0s2MjZLMyVSe5IDkEyqh5rACDbB3Mzc3MA0jUgT8liAJEMDkAIash_hDgPzNJPEZENUU0zxm3IAYgrQLcxQtxilppilGBkTMiMLAAylXs8', id: 'doc1', changes: [ { rev: '1-967a00dff5e02add41819138abb3284d' } ] } ], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN0s2MjZLMyVSe5IDkEyqh5rACDbB3Mzc3MA0jUgT8liAJEMDkAIash_hDgPzNJPEZENUU0zxm3IAYgqSW4xSU8xSjIyzAPAlU1s', pending: 0 });
+
+    mydb.changes(function(er, body) {
+      should(er).equal(null);
+      body.should.have.a.property('last_seq');
+      body.should.have.a.property('results').which.is.instanceOf(Object);
+      body.results.should.have.a.length(2);
+      body.results[0].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
+      body.results[0].should.be.an.Object.and.have.a.property('seq').and.match(/^1-/);
+      body.results[1].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
+      body.results[1].should.be.an.Object.and.have.a.property('seq').and.match(/^2-/);
+
+      firstChange = body.results[0];
+      done();
+    });
+  });
+
+  it('supports the "since" parameter', function(done) {
+    nock(SERVER).get('/' + MYDB + '/_changes?since='+firstChange.seq).reply(200, { results: [ { seq: '2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNKNTBPskTVboZLe5IDkEyqB5vAnMgINsEwKTXVxDKFkH4iHZjHAiQZGoAU0JL9CHemmCVbGqdZkmTKAYgpYN9C3GpiaWhiYmCeBQCL518O', id: 'doc2', changes: [Object] } ], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNKNTBPskTVboZLe5IDkEyqh5rACDbBMCk11cQyhUgH5LEASYYGIAU0ZD_CHSlmyZbGaZYkmXIAYgqSW0wsDU1MDMyzAGgWU5k', pending: 0 });
+
+    mydb.changes({since:firstChange.seq}, function(er, body) {
+      should(er).equal(null);
+      body.results.should.have.a.length(1);
+      body.results[0].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
+      body.results[0].should.be.an.Object.and.have.a.property('seq').and.match(/^2-/);
+      done();
+    });
+  });
+
+  it('supports since="now"', function(done) {
+    nock(SERVER).get('/' + MYDB + '/_changes?since=now').reply(200, { results: [], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNINUkzNCZSe5IDkEyqh5rACDbB1CQpzdI8lUgT8liAJEMDkAIash_hDoMkE7MkAwuSTDkAMQXJLSlpRuaGJiZZADxoU4k', pending: 0 });
+
+    mydb.changes({since:'now'}, function(er, body) {
+      should(er).equal(null);
+      body.results.should.have.a.length(0);
+      done();
+    });
+  });
+
+  after(function(done) {
+    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    cc.db.destroy(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = null;
+      cc = null;
+      ddoc = viewname = null;
+      done();
+    });
+  });
+});
+
+describe('Changes follower', function() {
+  before(function(done) {
+    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    cc = Cloudant({account:ME, password:PASSWORD});
+    cc.db.create(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = cc.db.use("mydb");
+      ddoc = viewname = null;
+      done();
+    });
+  });
+
+  it('create query dummy data', function(done) {
+    nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"}]);
+    mydb.bulk({docs: [ {_id:'doc1'},{_id:'doc2'} ]}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Array;
+      for (var i in d) {
+        d[i].should.be.an.Object;
+        d[i].should.have.a.property("id");
+        d[i].should.have.a.property("rev");
+      }
+      done();
+    });
+  });
+
+  // Remember the first change for subsequent tests.
+  var firstChange = null
+
+  it('follows changes', function(done) {
+    nock(SERVER).get('/' + MYDB).reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' });
+
+    nock(SERVER)
+      .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since=0&feed=continuous&heartbeat=30000
+      .get('/' + MYDB + '/_changes').reply(200,
+        '{"seq":"1-g1AAAAEleJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqQCYkMRFqZxwIkGRqAFFDbfoTNhomWaSZJxkTaDDHlAMQUoPuZExnBppgZG6clJ5kSMiMLABOLXCo","id":"doc1","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n' +
+        '{"seq":"2-g1AAAAFTeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqwCcyJjGATEi0NkpOTkgnpJ9KBeSxAkqEBSAEt2Y9wp2GiZZpJkjGR7oSYcgBiCpJbzYyN05KTTAmZkQUA7ZNq0w","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n')
+
+    var iterations = 0;
+    var feed = mydb.follow(function(er, change) {
+      should(er).equal(null);
+      iterations += 1;
+      change.should.be.an.Object;
+      change.should.have.a.property('id').and.match(/^doc[12]$/);
+
+      // First change should match "1-...", second should match "2-...".
+      change.should.have.a.property('seq').and.match(new RegExp('^' + iterations + '-'));
+
+      if (iterations == 1) {
+        firstChange = change;
+      } else if (iterations == 2) {
+        feed.stop();
+        done();
+      }
+    });
+  });
+
+  it('supports the "since" parameter', function(done) {
+    nock(SERVER).get('/' + MYDB).reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' });
+
+    nock(SERVER)
+      .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since &feed, &heartbeat
+      .get('/' + MYDB + '/_changes').reply(200,
+        '{"seq":"2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgNzFIM7c0S0XVboZLe5IDkEyqB5vAnMgINiEtLTHR2MSMkH4iHZjHAiQZGoAU0JL9CHcmGVsmG6amkmTKAYgpYN9C3GqalJpikmKUBQBsbl-8","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n')
+
+    var feed = mydb.follow({since:firstChange.seq}, function(er, change) {
+      should(er).equal(null);
+      change.should.be.an.Object;
+      change.should.have.a.property('id').and.match(/^doc[12]$/);
+      change.should.have.a.property('seq').and.match(/^2-/);
+      feed.stop();
+      done();
+    });
+  });
+
+  it('supports since="now"', function(done) {
+    var docId = firstChange.id;
+
+    nock(SERVER).get('/' + MYDB).reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' });
+    nock(SERVER).post('/' + MYDB).reply(200, {ok:true,id:docId,rev:"2-a1933e6ba0b5ac9868cd6f5adc12dc5f"});
+    nock(SERVER)
+      .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since &feed, &heartbeat
+      .get('/' + MYDB + '/_changes').reply(200,
+        '{"seq":"3-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgT05OSjQ0SyNSe5IDkEyqB5vAnMgENsHM1CDZPDGFkH4ibchjAZIMDUAKaMl-hDtTLZMMktOMSDLlAMQUsG8ZIaYYWpqmGCVnAQDI71_n","id":"'+docId+'","changes":[{"rev":"2-a1933e6ba0b5ac9868cd6f5adc12dc5f"}]}\n');
+
+    // Make an update that will trigger the "since=now" follower.
+    setTimeout(update_doc, 1);
+    var feed = mydb.follow({since:'now'}, on_change);
+
+    function update_doc() {
+      var newDoc = {_id:docId, _rev:firstChange.changes[0].rev, newField:'newValue'}
+      mydb.insert(newDoc, function(er, result) {
+        should(er).equal(null);
+      });
+    }
+
+    function on_change(er, change) {
+      should(er).equal(null);
+      change.should.have.a.property('id').and.equal(docId);
+      change.should.have.a.property('seq').and.match(/^3-/);
+      feed.stop();
+      done();
+    }
+  });
+
+  after(function(done) {
+    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    cc.db.destroy(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = null;
+      cc = null;
+      ddoc = viewname = null;
+      done();
+    });
+  });
+});
+
 describe('Cloudant Query', function() {
   before(function(done) {
     nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
@@ -386,7 +596,7 @@ describe('Cloudant Search', function() {
 
 describe('User Agent tests', function() {
   var server = null;
-  
+
   before(function(done) {
     server =  require("http").createServer(function(request, response) {
         response.writeHead(200, {"Content-Type": "application/json"});
