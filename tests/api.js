@@ -627,3 +627,33 @@ describe('User Agent tests', function() {
     done();
   });
 });
+
+describe('Gzip header tests', function() {
+  var server = null;
+
+  before(function(done) {
+    server =  require("http").createServer(function(request, response) {
+        response.writeHead(200, {"Content-Type": "application/json"});
+        response.end(JSON.stringify(request.headers));
+    }).listen(8080);
+    done();
+  });
+
+  it('checks that the library is providing "I accept compression" headers', function(done) {
+    var cc = Cloudant("http://localhost:8080");
+    var db = cc.db.use("justtesting");
+    db.get("justtesting2", function(er, data) {
+      should(er).equal(null);
+      data.should.be.an.Object;
+      data.should.have.a.property("accept-encoding");
+      data["accept-encoding"].should.be.a.String;
+      data["accept-encoding"].should.equal("gzip");
+      done();
+    });
+  });
+
+  after(function(done) {
+    server.close();
+    done();
+  });
+});
