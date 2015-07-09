@@ -13,6 +13,7 @@ This is the official Cloudant library for Node.js.
   * [Generate an API key](#generate-an-api-key)
   * [Use an API Key](#use-an-api-key)
 * [CORS](#cors)
+* [Virtual Hosts](#virtual-hosts)
 * [Cloudant Query](#cloudant-query)
 * [Cloudant Search](#cloudant-search)
 * [Cookie Authentication](#cookie-authentication)
@@ -309,7 +310,7 @@ e.g. enable CORS from any domain:
 ~~~ js
    cloudant.set_cors({ enable_cors: true, allow_credentials: true, origins: ["*"]}, function(err, data) {
      console.log(err, data);
-   };
+   });
 ~~~
 
 or enable access from a list of specified domains:
@@ -317,7 +318,7 @@ or enable access from a list of specified domains:
 ~~~ js
    cloudant.set_cors_({ enable_cors: true, allow_credentials: true, origins: [ "https://mydomain.com","https://mysubdomain.mydomain.com"]}, function(err, data) {
      console.log(err, data);
-   };
+   });
 ~~~
 
 or disable CORS access
@@ -325,7 +326,7 @@ or disable CORS access
 ~~~ js
    cloudant.set_cors({ enable_cors: false }, function(err, data) {
      console.log(err, data);
-   };
+   });
 ~~~
 
 or to fetch the current CORS configuration
@@ -340,6 +341,33 @@ cloudant.get_cors(function(err, data) {
 
 See <https://docs.cloudant.com/api.html#cors> for further details.
 
+
+## Virtual Hosts
+
+If you wish to access your Cloudant domain name (myaccount.cloudant.com) using a CNAME'd domain name (mysubdomain.mydomain.com) then you can
+instruct Cloudant to do so.
+
+e.g. add a virtual host
+~~~ js
+   cloudant.add_virtual_host({ host: "mysubdomain.mydomain.com", path: "/mypath"}, function(err, data) {
+     console.log(err, data);
+   });
+~~~
+
+e.g. view virtual host configuration
+
+~~~ js
+   cloudant.get_virtual_hosts(function(err, data) {
+     console.log(err, data);
+   });
+~~~
+
+or delete a virtual host
+~~~ js
+   cloudant.delete_virtual_host({ host: "mysubdomain.mydomain.com", path: "/mypath"}, function(err, data) {
+     console.log(err, data);
+   });
+~~~
 
 ## Cloudant Query
 

@@ -657,3 +657,43 @@ describe('Gzip header tests', function() {
     done();
   });
 });
+
+describe('Virtual Hosts', function() {
+  it('supports virtual hosts API - GET /_api/v2/user/virtual_hosts', function(done) {
+    nock(SERVER).get('/_api/v2/user/virtual_hosts').reply(200, {"virtual_hosts": []});
+    var c = Cloudant({account:ME, password:PASSWORD});
+    c.get_virtual_hosts(function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("virtual_hosts");
+      d.virtual_hosts.should.be.an.Array;
+      done();
+    });
+  });
+  
+  it('supports virtual hosts API - POST /_api/v2/user/virtual_hosts', function(done) {
+    nock(SERVER).post('/_api/v2/user/virtual_hosts').reply(200, {"ok": true});
+    var c = Cloudant({account:ME, password:PASSWORD});
+    c.add_virtual_host({ host: "myhost.com", path:"/mypath"}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.a.Boolean;
+      d.ok.should.equal(true);
+      done();
+    });
+  });
+
+  it('supports virtual hosts API - DELETE /_api/v2/user/config/virtual_hosts', function(done) {
+    nock(SERVER).delete('/_api/v2/user/virtual_hosts').reply(200, { "ok": true });
+    var c = Cloudant({account:ME, password:PASSWORD});
+    c.delete_virtual_host({ host: "myhost.com", path:"/mypath"}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.a.Boolean;
+      d.ok.should.be.equal(true);
+      done();
+    });
+  });
+});

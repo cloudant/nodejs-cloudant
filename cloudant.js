@@ -168,6 +168,30 @@ function Cloudant(credentials, callback) {
     console.error("set_permissions is deprecated. use set_security instead");
     callback(null, null);
   };
+  
+  // https://docs.cloudant.com/api.html#setting-the-cors-configuration
+  var set_cors = function(configuration, callback) {
+    nano.request({path: "_api/v2/user/config/cors", 
+                  method: "put", 
+                  body: configuration }, callback);
+  };
+  
+  var get_virtual_hosts = function(callback) {
+    nano.request({path: "_api/v2/user/virtual_hosts", 
+                  method: "get"}, callback);
+  };
+  
+  var add_virtual_host = function(opts, callback) {
+    nano.request({path: "_api/v2/user/virtual_hosts", 
+                  method: "post", 
+                  body: opts }, callback);
+  };
+  
+  var delete_virtual_host = function(opts, callback) {
+    nano.request({path: "_api/v2/user/virtual_hosts", 
+                  method: "delete", 
+                  body: opts }, callback);
+  };
 
   // add top-level Cloudant-specific functions
   nano.ping = ping;
@@ -175,6 +199,9 @@ function Cloudant(credentials, callback) {
   nano.set_cors = set_cors;
   nano.set_permissions = set_permissions;
   nano.generate_api_key = generate_api_key;
+  nano.get_virtual_hosts = get_virtual_hosts;
+  nano.add_virtual_host = add_virtual_host;
+  nano.delete_virtual_host = delete_virtual_host;
 
   if (callback) {
     debug('Automatic ping');
