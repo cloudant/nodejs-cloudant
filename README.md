@@ -239,11 +239,9 @@ Next, set access roles for this API key:
   // Set the security for three users.
   var db = "my_database",
     security = { 
-                cloudant: {
                    nobody: []
                    fred : [ '_reader', '_writer', '_admin', '_replicator' ],
                    isdaingialkyciffestontsk: [ '_reader', '_writer' ]
-                 }
                }; 
 
   var my_database = cloudant.db.use(db);
