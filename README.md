@@ -181,11 +181,11 @@ Cloudant({hostname:"companycloudant.local", username:"somebody", password:"someb
 
 Cloudant is a wrapper around the Nano library and as such, Nano's documentation should be consulted for:
 
-- [Database functions](https://github.com/dscape/nano#database-functions)
-- [Document functions](https://github.com/dscape/nano#document-functions)
-- [Multipart functions](https://github.com/dscape/nano#multipart-functions)
-- [Attachment functions](https://github.com/dscape/nano#attachments-functions)
-- [View and Design functions](https://github.com/dscape/nano#views-and-design-functions)
+- [Database functions](https://github.com/apache/couchdb-nano#database-functions)
+- [Document functions](https://github.com/apache/couchdb-nano#document-functions)
+- [Multipart functions](https://github.com/apache/couchdb-nano#multipart-functions)
+- [Attachment functions](https://github.com/apache/couchdb-nano#attachments-functions)
+- [View and Design functions](https://github.com/apache/couchdb-nano#views-and-design-functions)
 
 This library adds documentation for the following:
 
@@ -751,7 +751,7 @@ and limitations under the License.
 
 ## Reference
 
-* [Nano Library](https://github.com/dscape/nano)
+* [Nano Library](https://github.com/apache/couchdb-nano)
 * [Cloudant Documentation](https://docs.cloudant.com/)
 * [Cloudant Query](https://docs.cloudant.com/cloudant_query.html)
 * [Cloudant Search](https://docs.cloudant.com/search.html)
