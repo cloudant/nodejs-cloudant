@@ -1,7 +1,7 @@
 {
   "name": "cloudant",
   "description": "Cloudant Node.js client",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "homepage": "http://github.com/cloudant/nodejs-cloudant",
   "repository": "git://github.com/cloudant/nodejs-cloudant",
   "version": "1.2.1",
