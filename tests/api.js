@@ -18,6 +18,7 @@ require('dotenv').config();
 var should = require('should');
 
 var nock = require('./nock.js');
+var fs = require('fs'); 
 var Cloudant = require('../cloudant.js');
 
 
@@ -655,6 +656,24 @@ describe('Gzip header tests', function() {
   after(function(done) {
     server.close();
     done();
+  });
+});
+
+describe('Gzip attachment tests', function() {
+  it('checks that the zipped response is unzipped', function(done) {
+    nock(SERVER).get('/' + MYDB + "/x/y.css").replyWithFile(200, __dirname + '/y.css.gz', {
+        'content-encoding': 'gzip',
+        'content-type': 'text/css'
+      });
+    var c = Cloudant({account:ME, password:PASSWORD});
+    var mydb = c.db.use(MYDB);
+    mydb.attachment.get("x","y.css", function(er,data) {
+      should(er).equal(null);
+      data.should.be.an.Object;
+      var original = fs.readFileSync( __dirname + '/y.css');
+      data.toString().should.be.equal(original.toString());
+      done();
+    });
   });
 });
 
