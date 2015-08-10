@@ -605,14 +605,13 @@ You can also increase the size in your calling context using `requestDefaults` i
 Here is an example of explicitly using the keep alive agent (installed using `npm install agentkeepalive`), especially useful to limit your open sockets when doing high-volume access to Cloudant:
 
 ~~~ js
-var agentkeepalive = require('agentkeepalive')
-var myagent = new agentkeepalive({
-    maxSockets: 50
-  , maxKeepAliveRequests: 0
-  , maxKeepAliveTime: 30000
-  })
-
-var cloudant = require('cloudant')({account:"me", password:"secret", request_defaults:{agent:myagent}});
+var HttpsAgent = require('agentkeepalive').HttpsAgent;
+var myagent = new HttpsAgent({
+    maxSockets: 50,
+    maxKeepAliveRequests: 0,
+    maxKeepAliveTime: 30000
+  });
+var cloudant = require('cloudant')({account:"me", password:"secret", requestDefaults:{agent:myagent}});
 // Using Cloudant with myagent...
 ~~~
 
