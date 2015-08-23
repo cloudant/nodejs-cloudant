@@ -48,18 +48,21 @@ Now it's time to begin doing real work with Cloudant and Node.js.
 Initialize your Cloudant connection by supplying your *account* and *password*, and supplying a callback function to run when everything is ready.
 
 ~~~ js
+// Load the Cloudant library.
+var Cloudant = require('cloudant');
 
-var me = 'jhs' // Set this to your own account
-var password = process.env.cloudant_password
+var me = 'nodejs'; // Set this to your own account
+var password = process.env.cloudant_password;
 
-var cloudant = require('cloudant')({account:me, password:password});
+// Initialize the library with my account.
+var cloudant = Cloudant({account:me, password:password});
 
-cloudant.db.list(function(err, all_dbs) {
-  console.log('All my databases: %s', all_dbs.join(', '))
-})
+cloudant.db.list(function(err, allDbs) {
+  console.log('All my databases: %s', allDbs.join(', '))
+});
 ~~~
 
-Output:
+Possible output (depending on your databases, of course):
 
      All my databases: example_db, jasons_stuff, scores
 
@@ -700,7 +703,7 @@ Here is simple but complete example of working with data:
 ~~~ js
 var Cloudant = require('Cloudant')
 
-var me = 'jhs' // Set this to your own account
+var me = 'nodejs' // Set this to your own account
 var password = process.env.cloudant_password
 
 Cloudant({account:me, password:password}, function(er, cloudant) {
