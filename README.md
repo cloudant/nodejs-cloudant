@@ -142,17 +142,23 @@ var cloudant = Cloudant("https://MYUSERNAME:MYPASSWORD@MYACCOUNT.cloudant.com");
 
 This can help avoid messy code if you are requiring the Cloudant library in many places in your app.
 
-Here is a simple example of initializing sychronously:
+Here is a simple example of initializing asychronously, using its optional callback parameter:
 
 ~~~ js
-var Cloudant = require('cloudant')({account:me, password:password});
+var Cloudant = require('cloudant');
+var me = 'nodejs'; // Replace with your account.
+var password = process.env.cloudant_password;
 
-var db = Cloudant.db.use("animals");
+Cloudant({account:me, password:password}, function(err, cloudant) {
+  if (err) {
+    return console.log('Failed to initialize Cloudant: ' + err.message);
+  }
 
-db.get("dog", function(err, data) {
-
-  // rest of your code goes here
-
+  var db = cloudant.db.use("animals");
+  db.get("dog", function(err, data) {
+    // The rest of your code goes here. For example:
+    console.log("Found dog:", data);
+  });
 });
 ~~~
 
@@ -171,6 +177,7 @@ The `ping()` function is the only exception to this rule. It does not return hea
 By default, when you connect to your cloudant account (i.e. "me.cloudant.com"), you authenticate as the account owner (i.e. "me"). However, you can use Cloudant with any username and password. Just provide an additional "username" option when you initialize Cloudant. This will connect to your account, but using the username as the authenticated user. (And of course, use the appropriate password.)
 
 ~~~ js
+var Cloudant = require('cloudant');
 Cloudant({account:"me", username:"somebody", password:"somebody's secret"}, function(er, cloudant, reply) {
   if (er)
     throw er

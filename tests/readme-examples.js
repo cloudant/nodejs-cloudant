@@ -94,3 +94,30 @@ describe('Getting Started', function() {
     });
   });
 });
+
+describe('Initialization', function() {
+  this.timeout(10 * 1000);
+
+  nock('https://nodejs.cloudant.com').get('/_session').reply(200, {ok:true, userCtx:{name:'nodejs', roles:[]}});
+  nock('https://nodejs.cloudant.com').get('/').reply(200, {couchdb:'Welcome', version:'1.0.2', cloudant_build:'2488'});
+  nock('https://nodejs.cloudant.com').get('/animals/dog').reply(404, {error:'not_found', reason:'missing'});
+
+  it('Example 1', function(done) {
+    var Cloudant = require(CLOUDANT);
+    var me = 'nodejs'; // Replace with your account.
+    var password = process.env.cloudant_password;
+
+    Cloudant({account:me, password:password}, function(err, cloudant) {
+      if (err) {
+        return console.log('Failed to initialize Cloudant: ' + err.message);
+      }
+
+      var db = cloudant.db.use("animals");
+      db.get("dog", function(err, data) {
+        // The rest of your code goes here. For example:
+        console.log("Found dog:", data);
+        done();
+      });
+    });
+  });
+});
