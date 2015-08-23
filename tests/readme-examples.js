@@ -52,4 +52,45 @@ describe('Getting Started', function() {
       done();
     });
   });
+
+  nock('https://nodejs.cloudant.com').delete('/alice').reply(404, {error:'not_found', reason:'Database does not exist.'});
+  nock('https://nodejs.cloudant.com').put('/alice').reply(201, {ok:true});
+  nock('https://nodejs.cloudant.com').put('/alice/rabbit').reply(201, {ok:true, id:'rabbit', rev:'1-6e4cb465d49c0368ac3946506d26335d'});
+
+  it('Example 2', function(done) {
+    require('dotenv').load();
+
+    // Load the Cloudant library.
+    var Cloudant = require(CLOUDANT);
+
+    // Initialize Cloudant with settings from .env
+    var username = process.env.cloudant_username || "nodejs";
+    var password = process.env.cloudant_password;
+    var cloudant = Cloudant({account:username, password:password});
+
+    // Remove any existing database called "alice".
+    cloudant.db.destroy('alice', function(err) {
+
+      // Create a new "alice" database.
+      cloudant.db.create('alice', function() {
+
+        // Specify the database we are going to use (alice)...
+        var alice = cloudant.db.use('alice')
+
+        // ...and insert a document in it.
+        alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
+          if (err) {
+            return console.log('[alice.insert] ', err.message);
+          }
+
+          should(err).equal(null);
+          body.should.be.an.instanceOf(Object);
+          body.ok.should.be.equal(true);
+          body.id.should.be.equal('rabbit');
+          body.should.have.a.property('rev').which.is.instanceOf(String);
+          done();
+        });
+      });
+    });
+  });
 });

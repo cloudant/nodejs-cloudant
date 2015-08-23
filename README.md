@@ -82,32 +82,41 @@ echo "cloudant_password='secret'"  >> .env       # Replace secret with your pass
 Here is simple but complete example of working with data:
 
 ~~~ js
-require('dotenv').load()
+require('dotenv').load();
 
-var Cloudant = require('Cloudant')
+// Load the Cloudant library.
+var Cloudant = require('cloudant');
 
-// Clean up the database we created previously.
-cloudant.db.destroy('alice', function() {
-  // Create a new database.
+// Initialize Cloudant with settings from .env
+var username = process.env.cloudant_username || "nodejs";
+var password = process.env.cloudant_password;
+var cloudant = Cloudant({account:username, password:password});
+
+// Remove any existing database called "alice".
+cloudant.db.destroy('alice', function(err) {
+
+  // Create a new "alice" database.
   cloudant.db.create('alice', function() {
-    // specify the database we are going to use
+
+    // Specify the database we are going to use (alice)...
     var alice = cloudant.db.use('alice')
-    // and insert a document in it
+
+    // ...and insert a document in it.
     alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
-      if (err)
-        return console.log('[alice.insert] ', err.message)
+      if (err) {
+        return console.log('[alice.insert] ', err.message);
+      }
 
-      console.log('you have inserted the rabbit.')
-      console.log(body)
-    })
-  })
-})
-
+      console.log('You have inserted the rabbit.');
+      console.log(body);
+    });
+  });
+});
 ~~~
 
 If you run this example, you will see:
 
-    you have inserted the rabbit.
+    You have inserted the rabbit.
     { ok: true,
       id: 'rabbit',
       rev: '1-6e4cb465d49c0368ac3946506d26335d' }
