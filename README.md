@@ -124,21 +124,26 @@ If you run this example, you will see:
 
 ### Initialization
 
-To use Cloudant, `require('cloudant')` in your code. That will return the initialization function. Run that function, passing your account name and password, and a callback. (And see the [security note](#security-note) about placing your password into your source code.
+To use Cloudant, `require('cloudant')` in your code. That will return the initialization function. Run that function, passing your account name and password, and an optional callback. (And see the [security note](#security-note) about placing your password into your source code.
+
+In general, the common style is that `Cloudant` (upper-case) is the **package** you load; wheareas `cloudant` (lower-case) is your connection to your database--the result of calling `Cloudant()`:
 
 ~~~ js
-var Cloudant = require('cloudant')({account:me, password:password});
+var Cloudant = require('cloudant');
+var cloudant = Cloudant({account:me, password:password});
 ~~~
 
 If you would prefer, you can also initialize Cloudant with a URL:
 
 ~~~ js
-var Cloudant = require('cloudant')("https://MYUSERNAME:MYPASSWORD@MYACCOUNT.cloudant.com");
+var Cloudant = require('cloudant')
+var cloudant = Cloudant("https://MYUSERNAME:MYPASSWORD@MYACCOUNT.cloudant.com");
 ~~~
 
 This can help avoid messy code if you are requiring the Cloudant library in many places in your app.
 
-A simple example of initializing sychronously is:
+Here is a simple example of initializing sychronously:
+
 ~~~ js
 var Cloudant = require('cloudant')({account:me, password:password});
 
@@ -157,7 +162,6 @@ After initialization, in general, callback functions receive three arguments:
 
 * `err` - the error, if any
 * `body` - the http _response body_ from Cloudant, if no error.
-  json parsed body, binary for non json responses
 * `header` - the http _response header_ from Cloudant, if no error
 
 The `ping()` function is the only exception to this rule. It does not return headers since a "ping" is made from multiple requests to gather various bits of information.
