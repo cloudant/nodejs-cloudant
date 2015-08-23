@@ -15,10 +15,10 @@
 // Cloudant client API tests
 require('dotenv').config();
 
+var fs = require('fs');
 var should = require('should');
 
 var nock = require('./nock.js');
-var fs = require('fs');
 var Cloudant = require('../cloudant.js');
 
 
