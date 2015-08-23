@@ -140,7 +140,7 @@ var Cloudant = require('cloudant')
 var cloudant = Cloudant("https://MYUSERNAME:MYPASSWORD@MYACCOUNT.cloudant.com");
 ~~~
 
-This can help avoid messy code if you are requiring the Cloudant library in many places in your app.
+You can optionally provide a callback to the Cloudant initialization function. This will make the library automatically "ping" Cloudant to confirm the connection and that your credentials work.
 
 Here is a simple example of initializing asychronously, using its optional callback parameter:
 
