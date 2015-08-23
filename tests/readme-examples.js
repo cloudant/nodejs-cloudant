@@ -32,6 +32,7 @@ var CLOUDANT = '../cloudant.js'
 
 
 describe('Getting Started', function() {
+  this.timeout(10 * 1000);
 
   nock('https://nodejs.cloudant.com').get('/_all_dbs').reply(200, ['database_changes', 'third_party_db']);
 
