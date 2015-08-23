@@ -18,7 +18,7 @@ require('dotenv').config();
 var should = require('should');
 
 var nock = require('./nock.js');
-var fs = require('fs'); 
+var fs = require('fs');
 var Cloudant = require('../cloudant.js');
 
 
@@ -689,7 +689,7 @@ describe('Virtual Hosts', function() {
       done();
     });
   });
-  
+
   it('supports virtual hosts API - POST /_api/v2/user/virtual_hosts', function(done) {
     nock(SERVER).post('/_api/v2/user/virtual_hosts').reply(200, {"ok": true});
     var c = Cloudant({account:ME, password:PASSWORD});

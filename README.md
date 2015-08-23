@@ -28,7 +28,7 @@ This is the official Cloudant library for Node.js.
   * [Security Note](#security-note)
 * [License](#license)
 * [Reference](#reference)
-  
+
 
 ## Installation and Usage
 
@@ -124,7 +124,7 @@ If you would prefer, you can also initialize Cloudant with a URL:
 var Cloudant = require('cloudant')("https://MYUSERNAME:MYPASSWORD@MYACCOUNT.cloudant.com");
 ~~~
 
-This can help avoid messy code if you are requiring the Cloudant library in many places in your app. 
+This can help avoid messy code if you are requiring the Cloudant library in many places in your app.
 
 A simple example of initializing sychronously is:
 ~~~ js
@@ -133,9 +133,9 @@ var Cloudant = require('cloudant')({account:me, password:password});
 var db = Cloudant.db.use("animals");
 
 db.get("dog", function(err, data) {
-  
+
   // rest of your code goes here
-  
+
 });
 ~~~
 
@@ -235,14 +235,14 @@ Next, set access roles for this API key:
 
 ~~~ js
 
-  
+
   // Set the security for three users.
   var db = "my_database",
-    security = { 
+    security = {
                    nobody: []
                    fred : [ '_reader', '_writer', '_admin', '_replicator' ],
                    isdaingialkyciffestontsk: [ '_reader', '_writer' ]
-               }; 
+               };
 
   var my_database = cloudant.db.use(db);
   my_database.set_security(security, function(er, result) {
@@ -251,7 +251,7 @@ Next, set access roles for this API key:
 
     console.log(result);
   });
-  
+
 ~~~
 
 or read the security settings for a database
@@ -301,7 +301,7 @@ var cloudant = require('cloudant')({account:"me", key:api.key, password:api.pass
 
 ## CORS
 
-If you need to access your Cloudant database from a web application that is served from a domain other than your Cloudant account, you will need to enable CORS (Cross-origin resource sharing). 
+If you need to access your Cloudant database from a web application that is served from a domain other than your Cloudant account, you will need to enable CORS (Cross-origin resource sharing).
 
 e.g. enable CORS from any domain:
 
@@ -655,7 +655,7 @@ First clone this project from GitHub, and then install its dependencies using np
 
 ### Test Suite
 
-We use npm to handle running the test suite. To run the comprehensive test suite, just run `npm test`. 
+We use npm to handle running the test suite. To run the comprehensive test suite, just run `npm test`.
 
 or after adding a new test you can run it individually (with verbose output) using:
 
@@ -663,7 +663,7 @@ or after adding a new test you can run it individually (with verbose output) usi
 npm test-verbose
 ~~~
 
-This runs against a local "mock" web server, called Nock. However the test suite can also run against a live Cloudant service. I have registered "nodejs.cloudant.com" for this purpose. 
+This runs against a local "mock" web server, called Nock. However the test suite can also run against a live Cloudant service. I have registered "nodejs.cloudant.com" for this purpose.
 
 ~~~ sh
     $ npm test-live
