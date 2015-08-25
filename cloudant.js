@@ -33,7 +33,7 @@ var reconfigure = function(config) {
 
   // The username is the account ("foo" for "foo.cloudant.com")
   // or the third-party API key.
-  var username = config.key || config.account;
+  var username = config.key || config.username || config.account;
 
   // Configure for Cloudant, either authenticated or anonymous.
   if (config.account && config.password)

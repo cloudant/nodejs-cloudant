@@ -178,12 +178,17 @@ By default, when you connect to your cloudant account (i.e. "me.cloudant.com"), 
 
 ~~~ js
 var Cloudant = require('cloudant');
-Cloudant({account:"me", username:"somebody", password:"somebody's secret"}, function(er, cloudant, reply) {
-  if (er)
-    throw er
+var me = "nodejs";         // Substitute with your Cloudant user account.
+var otherUsername = "jhs"; // Substitute with some other Cloudant user account.
+var otherPassword = process.env.other_cloudant_password;
 
-  console.log('Connected with username: %s', reply.userCtx.name)
-})
+Cloudant({account:me, username:otherUsername, password:otherPassword}, function(er, cloudant, reply) {
+  if (er) {
+    throw er;
+  }
+
+  console.log('Connected with username: %s', reply.userCtx.name);
+});
 ~~~
 
 ### Cloudant Local
