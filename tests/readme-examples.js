@@ -19,16 +19,21 @@
 // As much as possible, one should copy and paste the examples unmodified, with
 // a few exceptions:
 //
-//   1. require("cloudant") becomes require(CLOUDANT)
-//   2. console.log() becomes a should() call to actually confirm the results
-//   3. Insert a call to done() when the tests are complete
+//   1. console.log() becomes a should() call to actually confirm the results
+//   2. Insert a call to done() when the tests are complete
 
 require('dotenv').config();
 
 var should = require('should');
 
 var nock = require('./nock.js');
-var CLOUDANT = '../cloudant.js'
+
+var real_require = require;
+require = function(module) {
+  return (module == 'cloudant')
+    ? real_require('../cloudant.js')
+    : real_require.apply(this, arguments);
+}
 
 
 describe('Getting Started', function() {
@@ -38,7 +43,7 @@ describe('Getting Started', function() {
 
   it('Example 1', function(done) {
     // Load the Cloudant library.
-    var Cloudant = require(CLOUDANT);
+    var Cloudant = require('cloudant');
 
     var me = 'nodejs'; // Set this to your own account
     var password = process.env.cloudant_password;
@@ -61,7 +66,7 @@ describe('Getting Started', function() {
     require('dotenv').load();
 
     // Load the Cloudant library.
-    var Cloudant = require(CLOUDANT);
+    var Cloudant = require('cloudant');
 
     // Initialize Cloudant with settings from .env
     var username = process.env.cloudant_username || "nodejs";
@@ -103,7 +108,7 @@ describe('Initialization', function() {
   nock('https://nodejs.cloudant.com').get('/animals/dog').reply(404, {error:'not_found', reason:'missing'});
 
   it('Example 1', function(done) {
-    var Cloudant = require(CLOUDANT);
+    var Cloudant = require('cloudant');
     var me = 'nodejs'; // Replace with your account.
     var password = process.env.cloudant_password;
 
