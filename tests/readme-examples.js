@@ -115,7 +115,7 @@ describe('Initialization', function() {
       var db = cloudant.db.use("animals");
       db.get("dog", function(err, data) {
         // The rest of your code goes here. For example:
-        console.log("Found dog:", data);
+        err.should.be.an.Object.have.a.property('error').equal('not_found')
         done();
       });
     });
