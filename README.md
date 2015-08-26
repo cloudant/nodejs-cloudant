@@ -262,8 +262,6 @@ Output:
 Next, set access roles for this API key:
 
 ~~~ js
-
-
   // Set the security for three users.
   var db = "my_database",
     security = {
@@ -397,7 +395,7 @@ or delete a virtual host
 
 ## Cloudant Query
 
-This feature interfaces with Cloudant's query functionality. See the [Cloudant Query documentation][query] for details.
+This feature interfaces with Cloudant's query functionality. See the [Cloudant Query documentation][Cloudant Query] for details.
 
 As with Nano, when working with a database (as opposed to the root server), run the `.db.use()` method.
 
@@ -524,7 +522,7 @@ var userpass = 'pass'
 var cookies = {}
 
 
-var cloudant = require('cloudant')({account:username, password:userpass});
+var cloudant = Cloudant({account:username, password:userpass});
 
 // In this example, we authenticate using the same username/userpass as above.
 // However, you can use a different combination to authenticate as other users
