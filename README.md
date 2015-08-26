@@ -236,7 +236,6 @@ This library adds documentation for the following:
 - [Reference](#reference)
 
 
-
 ## Authorization and API Keys
 
 This feature interfaces with the Cloudant [authorization API][Authorization].
@@ -246,74 +245,64 @@ Use the authorization feature to generate new API keys to access your data. An A
 ### Generate an API key
 
 ~~~ js
+var Cloudant = require('cloudant');
+var me = 'nodejs'; // Replace with your account.
+var password = process.env.cloudant_password;
+var cloudant = Cloudant({account:me, password:password});
+
 cloudant.generate_api_key(function(er, api) {
-  if (er)
-    throw er // You probably want wiser behavior than this.
+  if (er) {
+    throw er; // You probably want wiser behavior than this.
+  }
 
-  console.log('API key: %s', api.key)
-  console.log('Password for this key: %s', api.password)
-~~~
+  console.log('API key: %s', api.key);
+  console.log('Password for this key: %s', api.password);
+  console.log('');
 
-Output:
-
-    API key: isdaingialkyciffestontsk
-    Password for this key: XQiDHmwnkUu4tknHIjjs2P64
-
-Next, set access roles for this API key:
-
-~~~ js
-  // Set the security for three users.
-  var db = "my_database",
-    security = {
-                   nobody: []
-                   fred : [ '_reader', '_writer', '_admin', '_replicator' ],
-                   isdaingialkyciffestontsk: [ '_reader', '_writer' ]
-               };
+  // Set the security for three users: nobody, fred, and the above API key.
+  var db = "animals";
+  var security = {
+    nobody: [],
+    fred : [ '_reader', '_writer', '_admin', '_replicator' ]
+  };
+  security[api.key] = [ '_reader', '_writer' ];
 
   var my_database = cloudant.db.use(db);
   my_database.set_security(security, function(er, result) {
-    if (er)
-      throw er
+    if (er) {
+      throw er;
+    }
 
+    console.log('Set security for ' + db);
     console.log(result);
+    console.log('');
+
+    // Or you can read the security settings from a database.
+    my_database.get_security(function(er, result) {
+      if (er) {
+        throw er;
+      }
+
+      console.log('Got security for ' + db);
+      console.log(result);
+    });
   });
-
-~~~
-
-or read the security settings for a database
-
-~~~ js
-
- var db = "my_database",
- var my_database = cloudant.db.use(db);
- my_database.get_security(function(er, result) {
-   if (er)
-     throw er
-
-   console.log(result);
- });
-
+});
 ~~~
 
 Output:
 
-```
-{
-  "cloudant": {
-    "nobody": [],
-    "fred": [
-      "_reader",
-      "_writer",
-      "_admin",
-      "_replicator"
-    ],
-    "isdaingialkyciffestontsk": [
-      "_reader",
-      "_writer"
-    ]
-  }
-}
-```
+    API key: thandoodstrenterprourete
+    Password for this key: Eivln4jPiLS8BoTxjXjVukDT
+
+    Set security for animals
+    { ok: true }
+
+    Got security for animals
+    { cloudant:
+      { nobody: [],
+        thandoodstrenterprourete: [ '_reader', '_writer' ],
+        fred: [ '_reader', '_writer', '_admin', '_replicator' ] } }
 
 See the Cloudant API for full details](https://docs.cloudant.com/api.html#authorization)
 

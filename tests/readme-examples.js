@@ -19,7 +19,7 @@
 // As much as possible, one should copy and paste the examples unmodified, with
 // a few exceptions:
 //
-//   1. console.log() becomes a should() call to actually confirm the results
+//   1. Prepend should() calls before console.log() to actually confirm the results
 //   2. Insert a call to done() when the tests are complete
 
 require('dotenv').config();
@@ -34,6 +34,9 @@ require = function(module) {
     ? real_require('../cloudant.js')
     : real_require.apply(this, arguments);
 }
+
+// Disable console.log
+var console = { log: function() {} };
 
 
 describe('Getting Started', function() {
@@ -169,4 +172,68 @@ describe('Cloudant Local', function() {
   // No tests!
 });
 
+describe('Authorization and API Keys', function() {
+  this.timeout(10 * 1000);
 
+  var mocks;
+  after(function() { mocks.done(); });
+  before(function() {
+    mocks = nock('https://nodejs.cloudant.com')
+      .post('/_api/v2/api_keys')
+      .reply(200, { "password": "Eivln4jPiLS8BoTxjXjVukDT", "ok": true, "key": "thandoodstrenterprourete" })
+      .put('/_api/v2/db/animals/_security')
+      .reply(200, {ok: true})
+      .get('/_api/v2/db/animals/_security')
+      .reply(200,{cloudant:{nobody:[],thandoodstrenterprourete:['_reader','_writer'],fred:['_reader','_writer','_admin','_replicator']}});
+  });
+
+  it('Example 1', function(done) {
+    var Cloudant = require('cloudant');
+    var me = 'nodejs'; // Replace with your account.
+    var password = process.env.cloudant_password;
+    var cloudant = Cloudant({account:me, password:password});
+
+    cloudant.generate_api_key(function(er, api) {
+      if (er) {
+        throw er; // You probably want wiser behavior than this.
+      }
+
+      api.should.be.an.Object.and.have.a.property('key');
+      console.log('API key: %s', api.key);
+      console.log('Password for this key: %s', api.password);
+      console.log('');
+
+      // Set the security for three users: nobody, fred, and the above API key.
+      var db = "animals";
+      var security = {
+        nobody: [],
+        fred : [ '_reader', '_writer', '_admin', '_replicator' ]
+      };
+      security[api.key] = [ '_reader', '_writer' ];
+
+      var my_database = cloudant.db.use(db);
+      my_database.set_security(security, function(er, result) {
+        if (er) {
+          throw er;
+        }
+
+        result.should.be.an.Object.and.have.a.property('ok');
+        console.log('Set security for ' + db);
+        console.log(result);
+        console.log('');
+
+        // Or you can read the security settings from a database.
+        my_database.get_security(function(er, result) {
+          if (er) {
+            throw er;
+          }
+
+          result.should.be.an.Object.and.have.a.property('cloudant');
+          console.log('Got security for ' + db);
+          console.log(result);
+          done();
+        });
+      });
+    });
+  });
+});
