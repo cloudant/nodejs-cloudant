@@ -239,7 +239,7 @@ This library adds documentation for the following:
 
 ## Authorization and API Keys
 
-This feature interfaces with the Cloudant [authorization API][auth].
+This feature interfaces with the Cloudant [authorization API][Authorization].
 
 Use the authorization feature to generate new API keys to access your data. An API key is basically a username/password pair for granting others access to your data, without giving them the keys to the castle.
 
@@ -455,7 +455,7 @@ db.find({selector:{name:'Alice'}}, function(er, result) {
 
 ## Cloudant Search
 
-This feature interfaces with Cloudant's search functionality. See the [Cloudant Search documentation][search] for details.
+This feature interfaces with Cloudant's search functionality. See the [Cloudant Search documentation][Cloudant Search] for details.
 
 First, when working with a database (as opposed to the root server), run the `.use()` method.
 
@@ -615,7 +615,7 @@ var cloudant = require('cloudant')(opts);
 
 ~~~
 
-Please check [request] for more information on the defaults. They support features like cookie jar, proxies, ssl, etc.
+Please check [Request][request] for more information on the defaults. They support features like cookie jar, proxies, ssl, etc.
 
 ### Pool size and open sockets
 
@@ -626,7 +626,7 @@ var https = require('https')
 https.globalAgent.maxSockets = 20
 ~~~
 
-You can also increase the size in your calling context using `requestDefaults` if this is problematic. refer to the [request] documentation and examples for further clarification.
+You can also increase the size in your calling context using `requestDefaults` if this is problematic. refer to the [Request][request] documentation and examples for further clarification.
 
 Here is an example of explicitly using the keep alive agent (installed using `npm install agentkeepalive`), especially useful to limit your open sockets when doing high-volume access to Cloudant:
 
@@ -776,8 +776,8 @@ and limitations under the License.
 
 ## Reference
 
-* [Nano Library](https://github.com/apache/couchdb-nano)
-* [Cloudant Documentation](https://docs.cloudant.com/)
+* [Nano Library]
+* [Cloudant Documentation]
 * [Cloudant Query](https://docs.cloudant.com/cloudant_query.html)
 * [Cloudant Search](https://docs.cloudant.com/search.html)
 * [Authentication](https://docs.cloudant.com/authentication.html)
@@ -785,3 +785,14 @@ and limitations under the License.
 * [CORS](https://docs.cloudant.com/cors.html)
 * [Issues](https://github.com/cloudant/nodejs-cloudant/issues)
 * [Follow library](https://github.com/iriscouch/follow)
+
+[Nano Library]: https://github.com/apache/couchdb-nano
+[Cloudant Documentation]: https://docs.cloudant.com/
+[Cloudant Query]: https://docs.cloudant.com/cloudant_query.html
+[Cloudant Search]: https://docs.cloudant.com/search.html
+[Authentication]: https://docs.cloudant.com/authentication.html
+[Authorization]: https://docs.cloudant.com/authorization.html
+[CORS]: https://docs.cloudant.com/cors.html
+[Issues]: https://github.com/cloudant/nodejs-cloudant/issues
+[Follow library]: https://github.com/iriscouch/follow
+[request]: https://github.com/request/request
