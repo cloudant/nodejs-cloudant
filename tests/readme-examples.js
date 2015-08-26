@@ -39,7 +39,7 @@ require = function(module) {
 describe('Getting Started', function() {
   this.timeout(10 * 1000);
 
-  var mocks
+  var mocks;
   before(function() {
     mocks = nock('https://nodejs.cloudant.com')
       .get('/_all_dbs').reply(200, ['database_changes', 'third_party_db'])
@@ -110,7 +110,7 @@ describe('Getting Started', function() {
 describe('Initialization', function() {
   this.timeout(10 * 1000);
 
-  var mocks
+  var mocks;
   after(function() { mocks.done(); });
   before(function() {
     mocks = nock('https://nodejs.cloudant.com')
@@ -140,7 +140,7 @@ describe('Initialization', function() {
 });
 
 describe('Password authentication', function() {
-  var mocks
+  var mocks;
   after(function() { mocks.done(); });
   before(function() {
     mocks = nock('https://nodejs.cloudant.com')
