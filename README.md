@@ -311,7 +311,8 @@ See the Cloudant API for full details](https://docs.cloudant.com/api.html#author
 To use an API key, initialize a new Cloudant connection, and provide an additional "key" option when you initialize Cloudant. This will connect to your account, but using the "key" as the authenticated user. (And of course, use the appropriate password associated with the API key.)
 
 ~~~ js
-var cloudant = require('cloudant')({account:"me", key:api.key, password:api.password});
+var Cloudant = require('cloudant');
+var cloudant = Cloudant({account:"me", key:api.key, password:api.password});
 ~~~
 
 ## CORS
