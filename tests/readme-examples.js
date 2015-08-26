@@ -164,3 +164,9 @@ describe('Password authentication', function() {
     });
   });
 });
+
+describe('Cloudant Local', function() {
+  // No tests!
+});
+
+
