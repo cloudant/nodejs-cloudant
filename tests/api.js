@@ -50,8 +50,9 @@ describe('Initialization', function() {
   });
 
   it('supports a ping callback', function(done) {
-    nock(SERVER).get('/_session').reply(200, {ok:true, userCtx:{name:null,roles:[]}});
-    nock(SERVER).get('/')        .reply(200, {couchdb:'Welcome', version:'1.0.2'});
+    var mocks = nock(SERVER)
+      .get('/_session').reply(200, {ok:true, userCtx:{name:null,roles:[]}})
+      .get('/')        .reply(200, {couchdb:'Welcome', version:'1.0.2'});
 
     Cloudant({account:ME}, function(er, cloudant, body) {
       should(er).equal(null, 'No problem pinging Cloudant');
@@ -64,6 +65,8 @@ describe('Initialization', function() {
       body.userCtx.should.have.a.property("name");
       body.userCtx.should.have.a.property("roles");
       body.userCtx.roles.should.be.an.Array;
+
+      mocks.done();
       done();
     });
   });
@@ -82,7 +85,9 @@ describe('Initialization', function() {
 
 describe('Authentication', function() {
   it('supports Authentication API - POST /_api/v2/api_keys', function(done) {
-    nock(SERVER).post('/_api/v2/api_keys').reply(200, { "password": "Eivln4jPiLS8BoTxjXjVukDT", "ok": true, "key": "thandoodstrenterprourete" });
+    var mocks = nock(SERVER)
+      .post('/_api/v2/api_keys').reply(200, { "password": "Eivln4jPiLS8BoTxjXjVukDT", "ok": true, "key": "thandoodstrenterprourete" });
+
     var c = Cloudant({account:ME, password:PASSWORD});
     c.generate_api_key(function(er, d) {
       should(er).equal(null);
@@ -93,6 +98,8 @@ describe('Authentication', function() {
       d.ok.should.be.a.Boolean;
       d.should.have.a.property("key");
       d.key.should.be.a.String;
+
+      mocks.done();
       done();
     });
   });
@@ -100,7 +107,9 @@ describe('Authentication', function() {
 
 describe('CORS', function() {
   it('supports CORS API - GET /_api/v2/user/config/cors', function(done) {
-    nock(SERVER).get('/_api/v2/user/config/cors').reply(200, { "enable_cors": true, "allow_credentials": true, "origins": ["*"]});
+    var mocks = nock(SERVER)
+      .get('/_api/v2/user/config/cors').reply(200, { "enable_cors": true, "allow_credentials": true, "origins": ["*"]});
+
     var c = Cloudant({account:ME, password:PASSWORD});
     c.get_cors(function(er, d) {
       should(er).equal(null);
@@ -111,18 +120,24 @@ describe('CORS', function() {
       d.allow_credentials.should.be.a.Boolean;
       d.should.have.a.property("origins");
       d.origins.should.be.an.Array;
+
+      mocks.done();
       done();
     });
   });
 
   it('supports CORS API - PUT /_api/v2/user/config/cors', function(done) {
-    nock(SERVER).put('/_api/v2/user/config/cors').reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .put('/_api/v2/user/config/cors').reply(200, { "ok": true });
+
     var c = Cloudant({account:ME, password:PASSWORD});
     c.set_cors({ "enable_cors": true, "allow_credentials": true, "origins": ["*"]}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property("ok");
       d.ok.should.be.equal(true);
+
+      mocks.done();
       done();
     });
   });
@@ -130,7 +145,9 @@ describe('CORS', function() {
 
 describe('Authorization', function() {
   before(function(done) {
-    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .put('/' + MYDB).reply(200, { "ok": true });
+
     cc = Cloudant({account:ME, password:PASSWORD});
     cc.db.create(MYDB, function(er, d) {
       should(er).equal(null);
@@ -138,33 +155,45 @@ describe('Authorization', function() {
       d.should.have.a.property("ok");
       d.ok.should.be.equal(true);
       mydb = cc.db.use("mydb");
+
+      mocks.done();
       done();
     });
   });
 
   it('supports Authorization API GET _api/v2/db/<db>/_security', function(done) {
-    nock(SERVER).get('/_api/v2/db/' + MYDB + '/_security').reply(200, { });
+    var mocks = nock(SERVER)
+      .get('/_api/v2/db/' + MYDB + '/_security').reply(200, { });
+
     mydb.get_security(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.be.empty;
+
+      mocks.done();
       done();
     });
   });
 
   it('supports Authorization API - PUT _api/v2/db/<db/_security', function(done) {
-    nock(SERVER).put('/_api/v2/db/' + MYDB + '/_security').reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .put('/_api/v2/db/' + MYDB + '/_security').reply(200, { "ok": true });
+
     mydb.set_security({ "nobody": ["_reader"]}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property("ok");
       d.ok.should.be.equal(true);
+
+      mocks.done();
       done();
     });
   });
 
   after(function(done) {
-    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .delete('/' + MYDB).reply(200, { "ok": true });
+
     cc.db.destroy(MYDB, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -172,6 +201,8 @@ describe('Authorization', function() {
       d.ok.should.be.equal(true);
       mydb = null;
       cc = null;
+
+      mocks.done();
       done();
     });
   });
@@ -179,7 +210,9 @@ describe('Authorization', function() {
 
 describe('Changes query', function() {
   before(function(done) {
-    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .put('/' + MYDB).reply(200, { "ok": true });
+
     cc = Cloudant({account:ME, password:PASSWORD});
     cc.db.create(MYDB, function(er, d) {
       should(er).equal(null);
@@ -188,12 +221,17 @@ describe('Changes query', function() {
       d.ok.should.be.equal(true);
       mydb = cc.db.use("mydb");
       ddoc = viewname = null;
+
+      mocks.done();
       done();
     });
   });
 
   it('create query dummy data', function(done) {
-    nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"}]);
+    var mocks = nock(SERVER)
+      .post('/' + MYDB + '/_bulk_docs')
+      .reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"}]);
+
     mydb.bulk({docs: [ {_id:'doc1'},{_id:'doc2'} ]}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Array;
@@ -202,6 +240,8 @@ describe('Changes query', function() {
         d[i].should.have.a.property("id");
         d[i].should.have.a.property("rev");
       }
+
+      mocks.done();
       done();
     });
   });
@@ -210,7 +250,9 @@ describe('Changes query', function() {
   var firstChange = null
 
   it('gets a simple changes feed', function(done) {
-    nock(SERVER).get('/' + MYDB + '/_changes').reply(200, { results: [ { seq: '1-g1AAAAEJeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPUhPBnMiYy6Qx25uZm5uYJpGSD-RNuSxAEmGBiAFtGQ_hstM8es7ANEH8lEWACBUVnc', id: 'doc2', changes: [ { rev: '1-967a00dff5e02add41819138abb3284d' } ] }, { seq: '2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN0s2MjZLMyVSe5IDkEyqh5rACDbB3Mzc3MA0jUgT8liAJEMDkAIash_hDgPzNJPEZENUU0zxm3IAYgrQLcxQtxilppilGBkTMiMLAAylXs8', id: 'doc1', changes: [ { rev: '1-967a00dff5e02add41819138abb3284d' } ] } ], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN0s2MjZLMyVSe5IDkEyqh5rACDbB3Mzc3MA0jUgT8liAJEMDkAIash_hDgPzNJPEZENUU0zxm3IAYgqSW4xSU8xSjIyzAPAlU1s', pending: 0 });
+    var mocks = nock(SERVER)
+      .get('/' + MYDB + '/_changes')
+      .reply(200, { results: [ { seq: '1-g1AAAAEJeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPUhPBnMiYy6Qx25uZm5uYJpGSD-RNuSxAEmGBiAFtGQ_hstM8es7ANEH8lEWACBUVnc', id: 'doc2', changes: [ { rev: '1-967a00dff5e02add41819138abb3284d' } ] }, { seq: '2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN0s2MjZLMyVSe5IDkEyqh5rACDbB3Mzc3MA0jUgT8liAJEMDkAIash_hDgPzNJPEZENUU0zxm3IAYgrQLcxQtxilppilGBkTMiMLAAylXs8', id: 'doc1', changes: [ { rev: '1-967a00dff5e02add41819138abb3284d' } ] } ], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN0s2MjZLMyVSe5IDkEyqh5rACDbB3Mzc3MA0jUgT8liAJEMDkAIash_hDgPzNJPEZENUU0zxm3IAYgqSW4xSU8xSjIyzAPAlU1s', pending: 0 });
 
     mydb.changes(function(er, body) {
       should(er).equal(null);
@@ -223,34 +265,46 @@ describe('Changes query', function() {
       body.results[1].should.be.an.Object.and.have.a.property('seq').and.match(/^2-/);
 
       firstChange = body.results[0];
+
+      mocks.done();
       done();
     });
   });
 
   it('supports the "since" parameter', function(done) {
-    nock(SERVER).get('/' + MYDB + '/_changes?since='+firstChange.seq).reply(200, { results: [ { seq: '2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNKNTBPskTVboZLe5IDkEyqB5vAnMgINsEwKTXVxDKFkH4iHZjHAiQZGoAU0JL9CHemmCVbGqdZkmTKAYgpYN9C3GpiaWhiYmCeBQCL518O', id: 'doc2', changes: [Object] } ], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNKNTBPskTVboZLe5IDkEyqh5rACDbBMCk11cQyhUgH5LEASYYGIAU0ZD_CHSlmyZbGaZYkmXIAYgqSW0wsDU1MDMyzAGgWU5k', pending: 0 });
+    var mocks = nock(SERVER)
+      .get('/' + MYDB + '/_changes?since='+firstChange.seq)
+      .reply(200, { results: [ { seq: '2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNKNTBPskTVboZLe5IDkEyqB5vAnMgINsEwKTXVxDKFkH4iHZjHAiQZGoAU0JL9CHemmCVbGqdZkmTKAYgpYN9C3GpiaWhiYmCeBQCL518O', id: 'doc2', changes: [Object] } ], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNKNTBPskTVboZLe5IDkEyqh5rACDbBMCk11cQyhUgH5LEASYYGIAU0ZD_CHSlmyZbGaZYkmXIAYgqSW0wsDU1MDMyzAGgWU5k', pending: 0 });
 
     mydb.changes({since:firstChange.seq}, function(er, body) {
       should(er).equal(null);
       body.results.should.have.a.length(1);
       body.results[0].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
       body.results[0].should.be.an.Object.and.have.a.property('seq').and.match(/^2-/);
+
+      mocks.done();
       done();
     });
   });
 
   it('supports since="now"', function(done) {
-    nock(SERVER).get('/' + MYDB + '/_changes?since=now').reply(200, { results: [], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNINUkzNCZSe5IDkEyqh5rACDbB1CQpzdI8lUgT8liAJEMDkAIash_hDoMkE7MkAwuSTDkAMQXJLSlpRuaGJiZZADxoU4k', pending: 0 });
+    var mocks = nock(SERVER)
+      .get('/' + MYDB + '/_changes?since=now')
+      .reply(200, { results: [], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNINUkzNCZSe5IDkEyqh5rACDbB1CQpzdI8lUgT8liAJEMDkAIash_hDoMkE7MkAwuSTDkAMQXJLSlpRuaGJiZZADxoU4k', pending: 0 });
 
     mydb.changes({since:'now'}, function(er, body) {
       should(er).equal(null);
       body.results.should.have.a.length(0);
+
+      mocks.done();
       done();
     });
   });
 
   after(function(done) {
-    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .delete('/' + MYDB).reply(200, { "ok": true });
+
     cc.db.destroy(MYDB, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -259,6 +313,8 @@ describe('Changes query', function() {
       mydb = null;
       cc = null;
       ddoc = viewname = null;
+
+      mocks.done();
       done();
     });
   });
@@ -266,7 +322,9 @@ describe('Changes query', function() {
 
 describe('Changes follower', function() {
   before(function(done) {
-    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .put('/' + MYDB).reply(200, { "ok": true });
+
     cc = Cloudant({account:ME, password:PASSWORD});
     cc.db.create(MYDB, function(er, d) {
       should(er).equal(null);
@@ -275,12 +333,17 @@ describe('Changes follower', function() {
       d.ok.should.be.equal(true);
       mydb = cc.db.use("mydb");
       ddoc = viewname = null;
+
+      mocks.done();
       done();
     });
   });
 
   it('create query dummy data', function(done) {
-    nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"}]);
+    var mocks = nock(SERVER)
+      .post('/' + MYDB + '/_bulk_docs')
+      .reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"}]);
+
     mydb.bulk({docs: [ {_id:'doc1'},{_id:'doc2'} ]}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Array;
@@ -289,6 +352,8 @@ describe('Changes follower', function() {
         d[i].should.have.a.property("id");
         d[i].should.have.a.property("rev");
       }
+
+      mocks.done();
       done();
     });
   });
@@ -297,13 +362,13 @@ describe('Changes follower', function() {
   var firstChange = null
 
   it('follows changes', function(done) {
-    nock(SERVER).get('/' + MYDB).reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' });
-
-    nock(SERVER)
+    var mocks = nock(SERVER)
+      .get('/' + MYDB)
+      .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
       .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since=0&feed=continuous&heartbeat=30000
-      .get('/' + MYDB + '/_changes').reply(200,
-        '{"seq":"1-g1AAAAEleJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqQCYkMRFqZxwIkGRqAFFDbfoTNhomWaSZJxkTaDDHlAMQUoPuZExnBppgZG6clJ5kSMiMLABOLXCo","id":"doc1","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n' +
-        '{"seq":"2-g1AAAAFTeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqwCcyJjGATEi0NkpOTkgnpJ9KBeSxAkqEBSAEt2Y9wp2GiZZpJkjGR7oSYcgBiCpJbzYyN05KTTAmZkQUA7ZNq0w","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n')
+      .get('/' + MYDB + '/_changes')
+      .reply(200, '{"seq":"1-g1AAAAEleJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqQCYkMRFqZxwIkGRqAFFDbfoTNhomWaSZJxkTaDDHlAMQUoPuZExnBppgZG6clJ5kSMiMLABOLXCo","id":"doc1","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n' +
+        '{"seq":"2-g1AAAAFTeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqwCcyJjGATEi0NkpOTkgnpJ9KBeSxAkqEBSAEt2Y9wp2GiZZpJkjGR7oSYcgBiCpJbzYyN05KTTAmZkQUA7ZNq0w","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n');
 
     var iterations = 0;
     var feed = mydb.follow(function(er, change) {
@@ -319,18 +384,20 @@ describe('Changes follower', function() {
         firstChange = change;
       } else if (iterations == 2) {
         feed.stop();
+
+        mocks.done();
         done();
       }
     });
   });
 
   it('supports the "since" parameter', function(done) {
-    nock(SERVER).get('/' + MYDB).reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' });
-
-    nock(SERVER)
+    var mocks = nock(SERVER)
+      .get('/' + MYDB)
+      .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
       .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since &feed, &heartbeat
-      .get('/' + MYDB + '/_changes').reply(200,
-        '{"seq":"2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgNzFIM7c0S0XVboZLe5IDkEyqB5vAnMgINiEtLTHR2MSMkH4iHZjHAiQZGoAU0JL9CHcmGVsmG6amkmTKAYgpYN9C3GqalJpikmKUBQBsbl-8","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n')
+      .get('/' + MYDB + '/_changes')
+      .reply(200, '{"seq":"2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgNzFIM7c0S0XVboZLe5IDkEyqB5vAnMgINiEtLTHR2MSMkH4iHZjHAiQZGoAU0JL9CHcmGVsmG6amkmTKAYgpYN9C3GqalJpikmKUBQBsbl-8","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n');
 
     var feed = mydb.follow({since:firstChange.seq}, function(er, change) {
       should(er).equal(null);
@@ -338,6 +405,8 @@ describe('Changes follower', function() {
       change.should.have.a.property('id').and.match(/^doc[12]$/);
       change.should.have.a.property('seq').and.match(/^2-/);
       feed.stop();
+
+      mocks.done();
       done();
     });
   });
@@ -345,12 +414,14 @@ describe('Changes follower', function() {
   it('supports since="now"', function(done) {
     var docId = firstChange.id;
 
-    nock(SERVER).get('/' + MYDB).reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' });
-    nock(SERVER).post('/' + MYDB).reply(200, {ok:true,id:docId,rev:"2-a1933e6ba0b5ac9868cd6f5adc12dc5f"});
-    nock(SERVER)
+    var mocks = nock(SERVER)
+      .get('/' + MYDB)
+      .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
+      .post('/' + MYDB)
+      .reply(200, {ok:true,id:docId,rev:"2-a1933e6ba0b5ac9868cd6f5adc12dc5f"})
       .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since &feed, &heartbeat
-      .get('/' + MYDB + '/_changes').reply(200,
-        '{"seq":"3-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgT05OSjQ0SyNSe5IDkEyqB5vAnMgENsHM1CDZPDGFkH4ibchjAZIMDUAKaMl-hDtTLZMMktOMSDLlAMQUsG8ZIaYYWpqmGCVnAQDI71_n","id":"'+docId+'","changes":[{"rev":"2-a1933e6ba0b5ac9868cd6f5adc12dc5f"}]}\n');
+      .get('/' + MYDB + '/_changes')
+      .reply(200, '{"seq":"3-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgT05OSjQ0SyNSe5IDkEyqB5vAnMgENsHM1CDZPDGFkH4ibchjAZIMDUAKaMl-hDtTLZMMktOMSDLlAMQUsG8ZIaYYWpqmGCVnAQDI71_n","id":"'+docId+'","changes":[{"rev":"2-a1933e6ba0b5ac9868cd6f5adc12dc5f"}]}\n');
 
     // Make an update that will trigger the "since=now" follower.
     setTimeout(update_doc, 1);
@@ -368,12 +439,16 @@ describe('Changes follower', function() {
       change.should.have.a.property('id').and.equal(docId);
       change.should.have.a.property('seq').and.match(/^3-/);
       feed.stop();
+
+      mocks.done();
       done();
     }
   });
 
   after(function(done) {
-    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .delete('/' + MYDB).reply(200, { "ok": true });
+
     cc.db.destroy(MYDB, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -382,6 +457,8 @@ describe('Changes follower', function() {
       mydb = null;
       cc = null;
       ddoc = viewname = null;
+
+      mocks.done();
       done();
     });
   });
@@ -389,7 +466,9 @@ describe('Changes follower', function() {
 
 describe('Cloudant Query', function() {
   before(function(done) {
-    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .put('/' + MYDB).reply(200, { "ok": true });
+
     cc = Cloudant({account:ME, password:PASSWORD});
     cc.db.create(MYDB, function(er, d) {
       should(er).equal(null);
@@ -398,12 +477,17 @@ describe('Cloudant Query', function() {
       d.ok.should.be.equal(true);
       mydb = cc.db.use("mydb");
       ddoc = viewname = null;
+
+      mocks.done();
       done();
     });
   });
 
   it('create query dummy data', function(done) {
-    nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{"id":"f400bde9395b9116d108ebc89aa816b8","rev":"1-23202479633c2b380f79507a776743d5"},{"id":"f400bde9395b9116d108ebc89aa81bb8","rev":"1-3975759ccff3842adf690a5c10caee42"},{"id":"f400bde9395b9116d108ebc89aa82127","rev":"1-027467bd0efec85f21c822a8eb537073"}]);
+    var mocks = nock(SERVER)
+      .post('/' + MYDB + '/_bulk_docs')
+      .reply(200, [{"id":"f400bde9395b9116d108ebc89aa816b8","rev":"1-23202479633c2b380f79507a776743d5"},{"id":"f400bde9395b9116d108ebc89aa81bb8","rev":"1-3975759ccff3842adf690a5c10caee42"},{"id":"f400bde9395b9116d108ebc89aa82127","rev":"1-027467bd0efec85f21c822a8eb537073"}]);
+
     mydb.bulk({docs: [ {a:1},{a:2}, {a:3} ]}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Array;
@@ -412,12 +496,17 @@ describe('Cloudant Query', function() {
         d[i].should.have.a.property("id");
         d[i].should.have.a.property("rev");
       }
+
+      mocks.done();
       done();
     });
   });
 
   it('supports Cloudant Query create indexes - POST /<db/_index API call', function(done) {
-    nock(SERVER).post('/' + MYDB + '/_index').reply(200, {"result":"created","id":"_design/32372935e14bed00cc6db4fc9efca0f1537d34a8","name":"32372935e14bed00cc6db4fc9efca0f1537d34a8"});
+    var mocks = nock(SERVER)
+      .post('/' + MYDB + '/_index')
+      .reply(200, {"result":"created","id":"_design/32372935e14bed00cc6db4fc9efca0f1537d34a8","name":"32372935e14bed00cc6db4fc9efca0f1537d34a8"});
+
     mydb.index( { "index": {}, "type": "text"}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -428,13 +517,18 @@ describe('Cloudant Query', function() {
       d.should.have.a.property("name");
       ddoc = d.id.replace(/_design\//,"");
       viewname = d.name;
+
+      mocks.done();
       done();
     });
 
   });
 
   it('supports Cloudant Query get indexes - GET /<db/_index', function(done) {
-    nock(SERVER).get('/' + MYDB + '/_index').reply(200, {"indexes":[{"ddoc":null,"name":"_all_docs","type":"special","def":{"fields":[{"_id":"asc"}]}},{"ddoc":"_design/32372935e14bed00cc6db4fc9efca0f1537d34a8","name":"32372935e14bed00cc6db4fc9efca0f1537d34a8","type":"text","def":{"default_analyzer":"keyword","default_field":{},"selector":{},"fields":[]}}]} );
+    var mocks = nock(SERVER)
+      .get('/' + MYDB + '/_index')
+      .reply(200, {"indexes":[{"ddoc":null,"name":"_all_docs","type":"special","def":{"fields":[{"_id":"asc"}]}},{"ddoc":"_design/32372935e14bed00cc6db4fc9efca0f1537d34a8","name":"32372935e14bed00cc6db4fc9efca0f1537d34a8","type":"text","def":{"default_analyzer":"keyword","default_field":{},"selector":{},"fields":[]}}]} );
+
     mydb.index(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -448,13 +542,18 @@ describe('Cloudant Query', function() {
           d.indexes[i].type.should.equal("text");
         }
       }
+
+      mocks.done();
       done();
     });
   });
 
   it('supports Cloudant Query - POST /<db/_find API call', function(done) {
     var query = { "selector": { "a": { "$gt": 2 }}};
-    nock(SERVER).post('/' + MYDB + '/_find', query).reply(200, {"docs":[ {"_id":"f400bde9395b9116d108ebc89aa82127","_rev":"1-027467bd0efec85f21c822a8eb537073","a":3}],"bookmark": "g2wAAAABaANkABxkYmNvcmVAZGIyLm1lYWQuY2xvdWRhbnQubmV0bAAAAAJhAGI_____amgCRj_wAAAAAAAAYQFq"} );
+    var mocks = nock(SERVER)
+      .post('/' + MYDB + '/_find', query)
+      .reply(200, {"docs":[ {"_id":"f400bde9395b9116d108ebc89aa82127","_rev":"1-027467bd0efec85f21c822a8eb537073","a":3}],"bookmark": "g2wAAAABaANkABxkYmNvcmVAZGIyLm1lYWQuY2xvdWRhbnQubmV0bAAAAAJhAGI_____amgCRj_wAAAAAAAAYQFq"} );
+
     mydb.find( query, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -464,24 +563,32 @@ describe('Cloudant Query', function() {
       d.docs[0].should.have.a.property("a");
       d.docs[0].a.should.be.a.Number;
       d.docs[0].a.should.be.equal(3);
+
+      mocks.done();
       done();
     });
   });
 
   it('supports deleting a Cloudant Query index - DELETE /db/_design/ddocname/type/viewname', function(done) {
     var path = '/' + MYDB + '/_index/' + ddoc + '/text/' + viewname;
-    nock(SERVER).delete(path).reply(200, {"ok":true} );
+    var mocks = nock(SERVER)
+      .delete(path).reply(200, {"ok":true} );
+
     mydb.index.del({ ddoc: ddoc, name: viewname, type:"text"}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property("ok");
       d.ok.should.be.equal(true);
+
+      mocks.done();
       done();
     });
   });
 
   after(function(done) {
-    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .delete('/' + MYDB).reply(200, { "ok": true });
+
     cc.db.destroy(MYDB, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -490,6 +597,8 @@ describe('Cloudant Query', function() {
       mydb = null;
       cc = null;
       ddoc = viewname = null;
+
+      mocks.done();
       done();
     });
   });
@@ -497,7 +606,9 @@ describe('Cloudant Query', function() {
 
 describe('Cloudant Search', function() {
   before(function(done) {
-    nock(SERVER).put('/' + MYDB).reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .put('/' + MYDB).reply(200, { "ok": true });
+
     cc = Cloudant({account:ME, password:PASSWORD});
     cc.db.create(MYDB, function(er, d) {
       should(er).equal(null);
@@ -506,12 +617,16 @@ describe('Cloudant Search', function() {
       d.ok.should.be.equal(true);
       mydb = cc.db.use("mydb");
       ddoc = viewname = null;
+
+      mocks.done();
       done();
     });
   });
 
   it('create search dummy data', function(done) {
-    nock(SERVER).post('/' + MYDB + '/_bulk_docs').reply(200, [{id:'a_tale',rev:'1-3e1f4ff28eaa99dc471ff994051f30ab'},{id:'towers',rev:'1-35c7c65df2cbb9a5f501717e78c508ee'},{id:'_design/library',rev:'1-1f87108fd3f9969a5d47600d6aa5034b'}]);
+    var mocks = nock(SERVER)
+      .post('/' + MYDB + '/_bulk_docs')
+      .reply(200, [{id:'a_tale',rev:'1-3e1f4ff28eaa99dc471ff994051f30ab'},{id:'towers',rev:'1-35c7c65df2cbb9a5f501717e78c508ee'},{id:'_design/library',rev:'1-1f87108fd3f9969a5d47600d6aa5034b'}]);
 
     var index = function(doc) {
       index('title', doc.title);
@@ -541,12 +656,16 @@ describe('Cloudant Search', function() {
         d[i].should.have.a.property("id");
         d[i].should.have.a.property("rev");
       }
+
+      mocks.done();
       done();
     });
   });
 
   it('searches test data: author:charles', function(done) {
-    nock(SERVER).get('/' + MYDB + '/_design/library/_search/books?q=author%3Acharles').reply(200, { total_rows: 1, bookmark: 'g2wAAAABaANkAB1kYmNvcmVAZGI2LnNsaW5nLmNsb3VkYW50Lm5ldGwAAAACbgQAAAAAgG4EAP___79qaAJGP8iMWIAAAABhAGo', rows: [ { id: 'a_tale', order: [Object], fields: {} } ] })
+    var mocks = nock(SERVER)
+      .get('/' + MYDB + '/_design/library/_search/books?q=author%3Acharles')
+      .reply(200, { total_rows: 1, bookmark: 'g2wAAAABaANkAB1kYmNvcmVAZGI2LnNsaW5nLmNsb3VkYW50Lm5ldGwAAAACbgQAAAAAgG4EAP___79qaAJGP8iMWIAAAABhAGo', rows: [ { id: 'a_tale', order: [Object], fields: {} } ] });
 
     mydb.search('library', 'books', {q:'author:charles'}, function(er, d) {
       should(er).equal(null);
@@ -557,12 +676,16 @@ describe('Cloudant Search', function() {
       d.rows[0].should.be.an.Object;
       d.rows[0].should.have.a.property('id').which.is.equal('a_tale');
       d.rows[0].should.have.a.property('order').which.is.instanceOf(Array);
+
+      mocks.done();
       done();
     });
   });
 
   it('searches test data: title:two', function(done) {
-    nock(SERVER).get('/' + MYDB + '/_design/library/_search/books?q=title%3Atwo').reply(200,{total_rows:2,bookmark:'g1AAAACIeJzLYWBgYMpgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASlLcgCSSfX____PymBysz_RE9EAFEhkIFJ7HguQZGgAUkAT9oONOLy4igFsRBYAPRQqlQ',rows:[{id:'towers',order:[Object],fields:{}},{id:'a_tale',order:[Object],fields:{}}]})
+    var mocks = nock(SERVER)
+      .get('/' + MYDB + '/_design/library/_search/books?q=title%3Atwo')
+      .reply(200,{total_rows:2,bookmark:'g1AAAACIeJzLYWBgYMpgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASlLcgCSSfX____PymBysz_RE9EAFEhkIFJ7HguQZGgAUkAT9oONOLy4igFsRBYAPRQqlQ',rows:[{id:'towers',order:[Object],fields:{}},{id:'a_tale',order:[Object],fields:{}}]});
 
     mydb.search('library', 'books', {q:'title:two'}, function(er, d) {
       should(er).equal(null);
@@ -576,12 +699,16 @@ describe('Cloudant Search', function() {
       d.rows[1].should.be.an.Object;
       d.rows[1].should.have.a.property('id').which.is.equal('a_tale');
       d.rows[1].should.have.a.property('order').which.is.instanceOf(Array);
+
+      mocks.done();
       done();
     });
   });
 
   after(function(done) {
-    nock(SERVER).delete('/' + MYDB).reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .delete('/' + MYDB).reply(200, { "ok": true });
+
     cc.db.destroy(MYDB, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -590,6 +717,8 @@ describe('Cloudant Search', function() {
       mydb = null;
       cc = null;
       ddoc = viewname = null;
+
+      mocks.done();
       done();
     });
   });
@@ -661,10 +790,12 @@ describe('Gzip header tests', function() {
 
 describe('Gzip attachment tests', function() {
   it('checks that the zipped response is unzipped', function(done) {
-    nock(SERVER).get('/' + MYDB + "/x/y.css").replyWithFile(200, __dirname + '/y.css.gz', {
+    var mocks = nock(SERVER)
+      .get('/' + MYDB + "/x/y.css").replyWithFile(200, __dirname + '/y.css.gz', {
         'content-encoding': 'gzip',
         'content-type': 'text/css'
       });
+
     var c = Cloudant({account:ME, password:PASSWORD});
     var mydb = c.db.use(MYDB);
     mydb.attachment.get("x","y.css", function(er,data) {
@@ -672,6 +803,8 @@ describe('Gzip attachment tests', function() {
       data.should.be.an.Object;
       var original = fs.readFileSync( __dirname + '/y.css');
       data.toString().should.be.equal(original.toString());
+
+      mocks.done();
       done();
     });
   });
@@ -679,19 +812,25 @@ describe('Gzip attachment tests', function() {
 
 describe('Virtual Hosts', function() {
   it('supports virtual hosts API - GET /_api/v2/user/virtual_hosts', function(done) {
-    nock(SERVER).get('/_api/v2/user/virtual_hosts').reply(200, {"virtual_hosts": []});
+    var mocks = nock(SERVER)
+      .get('/_api/v2/user/virtual_hosts').reply(200, {"virtual_hosts": []});
+
     var c = Cloudant({account:ME, password:PASSWORD});
     c.get_virtual_hosts(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property("virtual_hosts");
       d.virtual_hosts.should.be.an.Array;
+
+      mocks.done();
       done();
     });
   });
 
   it('supports virtual hosts API - POST /_api/v2/user/virtual_hosts', function(done) {
-    nock(SERVER).post('/_api/v2/user/virtual_hosts').reply(200, {"ok": true});
+    var mocks = nock(SERVER)
+      .post('/_api/v2/user/virtual_hosts').reply(200, {"ok": true});
+
     var c = Cloudant({account:ME, password:PASSWORD});
     c.add_virtual_host({ host: "myhost.com", path:"/mypath"}, function(er, d) {
       should(er).equal(null);
@@ -699,12 +838,16 @@ describe('Virtual Hosts', function() {
       d.should.have.a.property("ok");
       d.ok.should.be.a.Boolean;
       d.ok.should.equal(true);
+
+      mocks.done();
       done();
     });
   });
 
   it('supports virtual hosts API - DELETE /_api/v2/user/config/virtual_hosts', function(done) {
-    nock(SERVER).delete('/_api/v2/user/virtual_hosts').reply(200, { "ok": true });
+    var mocks = nock(SERVER)
+      .delete('/_api/v2/user/virtual_hosts').reply(200, { "ok": true });
+
     var c = Cloudant({account:ME, password:PASSWORD});
     c.delete_virtual_host({ host: "myhost.com", path:"/mypath"}, function(er, d) {
       should(er).equal(null);
@@ -712,6 +855,8 @@ describe('Virtual Hosts', function() {
       d.should.have.a.property("ok");
       d.ok.should.be.a.Boolean;
       d.ok.should.be.equal(true);
+
+      mocks.done();
       done();
     });
   });
