@@ -516,7 +516,7 @@ db.search('library', 'books', {q:'author:dickens'}, function(er, result) {
 Cloudant supports making requests using Cloudant's [cookie authentication](http://guide.couchdb.org/editions/1/en/security.html#cookies) functionality. there's a [step-by-step guide here](http://codetwizzle.com/articles/couchdb-cookie-authentication-nodejs-couchdb/), but essentially you just:
 
 ~~~ js
-var Cloudant     = require('Cloudant')
+var Cloudant = require('cloudant');
 var username = 'user'
 var userpass = 'pass'
 
@@ -726,7 +726,7 @@ Now your project has the dependency in place, however you can work on both of th
 Here is simple but complete example of working with data:
 
 ~~~ js
-var Cloudant = require('Cloudant')
+var Cloudant = require('cloudant')
 
 var me = 'nodejs' // Set this to your own account
 var password = process.env.cloudant_password
