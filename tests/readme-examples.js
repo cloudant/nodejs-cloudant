@@ -237,3 +237,62 @@ describe('Authorization and API Keys', function() {
     });
   });
 });
+
+describe('CORS', function() {
+  this.timeout(10 * 1000);
+
+  var mocks;
+  after(function() { mocks.done(); });
+  before(function() {
+    mocks = nock('https://nodejs.cloudant.com')
+      .put('/_api/v2/user/config/cors')
+      .reply(200, {ok:true})
+      .put('/_api/v2/user/config/cors')
+      .reply(200, {ok:true})
+      .put('/_api/v2/user/config/cors')
+      .reply(200, {ok:true})
+      .get('/_api/v2/user/config/cors')
+      .reply(200, { enable_cors: false, allow_credentials: false, origins: [] });
+  });
+
+  var cloudant;
+  before(function() {
+    var Cloudant = require('cloudant');
+    cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
+  });
+
+  it('Example 1', function(done) {
+    cloudant.set_cors({ enable_cors: true, allow_credentials: true, origins: ["*"]}, function(err, data) {
+      should(err).equal(null);
+      data.should.have.a.property('ok').equal(true);
+      console.log(err, data);
+      done();
+    });
+  });
+
+  it('Example 2', function(done) {
+    cloudant.set_cors({ enable_cors: true, allow_credentials: true, origins: [ "https://mydomain.com","https://mysubdomain.mydomain.com"]}, function(err, data) {
+      should(err).equal(null);
+      data.should.have.a.property('ok').equal(true);
+      console.log(err, data);
+      done();
+    });
+  });
+
+  it('Example 3', function(done) {
+    cloudant.set_cors({ enable_cors: false, origins: [] }, function(err, data) {
+      should(err).equal(null);
+      data.should.have.a.property('ok').equal(true);
+      console.log(err, data);
+      done();
+    });
+  });
+
+  it('Example 4', function(done) {
+    cloudant.get_cors(function(err, data) {
+      data.should.have.a.property('enable_cors');
+      console.log(data);
+      done();
+    });
+  });
+});

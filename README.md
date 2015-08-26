@@ -322,36 +322,38 @@ If you need to access your Cloudant database from a web application that is serv
 e.g. enable CORS from any domain:
 
 ~~~ js
-   cloudant.set_cors({ enable_cors: true, allow_credentials: true, origins: ["*"]}, function(err, data) {
-     console.log(err, data);
-   });
+cloudant.set_cors({ enable_cors: true, allow_credentials: true, origins: ["*"]}, function(err, data) {
+  console.log(err, data);
+});
 ~~~
 
 or enable access from a list of specified domains:
 
 ~~~ js
-   cloudant.set_cors_({ enable_cors: true, allow_credentials: true, origins: [ "https://mydomain.com","https://mysubdomain.mydomain.com"]}, function(err, data) {
-     console.log(err, data);
-   });
+cloudant.set_cors({ enable_cors: true, allow_credentials: true, origins: [ "https://mydomain.com","https://mysubdomain.mydomain.com"]}, function(err, data) {
+  console.log(err, data);
+});
 ~~~
 
 or disable CORS access
 
 ~~~ js
-   cloudant.set_cors({ enable_cors: false }, function(err, data) {
-     console.log(err, data);
-   });
+cloudant.set_cors({ enable_cors: false, origins: [] }, function(err, data) {
+  console.log(err, data);
+});
 ~~~
 
 or to fetch the current CORS configuration
 
 ~~~ js
-// get CORS configuration
 cloudant.get_cors(function(err, data) {
   console.log(data);
 });
-// { enable_cors: true, allow_credentials: true, origins: [ '*' ] }
 ~~~
+
+Output:
+
+    { enable_cors: true, allow_credentials: true, origins: [ '*' ] }
 
 See <https://docs.cloudant.com/api.html#cors> for further details.
 
