@@ -39,7 +39,18 @@ require = function(module) {
 describe('Getting Started', function() {
   this.timeout(10 * 1000);
 
-  nock('https://nodejs.cloudant.com').get('/_all_dbs').reply(200, ['database_changes', 'third_party_db']);
+  var mocks
+  before(function() {
+    mocks = nock('https://nodejs.cloudant.com')
+      .get('/_all_dbs').reply(200, ['database_changes', 'third_party_db'])
+      .delete('/alice').reply(404, {error:'not_found', reason:'Database does not exist.'})
+      .put('/alice').reply(201, {ok:true})
+      .put('/alice/rabbit').reply(201, {ok:true, id:'rabbit', rev:'1-6e4cb465d49c0368ac3946506d26335d'});
+  });
+
+  after(function() {
+    mocks.done();
+  });
 
   it('Example 1', function(done) {
     // Load the Cloudant library.
@@ -57,10 +68,6 @@ describe('Getting Started', function() {
       done();
     });
   });
-
-  nock('https://nodejs.cloudant.com').delete('/alice').reply(404, {error:'not_found', reason:'Database does not exist.'});
-  nock('https://nodejs.cloudant.com').put('/alice').reply(201, {ok:true});
-  nock('https://nodejs.cloudant.com').put('/alice/rabbit').reply(201, {ok:true, id:'rabbit', rev:'1-6e4cb465d49c0368ac3946506d26335d'});
 
   it('Example 2', function(done) {
     require('dotenv').load();
@@ -103,9 +110,14 @@ describe('Getting Started', function() {
 describe('Initialization', function() {
   this.timeout(10 * 1000);
 
-  nock('https://nodejs.cloudant.com').get('/_session').reply(200, {ok:true, userCtx:{name:'nodejs', roles:[]}});
-  nock('https://nodejs.cloudant.com').get('/').reply(200, {couchdb:'Welcome', version:'1.0.2', cloudant_build:'2488'});
-  nock('https://nodejs.cloudant.com').get('/animals/dog').reply(404, {error:'not_found', reason:'missing'});
+  var mocks
+  after(function() { mocks.done(); });
+  before(function() {
+    mocks = nock('https://nodejs.cloudant.com')
+      .get('/_session').reply(200, {ok:true, userCtx:{name:'nodejs', roles:[]}})
+      .get('/').reply(200, {couchdb:'Welcome', version:'1.0.2', cloudant_build:'2488'})
+      .get('/animals/dog').reply(404, {error:'not_found', reason:'missing'});
+  });
 
   it('Example 1', function(done) {
     var Cloudant = require('cloudant');
@@ -128,9 +140,13 @@ describe('Initialization', function() {
 });
 
 describe('Password authentication', function() {
-
-  nock('https://nodejs.cloudant.com').get('/_session').reply(200, {ok:true, userCtx:{name:'jhs', roles:[]}});
-  nock('https://nodejs.cloudant.com').get('/').reply(200, {couchdb:'Welcome', version:'1.0.2', cloudant_build:'2488'});
+  var mocks
+  after(function() { mocks.done(); });
+  before(function() {
+    mocks = nock('https://nodejs.cloudant.com')
+      .get('/_session').reply(200, {XXXXX:'YYYYYYYYYY', ok:true, userCtx:{name:'jhs', roles:[]}})
+      .get('/').reply(200, {couchdb:'Welcome!!!!!', version:'1.0.2', cloudant_build:'2488'});
+  });
 
   it('Example 1', function(done) {
     var Cloudant = require('cloudant');
