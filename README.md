@@ -399,13 +399,18 @@ To see all the indexes in a database, call the database `.index()` method with a
 
 ~~~ js
 db.index(function(er, result) {
-  if (er)
-    throw er
+  if (er) {
+    throw er;
+  }
 
-  console.log('The database has %d indexes', result.indexes.length)
-  for (var i = 0; i < result.indexes.length; i++)
-    console.log('  %s (%s): %j', result.indexes[i].name, result.indexes[i].type, result.indexes[i].def)
-})
+  console.log('The database has %d indexes', result.indexes.length);
+  for (var i = 0; i < result.indexes.length; i++) {
+    console.log('  %s (%s): %j', result.indexes[i].name, result.indexes[i].type, result.indexes[i].def);
+  }
+
+  result.should.have.a.property('indexes').which.is.an.Array;
+  done();
+});
 ~~~
 
 Example output:
@@ -418,13 +423,14 @@ Example output:
 To create an index, use the same `.index()` method but with an extra initial argument: the index definition. For example, to make an index on middle names in the data set:
 
 ~~~ js
-var middle_name = {name:'middle-name', type:'json', index:{fields:['middle']}}
-db.index(middle_name, function(er, response) {
-  if (er)
-    throw er
+var first_name = {name:'first-name', type:'json', index:{fields:['name']}}
+db.index(first_name, function(er, response) {
+  if (er) {
+    throw er;
+  }
 
-  console.log('Index creation result: %s', response.result)
-})
+  console.log('Index creation result: %s', response.result);
+});
 ~~~
 
 Output:
@@ -435,13 +441,15 @@ To query using the index, use the `.find()` method.
 
 ~~~ js
 db.find({selector:{name:'Alice'}}, function(er, result) {
-  if (er)
-    throw er
+  if (er) {
+    throw er;
+  }
 
-  console.log('Found %d documents with name Alice')
-  for (var i = 0; i < result.docs.length; i++)
-    console.log('  Doc id: %s', result.docs[i]._id)
-})
+  console.log('Found %d documents with name Alice', result.docs.length);
+  for (var i = 0; i < result.docs.length; i++) {
+    console.log('  Doc id: %s', result.docs[i]._id);
+  }
+});
 ~~~
 
 

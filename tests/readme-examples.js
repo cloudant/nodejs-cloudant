@@ -342,3 +342,85 @@ describe('Virtual Hosts', function() {
     });
   });
 });
+
+describe('Cloudant Query', function() {
+  this.timeout(10 * 1000);
+
+  var mocks;
+  before(function() {
+    mocks = nock('https://nodejs.cloudant.com')
+      .put('/my_db')
+      .reply(200, {ok:true})
+      .get('/my_db/_index')
+      .reply(200, {indexes:[ {name:'_all_docs', type:'special', def:{fields:[{_id:'asc'}]}} ]})
+      .post('/my_db/_index')
+      .reply(200, { result: 'created', id: '_design/778580d5684fd367424e39735f7857f2e9fb0eb9', name: 'first-name' })
+      .post('/my_db/_find')
+      .reply(200, {docs: []})
+      .delete('/my_db')
+      .reply(200, {ok:true});
+  });
+
+  var cloudant, db;
+  before(function(done) {
+    var Cloudant = require('cloudant');
+    cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
+    cloudant.db.create('my_db', function(er) {
+      if (er) throw er;
+      db = cloudant.db.use('my_db')
+      done();
+    });
+  });
+  after(function(done) {
+    cloudant.db.destroy('my_db', function(er) {
+      if (er) throw er;
+      mocks.done();
+      done();
+    });
+  });
+
+  it('Example 1', function(done) {
+    db.index(function(er, result) {
+      if (er) {
+        throw er;
+      }
+
+      console.log('The database has %d indexes', result.indexes.length);
+      for (var i = 0; i < result.indexes.length; i++) {
+        console.log('  %s (%s): %j', result.indexes[i].name, result.indexes[i].type, result.indexes[i].def);
+      }
+
+      result.should.have.a.property('indexes').which.is.an.Array;
+      done();
+    });
+  });
+
+  it('Example 2', function(done) {
+    var first_name = {name:'first-name', type:'json', index:{fields:['name']}}
+    db.index(first_name, function(er, response) {
+      if (er) {
+        throw er;
+      }
+
+      console.log('Index creation result: %s', response.result);
+      response.should.have.a.property('result').which.is.equal('created');
+      done();
+    });
+  });
+
+  it('Example 3', function(done) {
+    db.find({selector:{name:'Alice'}}, function(er, result) {
+      if (er) {
+        throw er;
+      }
+
+      console.log('Found %d documents with name Alice', result.docs.length);
+      for (var i = 0; i < result.docs.length; i++) {
+        console.log('  Doc id: %s', result.docs[i]._id);
+      }
+
+      result.should.have.a.property('docs').which.is.an.Array;
+      done();
+    });
+  });
+});
