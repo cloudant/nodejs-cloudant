@@ -540,7 +540,9 @@ describe('Cookie Authentication', function() {
       .reply(200, { ok: true, name: 'nodejs', roles: [] },
         {'set-cookie': ['AuthSession=bm9kZWpzOjU1RTA1NDdEOsUsoq9lykQCEBhwTpIyEbgmYpvX; Version=1; Expires=Sat, 29 Aug 2015 12:30:53 GMT; Max-Age=86400; Path=/; HttpOnly; Secure']})
       .post('/alice')
-      .reply(200, { ok: true, id: '72e0367f3e195340e239948164bbb7e7', rev: '1-feb5539029f4fc50dc3f827b164a2088' });
+      .reply(200, { ok: true, id: '72e0367f3e195340e239948164bbb7e7', rev: '1-feb5539029f4fc50dc3f827b164a2088' })
+      .get('/_session')
+      .reply(200, {ok:true, userCtx:{name:'nodejs',roles:['_admin','_reader','_writer']}});
 
     var Cloudant = require('cloudant');
     cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
@@ -602,6 +604,26 @@ describe('Cookie Authentication', function() {
       console.log(body)
 
       body.should.have.a.property('ok').which.is.equal(true);
+      done();
+    });
+  });
+
+  it('Example 3', function(done) {
+    // (Presuming the "cookie" global from the above example is still in scope.)
+
+    var Cloudant = require('cloudant');
+    var username = 'nodejs'; // Set this to your own account
+    var cloudant = Cloudant({account:username, cookie:cookies[username]});
+
+    cloudant.session(function(er, session) {
+      if (er) {
+        return console.log('oh noes!');
+      }
+
+      console.log('user is %s and has these roles: %j',
+        session.userCtx.name, session.userCtx.roles);
+
+      session.should.have.a.property('userCtx').which.is.an.Object;
       done();
     });
   });

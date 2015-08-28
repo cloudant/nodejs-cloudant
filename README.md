@@ -563,7 +563,8 @@ cloudant.auth(username, password, function(er, body, headers) {
 To reuse a cookie:
 
 ~~~ js
-// Make a new connection with the cookie.
+// (Presuming the "cookies" global from the above example is still in scope.)
+
 var Cloudant = require('cloudant');
 var username = 'nodejs'; // Set this to your own account
 var other_cloudant = Cloudant({account:username, cookie:cookies[username]});
@@ -584,11 +585,15 @@ alice.insert({_id:"my_doc"}, function (er, body, headers) {
 Getting current session:
 
 ~~~ js
-var cloudant = require('cloudant')({url: 'http://localhost:5984', cookie: 'AuthSession=' + auth});
+// (Presuming the "cookie" global from the above example is still in scope.)
 
-cloudant.session(function(err, session) {
-  if (err) {
-    return console.log('oh noes!')
+var Cloudant = require('cloudant');
+var username = 'nodejs'; // Set this to your own account
+var cloudant = Cloudant({account:username, cookie:cookies[username]});
+
+cloudant.session(function(er, session) {
+  if (er) {
+    return console.log('oh noes!');
   }
 
   console.log('user is %s and has these roles: %j',
