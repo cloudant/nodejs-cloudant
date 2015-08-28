@@ -36,7 +36,7 @@ require = function(module) {
 }
 
 // Disable console.log
-//var console = { log: function() {} };
+var console = { log: function() {} };
 
 
 describe('Getting Started', function() {
