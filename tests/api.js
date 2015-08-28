@@ -144,6 +144,8 @@ describe('CORS', function() {
 });
 
 describe('Authorization', function() {
+  this.timeout(10 * 1000);
+
   before(function(done) {
     var mocks = nock(SERVER)
       .put('/' + MYDB).reply(200, { "ok": true });
