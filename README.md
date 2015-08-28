@@ -365,24 +365,24 @@ instruct Cloudant to do so.
 
 e.g. add a virtual host
 ~~~ js
-   cloudant.add_virtual_host({ host: "mysubdomain.mydomain.com", path: "/mypath"}, function(err, data) {
-     console.log(err, data);
-   });
+cloudant.add_virtual_host({ host: "mysubdomain.mydomain.com", path: "/mypath"}, function(err, data) {
+  console.log(err, data);
+});
 ~~~
 
 e.g. view virtual host configuration
 
 ~~~ js
-   cloudant.get_virtual_hosts(function(err, data) {
-     console.log(err, data);
-   });
+cloudant.get_virtual_hosts(function(err, data) {
+  console.log(err, data);
+});
 ~~~
 
 or delete a virtual host
 ~~~ js
-   cloudant.delete_virtual_host({ host: "mysubdomain.mydomain.com", path: "/mypath"}, function(err, data) {
-     console.log(err, data);
-   });
+cloudant.delete_virtual_host({ host: "mysubdomain.mydomain.com", path: "/mypath"}, function(err, data) {
+  console.log(err, data);
+});
 ~~~
 
 ## Cloudant Query

@@ -19,7 +19,7 @@
 // As much as possible, one should copy and paste the examples unmodified, with
 // a few exceptions:
 //
-//   1. Prepend should() calls before console.log() to actually confirm the results
+//   1. Append should() calls after console.log() to actually confirm the results
 //   2. Insert a call to done() when the tests are complete
 
 require('dotenv').config();
@@ -292,6 +292,52 @@ describe('CORS', function() {
     cloudant.get_cors(function(err, data) {
       data.should.have.a.property('enable_cors');
       console.log(data);
+      done();
+    });
+  });
+});
+
+describe('Virtual Hosts', function() {
+  this.timeout(10 * 1000);
+
+  var mocks;
+  after(function() { mocks.done(); });
+  before(function() {
+    mocks = nock('https://nodejs.cloudant.com')
+      .post('/_api/v2/user/virtual_hosts')
+      .reply(200, {ok:true})
+      .get('/_api/v2/user/virtual_hosts')
+      .reply(200, { virtual_hosts: [ [ 'mysubdomain.mydomain.com', '/mypath' ] ] })
+      .delete('/_api/v2/user/virtual_hosts')
+      .reply(200, {ok:true});
+  });
+
+  var cloudant;
+  before(function() {
+    var Cloudant = require('cloudant');
+    cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
+  });
+
+  it('Example 1', function(done) {
+    cloudant.add_virtual_host({ host: "mysubdomain.mydomain.com", path: "/mypath"}, function(err, data) {
+      console.log(err, data);
+      data.should.have.a.property('ok').which.is.equal(true);
+      done();
+    });
+  });
+
+  it('Example 2', function(done) {
+    cloudant.get_virtual_hosts(function(err, data) {
+      console.log(err, data);
+      data.should.have.a.property('virtual_hosts').which.is.an.Array;
+      done();
+    });
+  });
+
+  it('Example 3', function(done) {
+    cloudant.delete_virtual_host({ host: "mysubdomain.mydomain.com", path: "/mypath"}, function(err, data) {
+      console.log(err, data);
+      data.should.have.a.property('ok').which.is.equal(true);
       done();
     });
   });
