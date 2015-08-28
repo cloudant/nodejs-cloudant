@@ -463,6 +463,24 @@ First, when working with a database (as opposed to the root server), run the `.u
 var db = cloudant.db.use('my_db')
 ~~~
 
+In this example, we will begin with some data to search: a collection of books.
+
+~~~
+var books = [
+  {author:"Charles Dickens", title:"David Copperfield"},
+  {author:"David Copperfield", title:"Tales of the Impossible"},
+  {author:"Charles Dickens", title:"Great Expectation"}
+]
+
+db.bulk({docs:books}, function(er) {
+  if (er) {
+    throw er;
+  }
+
+  console.log('Inserted all documents');
+});
+~~~
+
 To create a Cloudant Search index, create a design document the normal way you would with Nano, the database `.insert()` method.
 
 To see all the indexes in a database, call the database `.index()` method with a callback function.
@@ -472,41 +490,45 @@ To see all the indexes in a database, call the database `.index()` method with a
 // Note, you can make a normal JavaScript function. It is not necessary
 // for you to convert it to a string as with other languages and tools.
 var book_indexer = function(doc) {
-  // Index the title and author of books.
-  if (doc.type == 'book') {
-    index('title', doc.title)
-    index('author', doc.author)
+  if (doc.author && doc.title) {
+    // This looks like a book.
+    index('title', doc.title);
+    index('author', doc.author);
   }
 }
 
-var ddoc = { _id: '_design/library'
-           , indexes:
-             { books:
-               { analyzer: {name: 'standard'}
-               , index   : book_indexer
-               }
-             }
-           }
+var ddoc = {
+  _id: '_design/library',
+  indexes: {
+    books: {
+      analyzer: {name: 'standard'},
+      index   : book_indexer
+    }
+  }
+};
 
 db.insert(ddoc, function (er, result) {
-  if (er)
-    throw er
-  else
-    console.log('Created design document with books index')
-})
+  if (er) {
+    throw er;
+  }
+
+  console.log('Created design document with books index');
+});
 ~~~
 
 To query this index, use the database `.search()` method. The first argument is the design document name, followed by the index name, and finally an object with your search parameters.
 
 ~~~ js
 db.search('library', 'books', {q:'author:dickens'}, function(er, result) {
-  if (er)
-    throw er
+  if (er) {
+    throw er;
+  }
 
-  console.log('Showing %d out of a total %d books by Dickens', result.rows.length, result.total_rows)
-  for (var i = 0; i < result.rows.length; i++)
-    console.log('Document id: %s', result.rows.id)
-})
+  console.log('Showing %d out of a total %d books by Dickens', result.rows.length, result.total_rows);
+  for (var i = 0; i < result.rows.length; i++) {
+    console.log('Document id: %s', result.rows[i].id);
+  }
+});
 ~~~
 
 ## Cookie Authentication

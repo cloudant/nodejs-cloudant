@@ -424,3 +424,108 @@ describe('Cloudant Query', function() {
     });
   });
 });
+
+describe('Cloudant Search', function() {
+  this.timeout(10 * 1000);
+
+  var mocks;
+  before(function() {
+    mocks = nock('https://nodejs.cloudant.com')
+      .put('/my_db')
+      .reply(200, {ok:true})
+      .post('/my_db/_bulk_docs')
+      .reply(200, [ { id: '764de7aeca95c27fdd7fb6565dcfc0fe', rev: '1-eadaf74c0058257fcb498c3017dde3e5' },
+                    { id: '764de7aeca95c27fdd7fb6565dcfc4f5', rev: '1-c22d5563f4b9cddde6f26a47cd1ce88f' },
+                    { id: '764de7aeca95c27fdd7fb6565dcfc727', rev: '1-86039ff130d36c08a71b3f293fd4ea7e' }])
+      .post('/my_db')
+      .reply(200, { ok: true, id: '_design/library', rev: '1-cdbb57f890d060055b7fb8cb07628068' })
+      .get('/my_db/_design/library/_search/books').query(true)
+      .reply(200, {total_rows:2, rows:[{id:"764de7aeca95c27fdd7fb6565dcfc0fe"},{id:"764de7aeca95c27fdd7fb6565dcfc727"}]})
+      .delete('/my_db')
+      .reply(200, {ok:true});
+  });
+
+  var cloudant, db;
+  before(function(done) {
+    var Cloudant = require('cloudant');
+    cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
+    cloudant.db.create('my_db', function(er) {
+      if (er) throw er;
+      db = cloudant.db.use('my_db')
+      done();
+    });
+  });
+  after(function(done) {
+    cloudant.db.destroy('my_db', function(er) {
+      if (er) throw er;
+      mocks.done();
+      done();
+    });
+  });
+
+  it('Example 1', function(done) {
+    var books = [
+      {author:"Charles Dickens", title:"David Copperfield"},
+      {author:"David Copperfield", title:"Tales of the Impossible"},
+      {author:"Charles Dickens", title:"Great Expectation"}
+    ]
+
+    db.bulk({docs:books}, function(er) {
+      if (er) {
+        throw er;
+      }
+
+      console.log('Inserted all documents');
+      done();
+    });
+  });
+
+  it('Example 2', function(done) {
+    // Note, you can make a normal JavaScript function. It is not necessary
+    // for you to convert it to a string as with other languages and tools.
+    var book_indexer = function(doc) {
+      if (doc.author && doc.title) {
+        // This looks like a book.
+        index('title', doc.title);
+        index('author', doc.author);
+      }
+    }
+
+    var ddoc = {
+      _id: '_design/library',
+      indexes: {
+        books: {
+          analyzer: {name: 'standard'},
+          index   : book_indexer
+        }
+      }
+    };
+
+    db.insert(ddoc, function (er, result) {
+      if (er) {
+        throw er;
+      }
+
+      console.log('Created design document with books index');
+
+      result.should.have.a.property('ok').which.equal(true);
+      done();
+    });
+  });
+
+  it('Example 3', function(done) {
+    db.search('library', 'books', {q:'author:dickens'}, function(er, result) {
+      if (er) {
+        throw er;
+      }
+
+      console.log('Showing %d out of a total %d books by Dickens', result.rows.length, result.total_rows);
+      for (var i = 0; i < result.rows.length; i++) {
+        console.log('Document id: %s', result.rows[i].id);
+      }
+
+      result.should.have.a.property('rows').of.length(2);
+      done();
+    });
+  });
+});
