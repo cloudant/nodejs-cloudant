@@ -533,55 +533,57 @@ db.search('library', 'books', {q:'author:dickens'}, function(er, result) {
 
 ## Cookie Authentication
 
-Cloudant supports making requests using Cloudant's [cookie authentication](http://guide.couchdb.org/editions/1/en/security.html#cookies) functionality. there's a [step-by-step guide here](http://codetwizzle.com/articles/couchdb-cookie-authentication-nodejs-couchdb/), but essentially you just:
+Cloudant supports making requests using Cloudant's [cookie authentication](https://docs.cloudant.com/authentication.html#cookie-authentication).
 
 ~~~ js
 var Cloudant = require('cloudant');
-var username = 'user'
-var userpass = 'pass'
+var username = 'nodejs'; // Set this to your own account
+var password = process.env.cloudant_password;
+var cloudant = Cloudant({account:username, password:password});
 
-// A global variable to store the cookies. This can be on the filesystem or some other cache, too.
+// A global variable to store the cookies. Of course, you can store cookies any way you wish.
 var cookies = {}
 
-
-var cloudant = Cloudant({account:username, password:userpass});
 
 // In this example, we authenticate using the same username/userpass as above.
 // However, you can use a different combination to authenticate as other users
 // in your database. This can be useful for using a less-privileged account.
-cloudant.auth(username, userpass, function(err, body, headers) {
-  if (err)
-    return console.log('Error authenticating: ' + err.message)
+cloudant.auth(username, password, function(er, body, headers) {
+  if (er) {
+    return console.log('Error authenticating: ' + er.message);
+  }
 
-  console.log('Got cookie for %s: %s', username, headers['set-cookie'])
+  console.log('Got cookie for %s: %s', username, headers['set-cookie']);
 
   // Store the authentication cookie for later.
-  cookies[username] = headers['set-cookie']
-})
+  cookies[username] = headers['set-cookie'];
+});
 ~~~
 
 To reuse a cookie:
 
 ~~~ js
 // Make a new connection with the cookie.
-
-var cloudant = require('cloudant')({account:username, cookie:cookies[username]});
+var Cloudant = require('cloudant');
+var username = 'nodejs'; // Set this to your own account
+var other_cloudant = Cloudant({account:username, cookie:cookies[username]});
 
 var alice = other_cloudant.db.use('alice')
-alice.insert({_id:"my_doc"}, function (err, body, headers) {
-  if (err)
-    return console.log('Failed to insert into alice database: ' + err.message)
+alice.insert({_id:"my_doc"}, function (er, body, headers) {
+  if (er) {
+    return console.log('Failed to insert into alice database: ' + er.message);
+  }
 
   // Change the cookie if Cloudant tells us to.
-  if (headers && headers['set-cookie'])
-    cookies[username] = headers['set-cookie']
-})
-
+  if (headers && headers['set-cookie']) {
+    cookies[username] = headers['set-cookie'];
+  }
+});
 ~~~
 
 Getting current session:
 
-~~~javascript
+~~~ js
 var cloudant = require('cloudant')({url: 'http://localhost:5984', cookie: 'AuthSession=' + auth});
 
 cloudant.session(function(err, session) {

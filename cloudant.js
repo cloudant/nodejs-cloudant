@@ -51,7 +51,11 @@ var reconfigure = function(config) {
 function Cloudant(credentials, callback) {
   debug('Initialize', credentials);
 
-  // keep a copy of the credentials
+  // Convert the credentials into a URL that will work for cloudant. The
+  // credentials object will become squashed into a string, which is fine
+  // except for the .cookie option.
+  var cookie = credentials.cookie;
+
   var pkg = require('./package.json');
   var useragent = "nodejs-cloudant/" + pkg.version + " (Node.js " + process.version + ")";
   var requestDefaults = { headers: { "User-agent": useragent}, gzip:true  };
@@ -68,7 +72,7 @@ function Cloudant(credentials, callback) {
   }
 
   debug('Create underlying Nano instance, credentials=%j requestDefaults=%j', credentials, requestDefaults);
-  var nano = Nano({url:credentials, requestDefaults: requestDefaults, log: nanodebug});
+  var nano = Nano({url:credentials, requestDefaults: requestDefaults, cookie: cookie, log: nanodebug});
 
   // our own implementation of 'use' e.g. nano.use or nano.db.use
   // it includes all db-level functions

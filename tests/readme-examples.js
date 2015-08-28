@@ -36,7 +36,7 @@ require = function(module) {
 }
 
 // Disable console.log
-var console = { log: function() {} };
+//var console = { log: function() {} };
 
 
 describe('Getting Started', function() {
@@ -525,6 +525,83 @@ describe('Cloudant Search', function() {
       }
 
       result.should.have.a.property('rows').of.length(2);
+      done();
+    });
+  });
+});
+
+describe('Cookie Authentication', function() {
+  this.timeout(10 * 1000);
+
+  var mocks;
+  before(function() {
+    mocks = nock('https://nodejs.cloudant.com')
+      .post('/_session')
+      .reply(200, { ok: true, name: 'nodejs', roles: [] },
+        {'set-cookie': ['AuthSession=bm9kZWpzOjU1RTA1NDdEOsUsoq9lykQCEBhwTpIyEbgmYpvX; Version=1; Expires=Sat, 29 Aug 2015 12:30:53 GMT; Max-Age=86400; Path=/; HttpOnly; Secure']})
+      .post('/alice')
+      .reply(200, { ok: true, id: '72e0367f3e195340e239948164bbb7e7', rev: '1-feb5539029f4fc50dc3f827b164a2088' });
+
+    var Cloudant = require('cloudant');
+    cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
+  });
+
+  after(function() {
+    mocks.done();
+  });
+
+  var cookies;
+
+  it('Example 1', function(done) {
+    var Cloudant = require('cloudant');
+    var username = 'nodejs'; // Set this to your own account
+    var password = process.env.cloudant_password;
+    var cloudant = Cloudant({account:username, password:password});
+
+    // A global variable to store the cookies. Of course, you can store cookies any way you wish.
+    //var cookies = {}
+    cookies = {}
+
+
+    // In this example, we authenticate using the same username/userpass as above.
+    // However, you can use a different combination to authenticate as other users
+    // in your database. This can be useful for using a less-privileged account.
+    cloudant.auth(username, password, function(er, body, headers) {
+      if (er) {
+        return console.log('Error authenticating: ' + er.message);
+      }
+
+      console.log('Got cookie for %s: %s', username, headers['set-cookie']);
+
+      // Store the authentication cookie for later.
+      cookies[username] = headers['set-cookie'];
+
+      console.log('headers %j', headers)
+      headers.should.have.a.property('set-cookie').which.is.a.Array;
+      done();
+    });
+  });
+
+  it('Example 2', function(done) {
+    // Make a new connection with the cookie.
+    var Cloudant = require('cloudant');
+    var username = 'nodejs'; // Set this to your own account
+    var other_cloudant = Cloudant({account:username, cookie:cookies[username]});
+
+    var alice = other_cloudant.db.use('alice')
+    alice.insert({"I use cookies":true}, function (er, body, headers) {
+      if (er) {
+        return console.log('Failed to insert into alice database: ' + er.message);
+      }
+
+      // Change the cookie if Cloudant tells us to.
+      if (headers && headers['set-cookie']) {
+        cookies[username] = headers['set-cookie'];
+      }
+
+      console.log(body)
+
+      body.should.have.a.property('ok').which.is.equal(true);
       done();
     });
   });
