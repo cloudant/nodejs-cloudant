@@ -613,10 +613,19 @@ If you wish to see further information about what the nodejs-cloudant library is
     export DEBUG=cloudant
     # then run your Node.js application
 
-Debug messages will be displayed to indicate each of the Cloudant-specific function calls. If you want to see all debug messages, including calls made by the underlying `nano` library, then simply change the environment variable to
+Debug messages will be displayed to indicate each of the Cloudant-specific function calls.
+
+If you want to see all debug messages, including calls made by the underlying `nano` library and HTTP requests/responses sent, then simply change the environment variable to
 
     export DEBUG=cloudant,nano
     # then run your Node.js application
+
+This will log each request and response in the following format.
+
+    nano { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, uri: 'https://xxxx:yyyyy@xxxx.cloudant.com/woof', body: '{"a":1,"b":2}' } +3ms
+    nano { err: null, body: { ok: true, id: '98f178cb8f4fe089f70fa4c92a0c84b1', rev: '1-25f9b97d75a648d1fcd23f0a73d2776e' }, headers: { 'x-couch-request-id': '8220322dee', location: 'http://reader.cloudant.com/woof/98f178cb8f4fe089f70fa4c92a0c84b1', date: 'Mon, 07 Sep 2015 13:06:01 GMT', 'content-type': 'application/json', 'cache-control': 'must-revalidate', 'strict-transport-security': 'max-age=31536000', 'x-content-type-options': 'nosniff;', connection: 'close', statusCode: 201, uri: 'https://xxxx:yyyy@xxxx.cloudant.com/woof' } } 
+
+Note that it also logs credentials used in the requests.
 
 Similarly, if you only want `nano`-level debugging:
 
