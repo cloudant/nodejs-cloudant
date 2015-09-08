@@ -620,12 +620,12 @@ If you want to see all debug messages, including calls made by the underlying `n
     export DEBUG=cloudant,nano
     # then run your Node.js application
 
-This will log each request and response in the following format.
+This will log every request and response as in the following example:
 
     nano { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, uri: 'https://xxxx:yyyyy@xxxx.cloudant.com/woof', body: '{"a":1,"b":2}' } +3ms
     nano { err: null, body: { ok: true, id: '98f178cb8f4fe089f70fa4c92a0c84b1', rev: '1-25f9b97d75a648d1fcd23f0a73d2776e' }, headers: { 'x-couch-request-id': '8220322dee', location: 'http://reader.cloudant.com/woof/98f178cb8f4fe089f70fa4c92a0c84b1', date: 'Mon, 07 Sep 2015 13:06:01 GMT', 'content-type': 'application/json', 'cache-control': 'must-revalidate', 'strict-transport-security': 'max-age=31536000', 'x-content-type-options': 'nosniff;', connection: 'close', statusCode: 201, uri: 'https://xxxx:yyyy@xxxx.cloudant.com/woof' } } 
 
-Note that it also logs credentials used in the requests.
+Note that credentials used in the requests are also written to the log.
 
 Similarly, if you only want `nano`-level debugging:
 
