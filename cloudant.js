@@ -21,31 +21,7 @@ var Nano = require('nano'),
 
 // function from the old Cloudant library to
 // parse an object { account: "myaccount", password: "mypassword"}
-var reconfigure = function(config) {
-  config = JSON.parse(JSON.stringify(config)); //clone
-
-  // An account can be just the username, or the full cloudant URL.
-  var match = config.account &&
-              config.account.match &&
-              config.account.match(/(\w+)\.cloudant\.com/);
-  if (match)
-    config.account = match[1];
-
-  // The username is the account ("foo" for "foo.cloudant.com")
-  // or the third-party API key.
-  var username = config.key || config.username || config.account;
-
-  // Configure for Cloudant, either authenticated or anonymous.
-  if (config.account && config.password)
-    config.url = 'https://' + encodeURIComponent(username) + ':' +
-                  encodeURIComponent(config.password) + '@' +
-                  encodeURIComponent(config.account) + '.cloudant.com';
-  else if (config.account)
-    config.url = 'https://' + encodeURIComponent(config.account) +
-                 '.cloudant.com';
-
-  return config.url;
-};
+var reconfigure = require('./lib/reconfigure.js')
 
 // This IS the Cloudant API. It is mostly nano, with a few functions.
 function Cloudant(credentials, callback) {
@@ -65,6 +41,7 @@ function Cloudant(credentials, callback) {
     }
     credentials = reconfigure(credentials);
   } else {
+    credentials = reconfigure({ url: credentials})
     var parsed = url.parse(credentials);
     if (parsed.protocol === "http:" && typeof parsed.auth == "string") {
       console.warn("WARNING: You are passing your authentication credentials in plaintext over the HTTP protocol. It is highly recommend you use HTTPS instead and future versions of this library will enforce this.");
