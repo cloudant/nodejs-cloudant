@@ -16,11 +16,12 @@ module.exports = Cloudant;
 
 var Nano = require('nano'),
   debug = require('debug')('cloudant'),
-  nanodebug = require('debug')('nano'),
-  url = require('url');
+  nanodebug = require('debug')('nano');
+
 
 // function from the old Cloudant library to
 // parse an object { account: "myaccount", password: "mypassword"}
+// and return a URL
 var reconfigure = require('./lib/reconfigure.js')
 
 // This IS the Cloudant API. It is mostly nano, with a few functions.
@@ -42,10 +43,6 @@ function Cloudant(credentials, callback) {
     credentials = reconfigure(credentials);
   } else {
     credentials = reconfigure({ url: credentials})
-    var parsed = url.parse(credentials);
-    if (parsed.protocol === "http:" && typeof parsed.auth == "string") {
-      console.warn("WARNING: You are passing your authentication credentials in plaintext over the HTTP protocol. It is highly recommend you use HTTPS instead and future versions of this library will enforce this.");
-    }
   }
 
   debug('Create underlying Nano instance, credentials=%j requestDefaults=%j', credentials, requestDefaults);

@@ -61,4 +61,28 @@ describe('Reconfigure', function() {
     done();
   });
   
+  it('allows a local CouchDB url to used', function(done) {
+    var credentials = { url: "http://localhost:5984" };
+    var url = reconfigure(credentials);
+    url.should.be.a.String;
+    url.should.equal("http://localhost:5984");
+    done();
+  });
+  
+  it('allows an HTTP Cloudant URL - switching to HTTPS', function(done) {
+    var credentials = { url: "http://mykey:mypassword@mydomain.cloudant.com" };
+    var url = reconfigure(credentials);
+    url.should.be.a.String;
+    url.should.equal("https://mykey:mypassword@mydomain.cloudant.com");
+    done();
+  });
+  
+  it('allows an HTTP Cloudant URL with a port number - switching to HTTPS', function(done) {
+    var credentials = { url: "http://mykey:mypassword@mydomain.cloudant.com:80" };
+    var url = reconfigure(credentials);
+    url.should.be.a.String;
+    url.should.equal("https://mykey:mypassword@mydomain.cloudant.com");
+    done();
+  });
+  
 });
