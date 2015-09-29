@@ -17,14 +17,14 @@
     "database"
   ],
   "dependencies": {
-    "debug": "^2.2.0",
+    "debug": "2.2.0",
     "nano": "6.1.5"
   },
   "devDependencies": {
-    "dotenv": "^1.1.0",
-    "mocha": "^2.2.5",
-    "nock": "^2.10.0",
-    "should": "^6.0.3"
+    "dotenv": "1.2.0",
+    "mocha": "2.3.3",
+    "nock": "2.13.0",
+    "should": "6.0.3"
   },
   "scripts": {
     "test": "mocha tests/*.js",
