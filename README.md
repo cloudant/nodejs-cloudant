@@ -259,11 +259,12 @@ cloudant.generate_api_key(function(er, api) {
   console.log('Password for this key: %s', api.password);
   console.log('');
 
-  // Set the security for three users: nobody, fred, and the above API key.
+  // Set the security for three users: nobody, nodejs, and the above API key.
+  // (The "nodejs" user is an example account that belongs to IBM Cloudant.)
   var db = "animals";
   var security = {
     nobody: [],
-    fred : [ '_reader', '_writer', '_admin', '_replicator' ]
+    nodejs : [ '_reader', '_writer', '_admin', '_replicator' ]
   };
   security[api.key] = [ '_reader', '_writer' ];
 
@@ -302,7 +303,7 @@ Output:
     { cloudant:
       { nobody: [],
         thandoodstrenterprourete: [ '_reader', '_writer' ],
-        fred: [ '_reader', '_writer', '_admin', '_replicator' ] } }
+        nodejs: [ '_reader', '_writer', '_admin', '_replicator' ] } }
 
 See the Cloudant API for full details](https://docs.cloudant.com/api.html#authorization)
 
