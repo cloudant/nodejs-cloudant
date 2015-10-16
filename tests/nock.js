@@ -18,7 +18,7 @@ function noop() {
 
 function nock_noop() {
   // Return a completely inert nock-compatible object.
-  return {head:noop, get:noop, post:noop, put:noop, 'delete':noop, reply:noop, filteringPath:noop, done:noop, query:noop};
+  return {head:noop, get:noop, post:noop, put:noop, 'delete':noop, reply:noop, filteringPath:noop, done:noop, query:noop, replyWithFile:noop};
 }
 
 if (process.env.NOCK_OFF) {
