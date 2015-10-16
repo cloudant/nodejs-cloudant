@@ -790,7 +790,10 @@ describe('Gzip header tests', function() {
   });
 });
 
-describe('Gzip attachment tests', function() {
+if (! process.env.NOCK_OFF) {
+  describe('Gzip attachment tests', test_gzip);
+}
+function test_gzip() {
   it('checks that the zipped response is unzipped', function(done) {
     var mocks = nock(SERVER)
       .get('/' + MYDB + "/x/y.css").replyWithFile(200, __dirname + '/y.css.gz', {
@@ -810,7 +813,7 @@ describe('Gzip attachment tests', function() {
       done();
     });
   });
-});
+}
 
 describe('Virtual Hosts', function() {
   it('supports virtual hosts API - GET /_api/v2/user/virtual_hosts', function(done) {
