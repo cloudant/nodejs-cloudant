@@ -22,7 +22,8 @@ This is the official Cloudant library for Node.js.
   * [Pool size and open sockets](#pool-size-and-open-sockets)
   * [Extending the Cloudant Library](#extending-the-cloudant-library)
   * [Pipes](#pipes)
-* [Development](#development)
+* [Development and Contribution](#development-and-contribution)
+  * [Local Development](#local-development)
   * [Test Suite](#test-suite)
   * [Using in Other Projects](#using-in-other-projects)
   * [Security Note](#security-note)
@@ -709,7 +710,18 @@ stream`
 See the [Attachment Functions](#attachment-functions) section for examples of piping to and from attachments.
 
 
-## Development
+## Development and Contribution
+
+This is an open-source library, published under the Apache 2.0 license. We very much welcome contributions to the project so if you would like 
+to contribute (even if it's fixing a typo in the README!) simply
+
+* fork this repository. Visit https://github.com/cloudant/nodejs-cloudant and click the "Fork" button.
+* commit changes into your copy of the repository
+* when you're ready, create a Pull Request to contribute your changes back into this project
+
+If you're not confident about being able to fix a problem yourself, or want to simply [report an issue](https://github.com/cloudant/nodejs-cloudant/issues) then please.
+
+### Local Development
 
 To join the effort developing this project, start from our GitHub page: https://github.com/cloudant/nodejs-cloudant
 
