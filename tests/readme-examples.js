@@ -118,6 +118,7 @@ describe('Initialization', function() {
   before(function() {
     mocks = nock('https://nodejs.cloudant.com')
       .get('/_session').reply(200, {ok:true, userCtx:{name:'nodejs', roles:[]}})
+      .post('/_session').reply(200, {XXXXX:'YYYYYYYYYY', ok:true, userCtx:{name:'jhs', roles:[]}})
       .get('/').reply(200, {couchdb:'Welcome', version:'1.0.2', cloudant_build:'2488'})
       .get('/animals/dog').reply(404, {error:'not_found', reason:'missing'});
   });
@@ -148,6 +149,7 @@ describe('Password authentication', function() {
   before(function() {
     mocks = nock('https://nodejs.cloudant.com')
       .get('/_session').reply(200, {XXXXX:'YYYYYYYYYY', ok:true, userCtx:{name:'jhs', roles:[]}})
+      .post('/_session').reply(200, {XXXXX:'YYYYYYYYYY', ok:true, userCtx:{name:'jhs', roles:[]}})
       .get('/').reply(200, {couchdb:'Welcome!!!!!', version:'1.0.2', cloudant_build:'2488'});
   });
 

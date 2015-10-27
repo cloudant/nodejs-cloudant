@@ -28,6 +28,9 @@ var reconfigure = require('./lib/reconfigure.js')
 function Cloudant(credentials, callback) {
   debug('Initialize', credentials);
 
+  // Save the username and password for potential conversion to cookie auth.
+  var login = reconfigure.getCredentials(credentials);
+
   // Convert the credentials into a URL that will work for cloudant. The
   // credentials object will become squashed into a string, which is fine
   // except for the .cookie option.
@@ -183,11 +186,15 @@ function Cloudant(credentials, callback) {
 
   if (callback) {
     debug('Automatic ping');
-    nano.ping(function(er, pong, headers) {
+    nano.ping(login, function(er, pong, cookie) {
       if (er) {
         callback(er);
       } else {
-        callback(null, nano, pong, headers);
+        if (cookie) {
+          requestDefaults.headers.cookie = cookie;
+        }
+
+        callback(null, nano, pong);
       }
     });
   }
@@ -195,30 +202,51 @@ function Cloudant(credentials, callback) {
   return nano;
 }
 
-function ping(callback) {
+function ping(login, callback) {
   var nano = this;
+
+  if (!callback) {
+    callback = login;
+    login = null;
+  }
 
   // Only call back once.
   var inner_callback = callback;
-  callback = function(er, result) {
-    inner_callback(er, result);
+  callback = function(er, result, cookie) {
+    inner_callback(er, result, cookie);
     inner_callback = function() {};
   };
 
-  var done = {welcome:false, session:false};
+  var cookie = null;
+  var done = {welcome:false, session:false, auth:true};
   nano.session(       function(er, body) { returned('session', er, body); });
   nano.relax({db:""}, function(er, body) { returned('welcome', er, body); });
 
-  function returned(type, er, body) {
+  // If credentials are supplied, authenticate to get a cookie.
+  if (login && login.username && login.password) {
+    done.auth = false;
+    nano.auth(login.username, login.password, function(er, body, headers) {
+      returned('auth', er, body, headers);
+    });
+  }
+
+  function returned(type, er, body, headers) {
     if (er)
       return callback(er);
 
     debug('Pong/%s %j', type, body);
     done[type] = body;
-    if (done.welcome && done.session) {
+
+    if (type == 'auth') {
+      if (headers['set-cookie'] && headers['set-cookie'][0]) {
+        cookie = headers['set-cookie'][0].replace(/;.*$/, '');
+      }
+    }
+
+    if (done.welcome && done.session && done.auth) {
       // Return the CouchDB "Welcome" body but with the userCtx added in.
       done.welcome.userCtx = done.session.userCtx;
-      callback(null, done.welcome);
+      callback(null, done.welcome, cookie);
     }
   }
 }
