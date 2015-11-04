@@ -122,6 +122,7 @@ If you run this example, you will see:
       id: 'rabbit',
       rev: '1-6e4cb465d49c0368ac3946506d26335d' }
 
+You can find a further CRUD example in the [example](https://github.com/cloudant/nodejs-cloudant/tree/master/example) directory of this project.
 
 ### Initialization
 
