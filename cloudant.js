@@ -39,6 +39,7 @@ function Cloudant(credentials, callback) {
   if (typeof credentials == "object") {
     if (credentials.requestDefaults) {
       requestDefaults = credentials.requestDefaults;
+      delete credentials.requestDefaults;
     }
     credentials = reconfigure(credentials);
   } else {
