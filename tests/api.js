@@ -71,6 +71,21 @@ describe('Initialization', function() {
     });
   });
 
+  it('uses cookie auth for ping callback', function(done) {
+    var mocks = nock(SERVER)
+      .get('/_session').reply(200, {ok:true, userCtx:{name:null,roles:[]}})
+      .post('/_session').reply(200, {ok:true, userCtx:{name:ME,roles:[]}})
+      .get('/')        .reply(200, {couchdb:'Welcome', version:'1.0.2'});
+
+    Cloudant({account:ME, account:ME, password:PASSWORD}, function(er, cloudant, welcome) {
+      should(er).equal(null, 'No problem pinging Cloudant');
+      cloudant.should.be.an.Object;
+
+      mocks.done();
+      done();
+    });
+  });
+
   it('supports instantiation without a callback', function(done) {
     var c = Cloudant({account:ME});
     // check we get a Nano object back
