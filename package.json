@@ -16,9 +16,10 @@
     "nosql",
     "database"
   ],
+  "bundledDependencies": ["nano"],
   "dependencies": {
     "debug": "2.2.0",
-    "nano": "6.1.5"
+    "nano": "6.2.0"
   },
   "devDependencies": {
     "dotenv": "1.2.0",
