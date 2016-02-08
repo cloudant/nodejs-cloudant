@@ -73,7 +73,7 @@ var deleteDocument = function(callback) {
 
 // deleting the database document
 var deleteDatabase = function(callback) {
-  console.log("Creating database '" + dbname  + "'");
+  console.log("Deleting database '" + dbname  + "'");
   cloudant.db.destroy(dbname, function(err, data) {
     console.log("Error:", err);
     console.log("Data:", data);
