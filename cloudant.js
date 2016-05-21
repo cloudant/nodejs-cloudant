@@ -63,15 +63,15 @@ function Cloudant(credentials, callback) {
     // https://docs.cloudant.com/api.html#viewing-permissions
     var get_security = function(callback) {
       var path = "_api/v2/db/" + encodeURIComponent(db) + "/_security";
-      nano.request( { path: path}, callback);
+      return nano.request( { path: path}, callback);
     };
 
     // https://docs.cloudant.com/api.html#modifying-permissions
     var set_security = function(permissions, callback) {
       var path = "_api/v2/db/" + encodeURIComponent(db) + "/_security";
-      nano.request( { path: path,
-                      method: "put",
-                      body: {cloudant: permissions} }, callback);
+      return nano.request( { path: path,
+                             method: "put",
+                             body: {cloudant: permissions} }, callback);
     };
 
     // https://docs.cloudant.com/api.html#list-all-indexes &
@@ -84,9 +84,9 @@ function Cloudant(credentials, callback) {
         nano.request({ path: encodeURIComponent(db) + "/_index" }, callback);
       } else {
         // the user wants to create a new index
-        nano.request({ path: encodeURIComponent(db) + "/_index",
-                       method:"post",
-                       body: definition}, callback);
+        return nano.request({ path: encodeURIComponent(db) + "/_index",
+                              method:"post",
+                              body: definition}, callback);
       }
     };
 
@@ -102,14 +102,14 @@ function Cloudant(credentials, callback) {
                  encodeURIComponent(spec.ddoc) + "/" +
                  encodeURIComponent(type) + "/" +
                  encodeURIComponent(spec.name);
-      nano.request({ path:path, method:"delete"}, callback);
+      return nano.request({ path:path, method:"delete"}, callback);
     };
 
     // https://docs.cloudant.com/api.html#finding-documents-using-an-index
     var find = function(query, callback) {
-      nano.request( { path: encodeURIComponent(db) + "/_find",
-                      method: "post",
-                      body: query}, callback);
+      return nano.request( { path: encodeURIComponent(db) + "/_find",
+                             method: "post",
+                             body: query}, callback);
     };
 
     // add Cloudant special functions
@@ -130,19 +130,19 @@ function Cloudant(credentials, callback) {
 
   // https://docs.cloudant.com/api.html#creating-api-keys
   var generate_api_key = function(callback) {
-    nano.request({path: "_api/v2/api_keys", method: "post" }, callback);
+    return nano.request({path: "_api/v2/api_keys", method: "post" }, callback);
   };
 
   // https://docs.cloudant.com/api.html#reading-the-cors-configuration
   var get_cors = function(callback) {
-    nano.request({path: "_api/v2/user/config/cors" }, callback);
+    return nano.request({path: "_api/v2/user/config/cors" }, callback);
   };
 
   // https://docs.cloudant.com/api.html#setting-the-cors-configuration
   var set_cors = function(configuration, callback) {
-    nano.request({path: "_api/v2/user/config/cors",
-                  method: "put",
-                  body: configuration }, callback);
+    return nano.request({path: "_api/v2/user/config/cors",
+                         method: "put",
+                         body: configuration }, callback);
   };
 
   // the /set_permissions API call is deprecated
@@ -153,26 +153,26 @@ function Cloudant(credentials, callback) {
 
   // https://docs.cloudant.com/api.html#setting-the-cors-configuration
   var set_cors = function(configuration, callback) {
-    nano.request({path: "_api/v2/user/config/cors",
-                  method: "put",
-                  body: configuration }, callback);
+    return nano.request({path: "_api/v2/user/config/cors",
+                         method: "put",
+                         body: configuration }, callback);
   };
 
   var get_virtual_hosts = function(callback) {
-    nano.request({path: "_api/v2/user/virtual_hosts",
-                  method: "get"}, callback);
+    return nano.request({path: "_api/v2/user/virtual_hosts",
+                         method: "get"}, callback);
   };
 
   var add_virtual_host = function(opts, callback) {
-    nano.request({path: "_api/v2/user/virtual_hosts",
-                  method: "post",
-                  body: opts }, callback);
+    return nano.request({path: "_api/v2/user/virtual_hosts",
+                         method: "post",
+                         body: opts }, callback);
   };
 
   var delete_virtual_host = function(opts, callback) {
-    nano.request({path: "_api/v2/user/virtual_hosts",
-                  method: "delete",
-                  body: opts }, callback);
+    return nano.request({path: "_api/v2/user/virtual_hosts",
+                         method: "delete",
+                         body: opts }, callback);
   };
 
   // add top-level Cloudant-specific functions
