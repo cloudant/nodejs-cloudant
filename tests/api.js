@@ -794,7 +794,7 @@ describe('Gzip header tests', function() {
       data.should.be.an.Object;
       data.should.have.a.property("accept-encoding");
       data["accept-encoding"].should.be.a.String;
-      data["accept-encoding"].should.equal("gzip");
+      data["accept-encoding"].should.match(/gzip/);
       done();
     });
   });
