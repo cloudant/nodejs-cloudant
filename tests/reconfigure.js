@@ -85,4 +85,13 @@ describe('Reconfigure', function() {
     done();
   });
   
+  // Issue cloudant/nodejs-cloudant#129
+  it('fixes a Cloudant URL with a trailing / - removing the /', function(done) {
+    var credentials = { url: "https://mykey:mypassword@mydomain.cloudant.com/" };
+    var url = reconfigure(credentials);
+    url.should.be.a.String;
+    url.should.equal("https://mykey:mypassword@mydomain.cloudant.com");
+    done();
+  });
+  
 });
