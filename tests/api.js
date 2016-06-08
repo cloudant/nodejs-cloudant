@@ -225,6 +225,87 @@ describe('Authorization', function() {
   });
 });
 
+describe('Cloudant-Specific APIs', function() {
+  before(function(done) {
+    var mocks = nock(SERVER)
+      .put('/' + MYDB).reply(200, { "ok": true });
+
+    cc = Cloudant({account:ME, password:PASSWORD});
+    cc.db.create(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = cc.db.use("mydb");
+      ddoc = viewname = null;
+
+      mocks.done();
+      done();
+    });
+  });
+
+  it('create query dummy data', function(done) {
+    var mocks = nock(SERVER)
+      .post('/' + MYDB + '/_bulk_docs')
+      .reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"}]);
+
+    mydb.bulk({docs: [ {_id:'doc1'},{_id:'doc2'} ]}, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Array;
+      for (var i in d) {
+        d[i].should.be.an.Object;
+        d[i].should.have.a.property("id");
+        d[i].should.have.a.property("rev");
+      }
+
+      mocks.done();
+      done();
+    });
+  });
+
+  it('Has _bulk_get', function(done) {
+    var mocks = nock(SERVER)
+      .post('/' + MYDB + '/_bulk_get')
+      .reply(200, {results:[{id:'doc1',docs:[{ok:{_id:'doc1',_rev:'1-967a00dff5e02add41819138abb3284d'}}]},{id:'non_id',docs:[{error:{id:'non_id',rev:'undefined',error:'not_found',reason:'missing'}}]},{id:'doc2',docs:[{ok:{_id:'doc2',_rev:'1-967a00dff5e02add41819138abb3284d'}}]}]})
+
+    mydb.bulk_get({docs:[{id:'doc1'}, {id:'non_id'}, {id:'doc2'}]}, function(er, body) {
+      should(er).equal(null);
+      body.should.have.a.property('results').which.is.instanceOf(Array);
+      body.results.should.have.a.length(3);
+      body.results[0].should.be.an.Object.and.have.a.property('id').and.match(/^doc1$/);
+      body.results[0].docs[0].ok.should.be.an.Object
+          .and.have.a.property('_rev').and.match(/^1-967a00dff5e02add41819138abb3284d/);
+      body.results[1].should.be.an.Object.and.have.a.property('id').and.match(/^non_id/);
+      body.results[1].docs[0].error.should.be.an.Object
+          .and.have.a.property('error').and.match(/^not_found$/);
+      body.results[2].should.be.an.Object.and.have.a.property('id').and.match(/^doc2$/);
+      body.results[2].docs[0].ok.should.be.an.Object
+          .and.have.a.property('_rev').and.match(/^1-967a00dff5e02add41819138abb3284d/);
+
+      mocks.done();
+      done();
+    });
+  })
+
+  after(function(done) {
+    var mocks = nock(SERVER)
+      .delete('/' + MYDB).reply(200, { "ok": true });
+
+    cc.db.destroy(MYDB, function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property("ok");
+      d.ok.should.be.equal(true);
+      mydb = null;
+      cc = null;
+      ddoc = viewname = null;
+
+      mocks.done();
+      done();
+    });
+  });
+})
+
 describe('Changes query', function() {
   before(function(done) {
     var mocks = nock(SERVER)

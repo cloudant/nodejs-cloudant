@@ -60,6 +60,12 @@ function Cloudant(credentials, callback) {
     // Functions added to each db e.g. cloudant.use("mydb")
     // ****************
 
+    var bulk_get = function(options, callback) {
+      return nano.request( { path: encodeURIComponent(db) + "/_bulk_get",
+                             method: "post",
+                             body: options }, callback)
+    };
+
     // https://docs.cloudant.com/api.html#viewing-permissions
     var get_security = function(callback) {
       var path = "_api/v2/db/" + encodeURIComponent(db) + "/_security";
@@ -114,6 +120,7 @@ function Cloudant(credentials, callback) {
 
     // add Cloudant special functions
     var obj = nano._use(db);
+    obj.bulk_get = bulk_get;
     obj.get_security = get_security;
     obj.set_security = set_security;
     obj.index = index;
