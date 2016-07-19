@@ -93,5 +93,14 @@ describe('Reconfigure', function() {
     url.should.equal("https://mykey:mypassword@mydomain.cloudant.com");
     done();
   });
-  
+
+  // Issue cloudant/nodejs-cloudant#141
+  it('Allows account names with dashes', function(done) {
+    var credentials = { account: "this-account-has-dashes.cloudant.com", password: "bacon" };
+    var url = reconfigure(credentials);
+    url.should.be.a.String;
+    url.should.equal("https://this-account-has-dashes:bacon@this-account-has-dashes.cloudant.com");
+    done();
+  });
+
 });
