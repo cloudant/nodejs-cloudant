@@ -487,7 +487,6 @@ db.bulk({docs:books}, function(er) {
 To create a Cloudant Search index, create a design document the normal way you would with Nano, the database `.insert()` method.
 
 To see all the indexes in a database, call the database `.index()` method with a callback function.
-             , {_id: '_design/library', indexes:{books:{analyzer:{name:'standard'}, index:index}}}
 
 ~~~ js
 // Note, you can make a normal JavaScript function. It is not necessary
