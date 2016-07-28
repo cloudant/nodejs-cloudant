@@ -225,6 +225,7 @@ This library adds documentation for the following:
 - [CORS](#cors)
 - [Cloudant Query](#cloudant-query)
 - [Cloudant Search](#cloudant-search)
+- [Cloudant Geospatial](#cloudant-geospatial)
 - [Cookie Authentication](#cookie-authentication)
 - [Advanced Features](#advanced-features)
   - [Advanced Configuration](#advanced-configuration)
@@ -532,6 +533,94 @@ db.search('library', 'books', {q:'author:dickens'}, function(er, result) {
   }
 });
 ~~~
+
+## Cloudant Geospatial
+
+This feature interfaces with Cloudant's geospatial features. See the [Cloudant Geospatial documentation][Cloudant Geospatial] for details.
+
+Begin with a database, and insert documents in [GeoJSON format][geojson]. Documents should have `"type"` set to `"Feature"` and also `"geometry"` with a valid GeoJSON value. For example:
+
+~~~ js
+var db = cloudant.db.use('my_db')
+var cities = [
+  { "_id":"Boston",
+    "type":"Feature",
+    "geometry": {
+      "type":"Point","coordinates": [-71.063611, 42.358056]
+    }
+  },
+  { "_id":"Houston",
+    "type":"Feature",
+    "geometry": {
+      "type":"Point","coordinates": [-95.383056, 29.762778]
+    }
+  },
+  { "_id":"Ruston",
+    "type":"Feature",
+    "geometry": {
+      "type":"Point","coordinates": [-92.640556, 32.529722]
+    }
+  }
+];
+
+db.bulk({docs:cities}, function(er) {
+  if (er) {
+    throw er;
+  }
+
+  console.log('Inserted all cities');
+});
+~~~
+
+To make a spatial index of these documents, create a design document with `"st_indexes"` populated with a JavaScript indexing function.
+
+~~~ js
+// Note, you can make a normal JavaScript function. It is not necessary
+// for you to convert it to a string as with other languages and tools.
+var city_indexer = function(doc) {
+  if (doc.geometry && doc.geometry.coordinates) {
+    st_index(doc.geometry);
+  }
+};
+
+var ddoc = {
+  _id: '_design/city',
+  st_indexes: {
+    city_points: {
+      index: city_indexer
+    }
+  }
+};
+
+db.insert(ddoc, function (er, result) {
+  if (er) {
+    throw er;
+  }
+
+  console.log('Created design document with city index');
+});
+~~~
+
+To query this index, use the database `.geo()` method. The first argument is the design document name, followed by the index name, and finally an object with your search parameters.
+
+~~~ js
+// Find the city within 25km (15 miles) of Lexington, MA.
+var query = {
+  lat:42.447222, lon:-71.225,
+  radius:25000,
+  include_docs:true
+};
+
+db.geo('city', 'city_points', query, function(er, result) {
+  if (er) {
+    throw er;
+  }
+
+  console.log('Cities found: %d', result.rows.length); // "Cities found: 1"
+  console.log(result.rows[0].doc._id);                 // "Boston"
+});
+~~~
+
 
 ## Cookie Authentication
 
@@ -841,8 +930,10 @@ and limitations under the License.
 [Cloudant Documentation]: https://docs.cloudant.com/
 [Cloudant Query]: https://docs.cloudant.com/cloudant_query.html
 [Cloudant Search]: https://docs.cloudant.com/search.html
+[Cloudant Geospatial]: https://docs.cloudant.com/geo.html
 [Authentication]: https://docs.cloudant.com/authentication.html
 [Authorization]: https://docs.cloudant.com/authorization.html
+[geojson]: http://geojson.org/
 [CORS]: https://docs.cloudant.com/cors.html
 [Issues]: https://github.com/cloudant/nodejs-cloudant/issues
 [Follow library]: https://github.com/iriscouch/follow
