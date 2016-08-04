@@ -66,6 +66,14 @@ function Cloudant(credentials, callback) {
                              body: options }, callback)
     };
 
+    // https://docs.cloudant.com/geo.html
+    var geo = function(docName, indexName, query, callback) {
+      var path = encodeURIComponent(db) + "/_design/" +
+                 encodeURIComponent(docName) + "/_geo/" +
+                 encodeURIComponent(indexName);
+      return nano.request({path:path, qs:query}, callback);
+    };
+
     // https://docs.cloudant.com/api.html#viewing-permissions
     var get_security = function(callback) {
       var path = "_api/v2/db/" + encodeURIComponent(db) + "/_security";
@@ -120,6 +128,7 @@ function Cloudant(credentials, callback) {
 
     // add Cloudant special functions
     var obj = nano._use(db);
+    obj.geo = geo;
     obj.bulk_get = bulk_get;
     obj.get_security = get_security;
     obj.set_security = set_security;

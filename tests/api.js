@@ -247,9 +247,15 @@ describe('Cloudant-Specific APIs', function() {
   it('create query dummy data', function(done) {
     var mocks = nock(SERVER)
       .post('/' + MYDB + '/_bulk_docs')
-      .reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"}]);
+      .reply(200, [{"id":"doc1","rev":"1-967a00dff5e02add41819138abb3284d"},{"id":"doc2","rev":"1-967a00dff5e02add41819138abb3284d"},
+                   {"id":"geodoc", "rev":"1-11da8390b0a7401efda16f63c06b420b"},{"id":"_design/geodd","rev":"1-ff1c0ac66b134edad082d2b7a7d98c9c"}]);
 
-    mydb.bulk({docs: [ {_id:'doc1'},{_id:'doc2'} ]}, function(er, d) {
+    var geoDoc = {"_id":"geodoc", "type":"Feature", "geometry":{"type":"Point","coordinates":[-71.13687953,42.34690635]}};
+    var geoDD  = {"_id":"_design/geodd", "st_indexes": { "points": {
+      "index": "function(doc) { if (doc.geometry && doc.geometry.coordinates) { st_index(doc.geometry); } }"
+    } } };
+
+    mydb.bulk({docs: [ {_id:'doc1'},{_id:'doc2'}, geoDoc, geoDD ]}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Array;
       for (var i in d) {
@@ -286,6 +292,24 @@ describe('Cloudant-Specific APIs', function() {
       done();
     });
   })
+
+  it('Has geo querying', function(done) {
+    var mocks = nock(SERVER)
+      .get('/' + MYDB + '/_design/geodd/_geo/points?lat=42.347&lon=-71.137&radius=100&include_docs=true')
+      .reply(200, {"rows":[{"id":"geodoc","geometry":{"type":"Point","coordinates":[-71.13687953,42.34690635]},"doc":{"_id":"geodoc","_rev":"1-11da8390b0a7401efda16f63c06b420b","type":"Feature","geometry":{"type":"Point","coordinates":[-71.13687953,42.34690635]}}}]});
+
+    mydb.geo('geodd', 'points', {lat:42.347, lon:-71.137, radius:100, include_docs:true}, function(er, body) {
+      should(er).equal(null);
+      body.rows.should.be.instanceOf(Array).and.have.lengthOf(1);
+      body.rows[0].should.be.an.Object;
+      body.rows[0].should.have.a.property('geometry').which.is.an.Object;
+      body.rows[0].geometry.coordinates.should.be.instanceOf(Array).and.have.lengthOf(2);
+      body.rows[0].geometry.coordinates[0].should.equal(-71.13687953);
+      body.rows[0].geometry.coordinates[1].should.equal(42.34690635);
+      body.rows[0].doc.should.be.an.Object.and.have.a.property('_id').equal('geodoc');
+      done();
+    });
+  });
 
   after(function(done) {
     var mocks = nock(SERVER)

@@ -4,7 +4,7 @@ var reconfigure = require('../lib/reconfigure.js');
 describe('Reconfigure', function() {
   
   it('is a function', function(done) {
-    reconfigure.should.be.a.function;
+    reconfigure.should.be.a.Function;
     done();
   });
   
