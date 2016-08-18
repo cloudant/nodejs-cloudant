@@ -49,6 +49,13 @@ function Cloudant(credentials, callback) {
     credentials = reconfigure({ url: credentials})
   }
 
+  // keep connections alive by default
+  if (requestDefaults && !requestDefaults.agent) {
+    var protocol = (credentials.match(/^https/))? require('https') : require('http');
+    var agent = new protocol.Agent({ keepAlive:true });
+    requestDefaults.agent = agent;
+  } 
+
   debug('Create underlying Nano instance, credentials=%j requestDefaults=%j', credentials, requestDefaults);
   var nano = Nano({url:credentials, requestDefaults: requestDefaults, cookie: cookie, log: nanodebug});
 
