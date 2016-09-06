@@ -14,9 +14,9 @@ module.exports = Cloudant;
  * and limitations under the License.
  */
 
-var Nano = require('nano'),
-  debug = require('debug')('cloudant'),
-  nanodebug = require('debug')('nano');
+var Nano = require('nano');
+var debug = require('debug')('cloudant');
+var nanodebug = require('debug')('nano');
 
 
 // function from the old Cloudant library to
