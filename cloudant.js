@@ -25,39 +25,40 @@ var nanodebug = require('debug')('nano');
 var reconfigure = require('./lib/reconfigure.js')
 
 // This IS the Cloudant API. It is mostly nano, with a few functions.
-function Cloudant(credentials, callback) {
-  debug('Initialize', credentials);
+function Cloudant(options, callback) {
+  debug('Initialize', options);
 
   // Save the username and password for potential conversion to cookie auth.
-  var login = reconfigure.getCredentials(credentials);
+  var login = reconfigure.getOptions(options);
 
   // Convert the credentials into a URL that will work for cloudant. The
   // credentials object will become squashed into a string, which is fine
   // except for the .cookie option.
-  var cookie = credentials.cookie;
+  var cookie = options.cookie;
 
   var pkg = require('./package.json');
   var useragent = "nodejs-cloudant/" + pkg.version + " (Node.js " + process.version + ")";
   var requestDefaults = { headers: { "User-agent": useragent}, gzip:true  };
-  if (typeof credentials == "object") {
-    if (credentials.requestDefaults) {
-      requestDefaults = credentials.requestDefaults;
-      delete credentials.requestDefaults;
+  var theurl = null;
+  if (typeof options == "object") {
+    if (options.requestDefaults) {
+      requestDefaults = options.requestDefaults;
+      delete options.requestDefaults;
     }
-    credentials = reconfigure(credentials);
+    theurl = reconfigure(options);
   } else {
-    credentials = reconfigure({ url: credentials})
+    theurl = reconfigure({ url: options})
   }
 
   // keep connections alive by default
   if (requestDefaults && !requestDefaults.agent) {
-    var protocol = (credentials.match(/^https/))? require('https') : require('http');
+    var protocol = (theurl.match(/^https/))? require('https') : require('http');
     var agent = new protocol.Agent({ keepAlive:true });
     requestDefaults.agent = agent;
   } 
 
-  debug('Create underlying Nano instance, credentials=%j requestDefaults=%j', credentials, requestDefaults);
-  var nano = Nano({url:credentials, requestDefaults: requestDefaults, cookie: cookie, log: nanodebug});
+  debug('Create underlying Nano instance, options=%j requestDefaults=%j', options, requestDefaults);
+  var nano = Nano({url:theurl, requestDefaults: requestDefaults, cookie: cookie, log: nanodebug});
 
   // our own implementation of 'use' e.g. nano.use or nano.db.use
   // it includes all db-level functions
