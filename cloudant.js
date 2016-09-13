@@ -57,8 +57,11 @@ function Cloudant(options, callback) {
     requestDefaults.agent = agent;
   } 
 
+  // plugin a request library
+  var plugin =  require('./plugins/retry.js');
+
   debug('Create underlying Nano instance, options=%j requestDefaults=%j', options, requestDefaults);
-  var nano = Nano({url:theurl, requestDefaults: requestDefaults, cookie: cookie, log: nanodebug});
+  var nano = Nano({url:theurl, request: plugin, requestDefaults: requestDefaults, cookie: cookie, log: nanodebug});
 
   // our own implementation of 'use' e.g. nano.use or nano.db.use
   // it includes all db-level functions
