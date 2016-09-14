@@ -21,7 +21,7 @@ module.exports = function(options) {
           return resolve(b);
         }
         reject(b);
-        callback(err, h, b);
+        callback(err, h, sb);
       })
     });
   };

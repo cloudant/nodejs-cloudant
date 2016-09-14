@@ -11,8 +11,8 @@ module.exports = function(options) {
   
   var myrequest = function(req, callback) {
     var attempts = 0;
-    var maxAttempts = 3;
-    var firstTimeout = 500; // ms
+    var maxAttempts = options.retryAttempts || 3;
+    var firstTimeout = options.retryTimeout || 500; // ms
     var timeout = 0; // ms
     var statusCode = null;
 
