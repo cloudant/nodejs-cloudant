@@ -5,21 +5,28 @@ var request = require('request');
 
 var nullcallback = function() {};
 
-module.exports = function(req, callback) {
-  if (typeof callback !== 'function') {
-    callback = nullcallback;
-  }
-  return new Promise(function(resolve, reject) {
-    request(req, function(err, h, b) {
-      var statusCode = h && h.statusCode || 500;
-      if (statusCode >= 200 && statusCode < 400) {
-        callback(null, b);
-        return resolve(b);
-      }
-      reject(b);
-      callback(err, b);
-    })
-  });
+
+
+module.exports = function(options) {
+
+  var myrequest = function(req, callback) {
+    if (typeof callback !== 'function') {
+      callback = nullcallback;
+    }
+    return new Promise(function(resolve, reject) {
+      request(req, function(err, h, b) {
+        var statusCode = h && h.statusCode || 500;
+        if (statusCode >= 200 && statusCode < 400) {
+          callback(null, h, b);
+          return resolve(b);
+        }
+        reject(b);
+        callback(err, h, b);
+      })
+    });
+  };
+
+  return myrequest;
 };
     
     

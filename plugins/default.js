@@ -3,4 +3,6 @@
 // This is the simplest module to use as it supports JavaScript callbacks
 // and can be used for with the Node.js streaming API.
 
-module.exports = require('request');
+module.exports = function(options) {
+  return require('request');
+}

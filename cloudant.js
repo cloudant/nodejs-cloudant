@@ -58,7 +58,7 @@ function Cloudant(options, callback) {
   } 
 
   // plugin a request library
-  var plugin =  require('./plugins/retry.js');
+  var plugin =  require('./plugins/promises.js')(options);
 
   debug('Create underlying Nano instance, options=%j requestDefaults=%j', options, requestDefaults);
   var nano = Nano({url:theurl, request: plugin, requestDefaults: requestDefaults, cookie: cookie, log: nanodebug});
