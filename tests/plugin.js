@@ -36,20 +36,8 @@ var viewname = null;
 
 describe('retry-on-429 plugin', function() {
 
-  it('should return a 429', function(done) {
-    var cloudant = Cloudant({plugin:'retry', url: 'https://mock429.eu-gb.mybluemix.net/'});
-    var db = cloudant.db.use('test');
-    this.timeout(10000);
-    db.info(function(err, data) {
-      err.should.be.an.Object;
-      err.should.have.property('statusCode');
-      err.statusCode.should.be.a.Number;
-      err.statusCode.should.equal(429);
-      done();
-    })
-  });
-
   it('behave normally too', function(done) {
+    var mocks = nock(SERVER).get('/' + MYDB).reply(200, {});
     var cloudant = Cloudant({plugin:'retry', account:ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     this.timeout(10000);
@@ -64,6 +52,8 @@ describe('retry-on-429 plugin', function() {
 describe('promise plugin', function() {
 
   it('should return a promise', function(done) {
+    var mocks = nock(SERVER)
+      .get('/' + MYDB).reply(200, {});
     var cloudant = Cloudant({plugin:'promises', account:ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     var p = db.info().then(function(data) {
