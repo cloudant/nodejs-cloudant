@@ -58,9 +58,17 @@ function Cloudant(options, callback) {
   } 
 
   // plugin a request library
-  var plugintype = options.plugin || 'default';
-  debug('Using the "' + plugintype + '" plugin');
-  var plugin =  require('./plugins/' + plugintype)(options);
+  var plugin = null;
+  if (options.plugin) {
+    if(typeof options.plugin === 'string') {
+      var plugintype = options.plugin || 'default';
+      debug('Using the "' + plugintype + '" plugin');
+      plugin =  require('./plugins/' + plugintype)(options);
+    } else if (typeof options.plugin === 'function') { 
+      debug('Using a custom plugin');
+      plugin = options.plugin;
+    }
+  }
 
   debug('Create underlying Nano instance, options=%j requestDefaults=%j', options, requestDefaults);
   var nano = Nano({url:theurl, request: plugin, requestDefaults: requestDefaults, cookie: cookie, log: nanodebug});

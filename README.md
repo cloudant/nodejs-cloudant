@@ -211,12 +211,13 @@ Cloudant({hostname:"companycloudant.local", username:"somebody", password:"someb
 
 This library can be used with one of three `request` plugins:
 
-1. `default` - the default [request](https://www.npmjs.com/package/request) library plugin. This uses Node.js callbacks to communicate Cloudant's replies 
-back to your app and can be used to stream data using the Node.js Stream API.
-2. `promises` - if you'd prefer to write code in the Promises style then the "promises" plugin turns each request into a Promises. This plugin cannot be used 
-stream data.
-3. `retry` - on occasion, Cloudant's multi-tenant offerring may reply with an HTTP 429 response,  meaning "you've exceeded your call quota - try again later". 
+1. `default` - the default [request](https://www.npmjs.com/package/request) library plugin. This uses Node.js's callbacks to communicate Cloudant's replies 
+back to your app and can be used to stream data using the Node.js [Stream API](https://nodejs.org/api/stream.html).
+2. `promises` - if you'd prefer to write code in the Promises style then the "promises" plugin turns each request into a Promise. This plugin cannot be used 
+stream data because instead of returning the HTTP request, we are simply returning a Promise instead.
+3. `retry` - on occasion, Cloudant's multi-tenant offerring may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. 
 The "retry" plugin will automatically retry your request with exponential back-off.
+4. custom plugin - you may also supply your own function which will be called to make API calls.
 
 #### The 'promises' Plugins
 
@@ -255,6 +256,20 @@ Then use the Cloudant library normally. You may also opt to configure the retry 
 var cloudant = Cloudant({url: myurl, plugin:'retry', retryAttempts:5, retryTimeout:1000 });
 var mydb = cloudant.db.use('mydb');
 ```
+
+#### Custom plugin
+
+When initialising the Cloudant library, you can supply your own plugin function:
+
+```js  
+  var doNothingPlugin = function(opts, callback) {
+    // don't do anything, just pretend that everything's ok.
+    callback(null, { statusCode:200 }, { ok: true});
+  };
+  var cloudant = Cloudant({url: myurl, plugin: doNothingPlugin});
+```
+
+Whenever the Cloudant library wishes to make an outgoing HTTP request, it will call your function instead of `request`. 
 
 ## API Reference
 
