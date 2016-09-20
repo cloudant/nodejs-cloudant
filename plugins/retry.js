@@ -17,12 +17,13 @@
 // the library will retry the request up to three
 // times with exponential backoff.
 // This module is unsuitable for streaming requests.
-var request = require('request');
 var async = require('async');
 var debug = require('debug')('cloudant');
 
 module.exports = function(options) {
-  
+  var requestDefaults = options.requestDefaults || {jar: false};
+  var request = require('request').defaults(requestDefaults);
+
   var myrequest = function(req, callback) {
     var attempts = 0;
     var maxAttempts = options.retryAttempts || 3;

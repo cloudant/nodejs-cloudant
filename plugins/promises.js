@@ -15,12 +15,13 @@
 // this the the 'promises' request handler.
 // It is a function that returns a Promise and resolves the promise on success 
 // or rejects the Promise on failure
-var request = require('request');
 
 var nullcallback = function() {};
 
 module.exports = function(options) {
 
+  var requestDefaults = options.requestDefaults || {jar: false};
+  var request = require('request').defaults(requestDefaults);
   var myrequest = function(req, callback) {
     if (typeof callback !== 'function') {
       callback = nullcallback;
@@ -32,8 +33,8 @@ module.exports = function(options) {
           callback(null, h, b);
           return resolve(b);
         }
-        reject(b);
-        callback(err, h, sb);
+        reject(err || b);
+        callback(err, h, b);
       })
     });
   };

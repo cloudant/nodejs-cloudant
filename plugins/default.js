@@ -18,5 +18,6 @@
 // and can be used for with the Node.js streaming API.
 
 module.exports = function(options) {
-  return require('request');
+  var requestDefaults = options.requestDefaults || {jar: false};
+  return require('request').defaults(requestDefaults);
 }
