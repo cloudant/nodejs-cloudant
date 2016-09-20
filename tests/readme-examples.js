@@ -27,6 +27,9 @@ require('dotenv').config();
 var should = require('should');
 
 var nock = require('./nock.js');
+var ME = process.env.cloudant_username || 'nodejs';
+var PASSWORD = process.env.cloudant_password || null;
+var SERVER = 'https://' + ME + '.cloudant.com';
 
 var real_require = require;
 require = function(module) {
@@ -44,7 +47,7 @@ describe('Getting Started', function() {
 
   var mocks;
   before(function() {
-    mocks = nock('https://nodejs.cloudant.com')
+    mocks = nock(SERVER)
       .get('/_all_dbs').reply(200, ['database_changes', 'third_party_db'])
       .delete('/alice').reply(404, {error:'not_found', reason:'Database does not exist.'})
       .put('/alice').reply(201, {ok:true})
@@ -59,7 +62,7 @@ describe('Getting Started', function() {
     // Load the Cloudant library.
     var Cloudant = require('cloudant');
 
-    var me = 'nodejs'; // Set this to your own account
+    var me = ME; // Set this to your own account
     var password = process.env.cloudant_password;
 
     // Initialize the library with my account.
@@ -73,13 +76,13 @@ describe('Getting Started', function() {
   });
 
   it('Example 2', function(done) {
-    require('dotenv').load();
+
 
     // Load the Cloudant library.
     var Cloudant = require('cloudant');
 
     // Initialize Cloudant with settings from .env
-    var username = process.env.cloudant_username || "nodejs";
+    var username = ME;
     var password = process.env.cloudant_password;
     var cloudant = Cloudant({account:username, password:password});
 
@@ -116,8 +119,8 @@ describe('Initialization', function() {
   var mocks;
   after(function() { mocks.done(); });
   before(function() {
-    mocks = nock('https://nodejs.cloudant.com')
-      .get('/_session').reply(200, {ok:true, userCtx:{name:'nodejs', roles:[]}})
+    mocks = nock(SERVER)
+      .get('/_session').reply(200, {ok:true, userCtx:{name:ME, roles:[]}})
       .post('/_session').reply(200, {XXXXX:'YYYYYYYYYY', ok:true, userCtx:{name:'jhs', roles:[]}})
       .get('/').reply(200, {couchdb:'Welcome', version:'1.0.2', cloudant_build:'2488'})
       .get('/animals/dog').reply(404, {error:'not_found', reason:'missing'});
@@ -125,7 +128,7 @@ describe('Initialization', function() {
 
   it('Example 1', function(done) {
     var Cloudant = require('cloudant');
-    var me = 'nodejs'; // Replace with your account.
+    var me = ME; // Replace with your account.
     var password = process.env.cloudant_password;
 
     Cloudant({account:me, password:password}, function(err, cloudant) {
@@ -147,15 +150,15 @@ describe('Password authentication', function() {
   var mocks;
   after(function() { mocks.done(); });
   before(function() {
-    mocks = nock('https://nodejs.cloudant.com')
+    mocks = nock(SERVER)
       .get('/_session').reply(200, {XXXXX:'YYYYYYYYYY', ok:true, userCtx:{name:'jhs', roles:[]}})
-      .post('/_session').reply(200, {XXXXX:'YYYYYYYYYY', ok:true, userCtx:{name:'jhs', roles:[]}})
+      //.post('/_session').reply(200, {XXXXX:'YYYYYYYYYY', ok:true, userCtx:{name:'jhs', roles:[]}})
       .get('/').reply(200, {couchdb:'Welcome!!!!!', version:'1.0.2', cloudant_build:'2488'});
   });
 
   it('Example 1', function(done) {
     var Cloudant = require('cloudant');
-    var me = "nodejs";         // Substitute with your Cloudant user account.
+    var me = ME;         // Substitute with your Cloudant user account.
     var otherUsername = "jhs"; // Substitute with some other Cloudant user account.
     var otherPassword = process.env.other_cloudant_password;
 
@@ -180,7 +183,7 @@ describe('Authorization and API Keys', function() {
   var mocks;
   after(function() { mocks.done(); });
   before(function() {
-    mocks = nock('https://nodejs.cloudant.com')
+    mocks = nock(SERVER)
       .post('/_api/v2/api_keys')
       .reply(200, { "password": "Eivln4jPiLS8BoTxjXjVukDT", "ok": true, "key": "thandoodstrenterprourete" })
       .put('/_api/v2/db/animals/_security')
@@ -191,7 +194,7 @@ describe('Authorization and API Keys', function() {
 
   it('Example 1', function(done) {
     var Cloudant = require('cloudant');
-    var me = 'nodejs'; // Replace with your account.
+    var me = ME; // Replace with your account.
     var password = process.env.cloudant_password;
     var cloudant = Cloudant({account:me, password:password});
 
@@ -246,7 +249,7 @@ describe('CORS', function() {
   var mocks;
   after(function() { mocks.done(); });
   before(function() {
-    mocks = nock('https://nodejs.cloudant.com')
+    mocks = nock(SERVER)
       .put('/_api/v2/user/config/cors')
       .reply(200, {ok:true})
       .put('/_api/v2/user/config/cors')
@@ -260,7 +263,7 @@ describe('CORS', function() {
   var cloudant;
   before(function() {
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
+    cloudant = Cloudant({account:ME, password:process.env.cloudant_password});
   });
 
   it('Example 1', function(done) {
@@ -305,7 +308,7 @@ describe('Virtual Hosts', function() {
   var mocks;
   after(function() { mocks.done(); });
   before(function() {
-    mocks = nock('https://nodejs.cloudant.com')
+    mocks = nock(SERVER)
       .post('/_api/v2/user/virtual_hosts')
       .reply(200, {ok:true})
       .get('/_api/v2/user/virtual_hosts')
@@ -317,7 +320,7 @@ describe('Virtual Hosts', function() {
   var cloudant;
   before(function() {
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
+    cloudant = Cloudant({account:ME, password:process.env.cloudant_password});
   });
 
   it('Example 1', function(done) {
@@ -350,7 +353,7 @@ describe('Cloudant Query', function() {
 
   var mocks;
   before(function() {
-    mocks = nock('https://nodejs.cloudant.com')
+    mocks = nock(SERVER)
       .put('/my_db')
       .reply(200, {ok:true})
       .get('/my_db/_index')
@@ -366,7 +369,7 @@ describe('Cloudant Query', function() {
   var cloudant, db;
   before(function(done) {
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
+    cloudant = Cloudant({account:ME, password:process.env.cloudant_password});
     cloudant.db.create('my_db', function(er) {
       if (er) throw er;
       db = cloudant.db.use('my_db')
@@ -432,7 +435,7 @@ describe('Cloudant Search', function() {
 
   var mocks;
   before(function() {
-    mocks = nock('https://nodejs.cloudant.com')
+    mocks = nock(SERVER)
       .put('/my_db')
       .reply(200, {ok:true})
       .post('/my_db/_bulk_docs')
@@ -450,7 +453,7 @@ describe('Cloudant Search', function() {
   var cloudant, db;
   before(function(done) {
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
+    cloudant = Cloudant({account:ME, password:process.env.cloudant_password});
     cloudant.db.create('my_db', function(er) {
       if (er) throw er;
       db = cloudant.db.use('my_db')
@@ -537,17 +540,17 @@ describe('Cookie Authentication', function() {
 
   var mocks;
   before(function() {
-    mocks = nock('https://nodejs.cloudant.com')
+    mocks = nock(SERVER)
       .post('/_session')
-      .reply(200, { ok: true, name: 'nodejs', roles: [] },
+      .reply(200, { ok: true, name: ME, roles: [] },
         {'set-cookie': ['AuthSession=bm9kZWpzOjU1RTA1NDdEOsUsoq9lykQCEBhwTpIyEbgmYpvX; Version=1; Expires=Sat, 29 Aug 2015 12:30:53 GMT; Max-Age=86400; Path=/; HttpOnly; Secure']})
       .post('/alice')
       .reply(200, { ok: true, id: '72e0367f3e195340e239948164bbb7e7', rev: '1-feb5539029f4fc50dc3f827b164a2088' })
       .get('/_session')
-      .reply(200, {ok:true, userCtx:{name:'nodejs',roles:['_admin','_reader','_writer']}});
+      .reply(200, {ok:true, userCtx:{name:ME,roles:['_admin','_reader','_writer']}});
 
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account:'nodejs', password:process.env.cloudant_password});
+    cloudant = Cloudant({account:ME, password:process.env.cloudant_password});
   });
 
   after(function() {
@@ -558,7 +561,7 @@ describe('Cookie Authentication', function() {
 
   it('Example 1', function(done) {
     var Cloudant = require('cloudant');
-    var username = 'nodejs'; // Set this to your own account
+    var username = ME; // Set this to your own account
     var password = process.env.cloudant_password;
     var cloudant = Cloudant({account:username, password:password});
 
@@ -589,7 +592,7 @@ describe('Cookie Authentication', function() {
   it('Example 2', function(done) {
     // Make a new connection with the cookie.
     var Cloudant = require('cloudant');
-    var username = 'nodejs'; // Set this to your own account
+    var username = ME; // Set this to your own account
     var other_cloudant = Cloudant({account:username, cookie:cookies[username]});
 
     var alice = other_cloudant.db.use('alice')
@@ -614,7 +617,7 @@ describe('Cookie Authentication', function() {
     // (Presuming the "cookie" global from the above example is still in scope.)
 
     var Cloudant = require('cloudant');
-    var username = 'nodejs'; // Set this to your own account
+    var username = ME; // Set this to your own account
     var cloudant = Cloudant({account:username, cookie:cookies[username]});
 
     cloudant.session(function(er, session) {
