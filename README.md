@@ -8,6 +8,7 @@ This is the official Cloudant library for Node.js.
   * [Callback Signature](#callback-signature)
   * [Password Authentication](#password-authentication)
   * [Cloudant Local](#cloudant-local)
+  * [Request Plugins](#request-plugins)
 * [API Reference](#api-reference)
 * [Authorization and API Keys](#authorization-and-api-keys)
   * [Generate an API key](#generate-an-api-key)
@@ -206,6 +207,69 @@ Cloudant({hostname:"companycloudant.local", username:"somebody", password:"someb
 })
 ~~~
 
+### Request Plugins
+
+This library can be used with one of three `request` plugins:
+
+1. `default` - the default [request](https://www.npmjs.com/package/request) library plugin. This uses Node.js's callbacks to communicate Cloudant's replies 
+back to your app and can be used to stream data using the Node.js [Stream API](https://nodejs.org/api/stream.html).
+2. `promises` - if you'd prefer to write code in the Promises style then the "promises" plugin turns each request into a Promise. This plugin cannot be used 
+stream data because instead of returning the HTTP request, we are simply returning a Promise instead.
+3. `retry` - on occasion, Cloudant's multi-tenant offerring may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. 
+The "retry" plugin will automatically retry your request with exponential back-off.
+4. custom plugin - you may also supply your own function which will be called to make API calls.
+
+#### The 'promises' Plugins
+
+When initialising the Cloudant library, you can opt to use the 'promises' plugin:
+
+```js
+var cloudant = Cloudant({url: myurl, plugin:'promises'});
+var mydb = cloudant.db.use('mydb');
+```
+
+Then the library will return a Promise for every asynchronous call:
+
+```js
+mydb.list().then(function(data) {
+  console.log(data);
+}).catch(function(err) {
+  console.log('something went wrong', err);
+});
+```
+
+#### The 'retry' plugin
+
+When initialising the Cloudant library, you can opt to use the 'retry' plugin:
+
+```js
+var cloudant = Cloudant({url: myurl, plugin:'retry'});
+var mydb = cloudant.db.use('mydb');
+```
+
+Then use the Cloudant library normally. You may also opt to configure the retry parameters:
+
+- retryAttempts - the maximum number of times the request will be attempted (default 3)
+- retryTimeout - the number of milliseconds after the first attempt that the second request will be tried; the timeout doubling with each subsequent attempt  (default 500)
+
+```js
+var cloudant = Cloudant({url: myurl, plugin:'retry', retryAttempts:5, retryTimeout:1000 });
+var mydb = cloudant.db.use('mydb');
+```
+
+#### Custom plugin
+
+When initialising the Cloudant library, you can supply your own plugin function:
+
+```js  
+  var doNothingPlugin = function(opts, callback) {
+    // don't do anything, just pretend that everything's ok.
+    callback(null, { statusCode:200 }, { ok: true});
+  };
+  var cloudant = Cloudant({url: myurl, plugin: doNothingPlugin});
+```
+
+Whenever the Cloudant library wishes to make an outgoing HTTP request, it will call your function instead of `request`. 
 
 ## API Reference
 
