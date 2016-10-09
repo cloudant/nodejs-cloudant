@@ -59,6 +59,7 @@ function Cloudant(options, callback) {
   // plugin a request library
   var plugin = null;
   if (options.plugin) {
+    options.requestDefaults = requestDefaults;
     if(typeof options.plugin === 'string') {
       var plugintype = options.plugin || 'default';
       debug('Using the "' + plugintype + '" plugin');
