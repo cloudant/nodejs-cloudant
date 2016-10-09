@@ -43,7 +43,6 @@ function Cloudant(options, callback) {
   if (typeof options == "object") {
     if (options.requestDefaults) {
       requestDefaults = options.requestDefaults;
-      delete options.requestDefaults;
     }
     theurl = reconfigure(options);
   } else {

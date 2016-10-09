@@ -53,15 +53,32 @@ describe('promise plugin', function() {
 
   it('should return a promise', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + MYDB).reply(200, {});
+      .get('/' + MYDB).reply(200, { ok: true});
     var cloudant = Cloudant({plugin:'promises', account:ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     var p = db.info().then(function(data) {
-      data.should.be.an.object;
+      data.should.be.an.Object;
       done();
     });
     assert.equal(p instanceof Promise, true);
-  })
+  });
+
+  it('should return an error status code', function(done) {
+    var mocks = nock(SERVER)
+      .get('/' + MYDB).reply(404, { ok: false});
+    var cloudant = Cloudant({plugin:'promises', account:ME, password: PASSWORD});
+    var db = cloudant.db.use(MYDB);
+    var p = db.info().then(function(data) {
+      assert(false);
+    }).catch(function(e) {
+      e.should.be.an.Object;
+      e.should.have.property.statusCode;
+      e.statusCode.should.be.a.Number;
+      e.statusCode.should.equal(404);
+      done();
+    });
+    assert.equal(p instanceof Promise, true);
+  });
 
 });
 
