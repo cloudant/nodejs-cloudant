@@ -43,7 +43,6 @@ function Cloudant(options, callback) {
   if (typeof options == "object") {
     if (options.requestDefaults) {
       requestDefaults = options.requestDefaults;
-      delete options.requestDefaults;
     }
     theurl = reconfigure(options);
   } else {
@@ -60,6 +59,7 @@ function Cloudant(options, callback) {
   // plugin a request library
   var plugin = null;
   if (options.plugin) {
+    options.requestDefaults = requestDefaults;
     if(typeof options.plugin === 'string') {
       var plugintype = options.plugin || 'default';
       debug('Using the "' + plugintype + '" plugin');

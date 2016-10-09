@@ -29,9 +29,15 @@ module.exports = function(options) {
     return new Promise(function(resolve, reject) {
       request(req, function(err, h, b) {
         var statusCode = h && h.statusCode || 500;
+        if (b) {
+          try { b = JSON.parse(b); } catch (err) {  }
+        }
         if (statusCode >= 200 && statusCode < 400) {
           callback(null, h, b);
           return resolve(b);
+        }
+        if (b) {
+          b.statusCode = statusCode;
         }
         reject(err || b);
         callback(err, h, b);
