@@ -20,6 +20,8 @@
 var async = require('async');
 var debug = require('debug')('cloudant');
 
+var nullcallback = function() {};
+
 module.exports = function(options) {
   var requestDefaults = options.requestDefaults || {jar: false};
   var request = require('request').defaults(requestDefaults);
@@ -30,6 +32,10 @@ module.exports = function(options) {
     var firstTimeout = options.retryTimeout || 500; // ms
     var timeout = 0; // ms
     var statusCode = null;
+
+    if (typeof callback !== 'function') {
+      callback = nullcallback;
+    }
 
     // do the first function until the second function returns true
     async.doUntil(function(done) {
