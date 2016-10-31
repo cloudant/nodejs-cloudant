@@ -46,6 +46,15 @@ describe('retry-on-429 plugin', function() {
       data.should.be.an.Object;
       done();
     })
+  });
+
+  it('allow no callback', function(done) {
+    var mocks = nock(SERVER).get('/' + MYDB).reply(200, {});
+    var cloudant = Cloudant({plugin:'retry', account:ME, password: PASSWORD});
+    var db = cloudant.db.use(MYDB);
+    this.timeout(10000);
+    db.info();
+    setTimeout(done, 1000);
   })
 });
 
