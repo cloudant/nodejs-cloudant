@@ -21,6 +21,7 @@ var assert = require('assert');
 
 var nock = require('./nock.js');
 var Cloudant = require('../cloudant.js');
+var stream = require('stream');
 
 
 // These globals may potentially be parameterized.
@@ -55,7 +56,18 @@ describe('retry-on-429 plugin', function() {
     this.timeout(10000);
     db.info();
     setTimeout(done, 1000);
-  })
+  });
+
+  it('should return a stream', function(done) {
+    var mocks = nock(SERVER)
+      .get('/' + MYDB).reply(200, { ok: true});
+    var cloudant = Cloudant({plugin:'retry', account:ME, password: PASSWORD});
+    var db = cloudant.db.use(MYDB);
+    var p = db.info(function() {
+      done();
+    });
+    assert.equal(p instanceof stream.PassThrough, true);
+  });
 });
 
 describe('promise plugin', function() {

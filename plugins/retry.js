@@ -19,6 +19,7 @@
 // This module is unsuitable for streaming requests.
 var async = require('async');
 var debug = require('debug')('cloudant');
+var stream = require('stream');
 
 var nullcallback = function() {};
 
@@ -37,16 +38,26 @@ module.exports = function(options) {
       callback = nullcallback;
     }
 
+    // create a pass-through stream in case the caller wishes
+    // to pipe data using Node.js streams
+    var s = new stream.PassThrough();
+
     // do the first function until the second function returns true
     async.doUntil(function(done) {
+      statusCode = 500;
       attempts++;
-      if (attempts > 1) {
+      if (attempts >= 1) {
         debug('attempt', attempts, 'timeout', timeout);
       }
       setTimeout(function() {
         request(req, function(e, h, b) {
-          statusCode = h && h.statusCode || 500;
           done(null, [e, h, b]);
+        }).on('response', function(r) {
+          statusCode = r && r.statusCode || 500;
+        }).on('data', function(chunk) {
+          if (statusCode !== 429) {
+            s.write(chunk);
+          }
         });  
       }, timeout);
     }, function() {
@@ -61,8 +72,12 @@ module.exports = function(options) {
       } 
       return true;
     }, function(e, results) {
+      s.end();
       callback(results[0], results[1], results[2])
     });
+
+    // return the pass-through stream
+    return s;
   };
 
   return myrequest;
