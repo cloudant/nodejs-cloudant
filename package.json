@@ -17,15 +17,15 @@
     "database"
   ],
   "dependencies": {
-    "async": "^2.0.1",
+    "async": "2.1.2",
     "debug": "2.2.0",
-    "nano": "6.2.0",
-    "request": "^2.53.0"
+    "cloudant-nano": "6.3.0",
+    "request": "2.76.0"
   },
   "devDependencies": {
-    "dotenv": "1.2.0",
-    "mocha": "2.3.3",
-    "nock": "2.13.0",
+    "dotenv": "2.0.0",
+    "mocha": "3.1.2",
+    "nock": "9.0.0",
     "should": "6.0.3"
   },
   "scripts": {
