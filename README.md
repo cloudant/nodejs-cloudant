@@ -216,7 +216,7 @@ back to your app and can be used to stream data using the Node.js [Stream API](h
 2. `promises` - if you'd prefer to write code in the Promises style then the "promises" plugin turns each request into a Promise. This plugin cannot be used 
 stream data because instead of returning the HTTP request, we are simply returning a Promise instead.
 3. `retry` - on occasion, Cloudant's multi-tenant offerring may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. 
-The "retry" plugin will automatically retry your request with exponential back-off.
+The "retry" plugin will automatically retry your request with exponential back-off. The 'retry' plugin can be used to stream data.
 4. custom plugin - you may also supply your own function which will be called to make API calls.
 
 #### The 'promises' Plugins
