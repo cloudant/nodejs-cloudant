@@ -275,11 +275,11 @@ Whenever the Cloudant library wishes to make an outgoing HTTP request, it will c
 
 Cloudant is a wrapper around the Nano library and as such, Nano's documentation should be consulted for:
 
-- [Database functions](https://github.com/apache/couchdb-nano#database-functions)
-- [Document functions](https://github.com/apache/couchdb-nano#document-functions)
-- [Multipart functions](https://github.com/apache/couchdb-nano#multipart-functions)
-- [Attachment functions](https://github.com/apache/couchdb-nano#attachments-functions)
-- [View and Design functions](https://github.com/apache/couchdb-nano#views-and-design-functions)
+- [Database functions](https://github.com/cloudant-labs/cloudant-nano#database-functions)
+- [Document functions](https://github.com/cloudant-labs/cloudant-nano#document-functions)
+- [Multipart functions](https://github.com/cloudant-labs/cloudant-nano#multipart-functions)
+- [Attachment functions](https://github.com/cloudant-labs/cloudant-nano#attachments-functions)
+- [View and Design functions](https://github.com/cloudant-labs/cloudant-nano#views-and-design-functions)
 
 This library adds documentation for the following:
 
@@ -965,7 +965,7 @@ If you run this example, you will see:
 
 ## License
 
-Copyright (c) 2015 IBM Cloudant, Inc. All rights reserved.
+Copyright (c) 2016 IBM Cloudant, Inc. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -990,7 +990,7 @@ and limitations under the License.
 * [Issues](https://github.com/cloudant/nodejs-cloudant/issues)
 * [Follow library](https://github.com/iriscouch/follow)
 
-[Nano Library]: https://github.com/apache/couchdb-nano
+[Nano Library]: https://github.com/cloudant-labs/cloudant-nano
 [Cloudant Documentation]: https://docs.cloudant.com/
 [Cloudant Query]: https://docs.cloudant.com/cloudant_query.html
 [Cloudant Search]: https://docs.cloudant.com/search.html

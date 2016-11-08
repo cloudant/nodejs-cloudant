@@ -4,8 +4,8 @@
   "license": "Apache-2.0",
   "homepage": "http://github.com/cloudant/nodejs-cloudant",
   "repository": "git://github.com/cloudant/nodejs-cloudant",
-  "version": "1.5.2",
-  "author": "Jason Smith <jason@cloudant.com>",
+  "version": "1.6.0",
+  "author": "Jason Smith <jasons@us.ibm.com>",
   "contributors": [
     "Glynn Bird <glynn.bird@gmail.com>"
   ],
