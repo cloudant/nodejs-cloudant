@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "homepage": "http://github.com/cloudant/nodejs-cloudant",
   "repository": "git://github.com/cloudant/nodejs-cloudant",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "author": "Jason Smith <jasons@us.ibm.com>",
   "contributors": [
     "Glynn Bird <glynn.bird@gmail.com>"
@@ -19,7 +19,7 @@
   "dependencies": {
     "async": "2.1.2",
     "debug": "2.2.0",
-    "cloudant-nano": "6.4.0",
+    "cloudant-nano": "6.4.1",
     "request": "2.76.0"
   },
   "devDependencies": {
