@@ -209,7 +209,7 @@ Cloudant({hostname:"companycloudant.local", username:"somebody", password:"someb
 
 ### Request Plugins
 
-This library can be used with one of three `request` plugins:
+This library can be used with one of these `request` plugins:
 
 1. `default` - the default [request](https://www.npmjs.com/package/request) library plugin. This uses Node.js's callbacks to communicate Cloudant's replies 
 back to your app and can be used to stream data using the Node.js [Stream API](https://nodejs.org/api/stream.html).
@@ -217,7 +217,9 @@ back to your app and can be used to stream data using the Node.js [Stream API](h
 stream data because instead of returning the HTTP request, we are simply returning a Promise instead.
 3. `retry` - on occasion, Cloudant's multi-tenant offerring may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. 
 The "retry" plugin will automatically retry your request with exponential back-off. The 'retry' plugin can be used to stream data.
-4. custom plugin - you may also supply your own function which will be called to make API calls.
+4. `cookieauth` - this plugin will automatically swap your Cloudant credentials for a cookie transparently for you. It will handle the authentication for you
+and ensure that the cookie is refreshed. The 'cookieauth' plugin can be used to stream data.
+5. custom plugin - you may also supply your own function which will be called to make API calls.
 
 #### The 'promises' Plugins
 
@@ -256,6 +258,23 @@ Then use the Cloudant library normally. You may also opt to configure the retry 
 var cloudant = Cloudant({url: myurl, plugin:'retry', retryAttempts:5, retryTimeout:1000 });
 var mydb = cloudant.db.use('mydb');
 ```
+
+#### The 'cookieauth' plugin
+
+When initialising the Cloudant library, you can opt to use the 'retry' plugin:
+
+```js
+var cloudant = Cloudant({url: myurl, plugin:'cookieauth'});
+var mydb = cloudant.db.use('mydb');
+mydb.get('mydoc', function(err, data) {
+
+});
+```
+
+The above code will transparently call `POST /_session` to exchange your credentials for a cookie and then call `GET /mydoc` to fetch the document. 
+
+Subsequent calls to the same `cloudant` instance will simply use cookie authentication from that point. The library will automatically ensure that the cookie remains 
+up-to-date by calling Cloudant on an hourly basis to refresh the cookie. 
 
 #### Custom plugin
 

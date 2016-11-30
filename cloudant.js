@@ -17,6 +17,7 @@ module.exports = Cloudant;
 var Nano = require('cloudant-nano');
 var debug = require('debug')('cloudant');
 var nanodebug = require('debug')('nano');
+var async = require('async');
 
 
 // function from the old Cloudant library to
@@ -242,49 +243,38 @@ function Cloudant(options, callback) {
 
 function ping(login, callback) {
   var nano = this;
-
-  if (!callback) {
-    callback = login;
-    login = null;
-  }
-
-  // Only call back once.
-  var inner_callback = callback;
-  callback = function(er, result, cookie) {
-    inner_callback(er, result, cookie);
-    inner_callback = function() {};
-  };
-
   var cookie = null;
-  var done = {welcome:false, session:false, auth:true};
-  nano.session(       function(er, body) { returned('session', er, body); });
-  nano.relax({db:""}, function(er, body) { returned('welcome', er, body); });
 
-  // If credentials are supplied, authenticate to get a cookie.
-  if (login && login.username && login.password) {
-    done.auth = false;
-    nano.auth(login.username, login.password, function(er, body, headers) {
-      returned('auth', er, body, headers);
-    });
-  }
-
-  function returned(type, er, body, headers) {
-    if (er)
-      return callback(er);
-
-    debug('Pong/%s %j', type, body);
-    done[type] = body;
-
-    if (type == 'auth') {
-      if (headers['set-cookie'] && headers['set-cookie'][0]) {
-        cookie = headers['set-cookie'][0].replace(/;.*$/, '');
+  async.series([
+    function(done) {
+      if (login && login.username && login.password) {
+        done.auth = false;
+        nano.auth(login.username, login.password, function(e, b, h) {
+          cookie = (h && h['set-cookie']) || null;
+          if (cookie) {
+            cookie = cookie[0];
+          }
+          done(null, b);
+        });
+      } else {
+        done(null, null);
       }
+    },
+    function(done) {
+      nano.session(function(e, b, h) {
+        done(null, b);
+      });
+    }, 
+    function(done) {
+      nano.relax({db:''}, function(e, b, h) {
+        done(null, b);
+      })
     }
-
-    if (done.welcome && done.session && done.auth) {
-      // Return the CouchDB "Welcome" body but with the userCtx added in.
-      done.welcome.userCtx = done.session.userCtx;
-      callback(null, done.welcome, cookie);
-    }
-  }
+  ], function(err, data) {
+    var body = (data && data[2]) || {};
+    body.userCtx  = (data && data[1] && data[1].userCtx) || {};
+    callback(null, body, cookie);
+  });
 }
+
+

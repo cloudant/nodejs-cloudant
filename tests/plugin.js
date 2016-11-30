@@ -123,3 +123,131 @@ describe('custom plugin', function() {
   })
 
 });
+
+describe('cookieauth plugin', function() {
+  it('should return a stream', function(done) {
+    var mocks = nock(SERVER)
+      .post('/_session').reply(200, { ok: true})
+      .get('/' + MYDB).reply(200, { ok: true});
+    var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD});
+    var db = cloudant.db.use(MYDB);
+    var p = db.info(function(err, data) {
+      assert.equal(err, null);
+      data.should.be.an.Object;
+      // check that we use all the nocked API calls
+      assert.equal(mocks.isDone(), true);
+      done();
+    });
+    assert.equal(p instanceof require('stream').PassThrough, true);
+  });
+
+  it('should authenticate before attempting API call', function(done) {
+    var mocks = nock(SERVER)
+      .post('/_session', {name: ME, password: PASSWORD}).reply(200, { ok: true, info: { }, userCtx: { name: ME, roles: ['_admin']}})
+      .get('/' + MYDB + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true});
+    var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD});
+    var db = cloudant.db.use(MYDB);
+    var p = db.get('mydoc', function(err, data) {
+      assert.equal(err, null);
+      data.should.be.an.Object;
+      data.should.have.property._id;
+      data.should.have.property._rev;
+      data.should.have.property.ok;
+    
+      // check that we use all the nocked API calls
+      assert.equal(mocks.isDone(), true);
+      done();
+    });
+  });
+
+  it('should fail with incorrect authentication', function(done) {
+    var mocks = nock(SERVER)
+      .post('/_session', {name: ME, password: PASSWORD}).reply(401, {error:'unauthorized', reason: 'Name or password is incorrect.'});
+    var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD});
+    var db = cloudant.db.use(MYDB);
+    var p = db.get('mydoc', function(err, data) {
+      assert.equal(data, null);
+      err.should.be.an.Object;
+      err.should.have.property.error;
+      err.should.have.property.reason;
+    
+      // check that we use all the nocked API calls
+      assert.equal(mocks.isDone(), true);
+      done();
+    });
+  });
+
+  it('should only authenticate once', function(done) {
+    var mocks = nock(SERVER)
+      .post('/_session', {name: ME, password: PASSWORD}).reply(200, { ok: true, info: { }, userCtx: { name: ME, roles: ['_admin']}}, { 'Set-Cookie': 'AuthSession=xyz; Version=1; Path=/; HttpOnly' })
+      .get('/' + MYDB + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true})
+      .get('/' + MYDB + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true});
+    var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD});
+    var db = cloudant.db.use(MYDB);
+    var p = db.get('mydoc', function(err, data) {
+      assert.equal(err, null);
+      data.should.be.an.Object;
+      data.should.have.property._id;
+      data.should.have.property._rev;
+      data.should.have.property.ok;
+      
+      db.get('mydoc', function(err, data) {
+        assert.equal(err, null);
+        data.should.be.an.Object;
+        data.should.have.property._id;
+        data.should.have.property._rev;
+        data.should.have.property.ok;
+
+        // check that we use all the nocked API calls
+        assert.equal(mocks.isDone(), true);
+        done();
+      });
+
+    });
+  });
+
+  it('should not authenticate without credentials', function(done) {
+    var mocks = nock(SERVER)
+      .get('/' + MYDB + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true});
+    var cloudant = Cloudant({plugin:'cookieauth', url: SERVER});
+    var db = cloudant.db.use(MYDB);
+    var p = db.get('mydoc', function(err, data) {
+      assert.equal(err, null);
+      data.should.be.an.Object;
+      data.should.have.property._id;
+      data.should.have.property._rev;
+      data.should.have.property.ok;
+
+      // check that we use all the nocked API calls
+      assert.equal(mocks.isDone(), true);
+      done();
+
+    });
+  });
+
+  it('should work with asynchronous instantiation', function(done) {
+    var mocks = nock(SERVER)
+      .post('/_session', {name: ME, password: PASSWORD}).reply(200, { ok: true, info: { }, userCtx: { name: ME, roles: ['_admin']}}, { 'Set-Cookie': 'AuthSession=xyz; Version=1; Path=/; HttpOnly' })
+      .get('/_session').reply(200, { ok: true, info: { }, userCtx: { name: ME, roles: ['_admin']}})
+      .get('*').reply(200, {"couchdb":"Welcome","version":"2.0.0","vendor":{"name":"IBM Cloudant","version":"5662","variant":"paas"},"features":["geo"]})
+    var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD}, function(err, data) {
+      assert.equal(err, null);
+      data.should.be.an.Object;
+      data.should.have.property.userCtx;
+      done();
+    });
+  });
+
+  it('should work with asynchronous instantiation with no credentials', function(done) {
+    var mocks = nock(SERVER)
+      .get('/_session').reply(200, { ok: true, info: { }, userCtx: { name: ME, roles: ['_admin']}})
+      .get('*').reply(200, {"couchdb":"Welcome","version":"2.0.0","vendor":{"name":"IBM Cloudant","version":"5662","variant":"paas"},"features":["geo"]})
+    var cloudant = Cloudant({plugin:'cookieauth', url: SERVER}, function(err, data) {
+      assert.equal(err, null);
+      data.should.be.an.Object;
+      data.should.have.property.userCtx;
+      done();
+    });
+  });
+
+});
