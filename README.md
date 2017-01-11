@@ -143,6 +143,15 @@ var Cloudant = require('cloudant')
 var cloudant = Cloudant("https://MYUSERNAME:MYPASSWORD@MYACCOUNT.cloudant.com");
 ~~~
 
+Running on Bluemix? You can initialize Cloudant directly from the `VCAP_SERVICES` environment variable:
+
+~~~ js
+var Cloudant = require('cloudant');
+var cloudant = Cloudant({instanceName: 'foo', vcapServices: JSON.parse(process.env.VCAP_SERVICES)});
+~~~
+
+Note, if you only have a single Cloudant service then specifying the `instanceName` isn't required.
+
 You can optionally provide a callback to the Cloudant initialization function. This will make the library automatically "ping" Cloudant to confirm the connection and that your credentials work.
 
 Here is a simple example of initializing asychronously, using its optional callback parameter:
