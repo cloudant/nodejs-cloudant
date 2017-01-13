@@ -104,6 +104,87 @@ describe('Reconfigure', function() {
     done();
   });
 
+  it('gets first URL from vcap containing single service', function(done) {
+    var config = {vcapServices: {cloudantNoSQLDB: [
+      {credentials: {url: "http://mykey:mypassword@mydomain.cloudant.com"}}
+    ]}};
+    var url = reconfigure(config);
+    url.should.be.a.String;
+    url.should.equal("http://mykey:mypassword@mydomain.cloudant.com");
+    done();
+  });
+
+  it('gets URL by instance name from vcap containing single service', function(done) {
+    var config = {instanceName: "serviceA", vcapServices: {cloudantNoSQLDB: [
+      {name: "serviceA", credentials: {url: "http://mykey:mypassword@mydomain.cloudant.com"}}
+    ]}};
+    var url = reconfigure(config);
+    url.should.be.a.String;
+    url.should.equal("http://mykey:mypassword@mydomain.cloudant.com");
+    done();
+  });
+
+  it('gets first URL from vcap containing multiple services', function(done) {
+    var config = {vcapServices: {cloudantNoSQLDB: [
+      {credentials: {url: "http://mykey:mypassword@mydomain.cloudant.com"}},
+      {credentials: {url: "http://foo.bar"}},
+      {credentials: {url: "http://foo.bar"}}
+    ]}};
+    var url = reconfigure(config);
+    url.should.be.a.String;
+    url.should.equal("http://mykey:mypassword@mydomain.cloudant.com");
+    done();
+  });
+
+  it('gets URL by instance name from vcap containing multiple services', function(done) {
+    var config = {instanceName: 'serviceC', vcapServices: {cloudantNoSQLDB: [
+      {name: "serviceA", credentials: {url: "http://foo.bar"}},
+      {name: "serviceB", credentials: {url: "http://foo.bar"}},
+      {name: "serviceC", credentials: {url: "http://mykey:mypassword@mydomain.cloudant.com"}}
+    ]}};
+    var url = reconfigure(config);
+    url.should.be.a.String;
+    url.should.equal("http://mykey:mypassword@mydomain.cloudant.com");
+    done();
+  });
+
+  it('errors for empty vcap', function(done) {
+    var config = {vcapServices: {}}
+    should(function () { reconfigure(config); }).throw("Missing Cloudant service in vcapServices");
+    done();
+  });
+
+  it('errors for no services in vcap', function(done) {
+    var config = {vcapServices: {cloudantNoSQLDB: []}}
+    should(function () { reconfigure(config); }).throw("Missing Cloudant service in vcapServices");
+    done();
+  });
+
+  it('errors for missing service in vcap', function(done) {
+    var config = {instanceName: 'serviceC', vcapServices: {cloudantNoSQLDB: [
+      {name: "serviceA", credentials: {url: "http://foo.bar"}},
+      {name: "serviceB", credentials: {url: "http://foo.bar"}} // missing "serviceC"
+    ]}};
+    should(function () { reconfigure(config); }).throw("Missing Cloudant service in vcapServices");
+    done();
+  });
+
+  it('errors for invalid service in vcap - missing credentials', function(done) {
+    var config = {vcapServices: {cloudantNoSQLDB: [
+      {name: "serviceA"} // invalid service, missing credentials
+    ]}};
+    should(function () { reconfigure(config); }).throw('Invalid Cloudant service in vcapServices');
+    done();
+  });
+
+  it('errors for invalid service in vcap - missing url', function(done) {
+    var config = {vcapServices: {cloudantNoSQLDB: [
+      {name: "serviceA", credentials: {}} // invalid service, missing url
+    ]}};
+    should(function () { reconfigure(config); }).throw("Invalid Cloudant service in vcapServices");
+    done();
+  });
+
   it('detects bad urls', function(done) {
     var credentials = { url: 'invalid' };
     var url = reconfigure(credentials);
@@ -120,6 +201,7 @@ describe('Reconfigure', function() {
     var credentials = 'invalid';
     var url = reconfigure(credentials);
     assert.equal(url, null);
+
     done();
   });
 
