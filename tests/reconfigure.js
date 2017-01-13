@@ -1,5 +1,6 @@
 var should = require('should');
 var reconfigure = require('../lib/reconfigure.js');
+var assert = require('assert');
 
 describe('Reconfigure', function() {
   
@@ -100,6 +101,25 @@ describe('Reconfigure', function() {
     var url = reconfigure(credentials);
     url.should.be.a.String;
     url.should.equal("https://this-account-has-dashes:bacon@this-account-has-dashes.cloudant.com");
+    done();
+  });
+
+  it('detects bad urls', function(done) {
+    var credentials = { url: 'invalid' };
+    var url = reconfigure(credentials);
+    assert.equal(url, null);
+    var credentials = { url: '' };
+    var url = reconfigure(credentials);
+    assert.equal(url, null);
+    var credentials = { url: 'http://' };
+    var url = reconfigure(credentials);
+    assert.equal(url, null);
+    var credentials = { };
+    var url = reconfigure(credentials);
+    assert.equal(url, null);
+    var credentials = 'invalid';
+    var url = reconfigure(credentials);
+    assert.equal(url, null);
     done();
   });
 
