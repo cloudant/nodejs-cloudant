@@ -1,5 +1,6 @@
 var should = require('should');
 var reconfigure = require('../lib/reconfigure.js');
+var assert = require('assert');
 
 describe('Reconfigure', function() {
   
@@ -181,6 +182,24 @@ describe('Reconfigure', function() {
       {name: "serviceA", credentials: {}} // invalid service, missing url
     ]}};
     should(function () { reconfigure(config); }).throw("Invalid Cloudant service in vcapServices");
+
+  it('detects bad urls', function(done) {
+    var credentials = { url: 'invalid' };
+    var url = reconfigure(credentials);
+    assert.equal(url, null);
+    var credentials = { url: '' };
+    var url = reconfigure(credentials);
+    assert.equal(url, null);
+    var credentials = { url: 'http://' };
+    var url = reconfigure(credentials);
+    assert.equal(url, null);
+    var credentials = { };
+    var url = reconfigure(credentials);
+    assert.equal(url, null);
+    var credentials = 'invalid';
+    var url = reconfigure(credentials);
+    assert.equal(url, null);
+
     done();
   });
 

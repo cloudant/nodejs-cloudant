@@ -49,6 +49,13 @@ function Cloudant(options, callback) {
   } else {
     theurl = reconfigure({ url: options})
   }
+  if (theurl === null) {
+    if (callback) {
+      return callback('invalid url', null);
+    } else {
+      throw(new Error('invalid url'));
+    }
+  }
 
   // keep connections alive by default
   if (requestDefaults && !requestDefaults.agent) {
