@@ -182,6 +182,8 @@ describe('Reconfigure', function() {
       {name: "serviceA", credentials: {}} // invalid service, missing url
     ]}};
     should(function () { reconfigure(config); }).throw("Invalid Cloudant service in vcapServices");
+    done();
+  });
 
   it('detects bad urls', function(done) {
     var credentials = { url: 'invalid' };
