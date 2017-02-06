@@ -227,25 +227,20 @@ describe('cookieauth plugin', function() {
 
   it('should work with asynchronous instantiation', function(done) {
     var mocks = nock(SERVER)
-      .post('/_session', {name: ME, password: PASSWORD}).reply(200, { ok: true, info: { }, userCtx: { name: ME, roles: ['_admin']}}, { 'Set-Cookie': 'AuthSession=xyz; Version=1; Path=/; HttpOnly' })
-      .get('/_session').reply(200, { ok: true, info: { }, userCtx: { name: ME, roles: ['_admin']}})
-      .get('*').reply(200, {"couchdb":"Welcome","version":"2.0.0","vendor":{"name":"IBM Cloudant","version":"5662","variant":"paas"},"features":["geo"]})
+      .post('/_session').reply(403, { ok: false})
     var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD}, function(err, data) {
-      assert.equal(err, null);
-      data.should.be.an.Object;
-      data.should.have.property.userCtx;
+      err.should.be.an.Object;
+      assert.equal(mocks.isDone(), true);
       done();
     });
   });
 
   it('should work with asynchronous instantiation with no credentials', function(done) {
     var mocks = nock(SERVER)
-      .get('/_session').reply(200, { ok: true, info: { }, userCtx: { name: ME, roles: ['_admin']}})
-      .get('*').reply(200, {"couchdb":"Welcome","version":"2.0.0","vendor":{"name":"IBM Cloudant","version":"5662","variant":"paas"},"features":["geo"]})
-    var cloudant = Cloudant({plugin:'cookieauth', url: SERVER}, function(err, data) {
-      assert.equal(err, null);
-      data.should.be.an.Object;
-      data.should.have.property.userCtx;
+      .get('/_session').reply(403, { ok: false})
+     var cloudant = Cloudant({plugin:'cookieauth', url: SERVER}, function(err, data) {
+      err.should.be.an.Object;
+      assert.equal(mocks.isDone(), true);
       done();
     });
   });
