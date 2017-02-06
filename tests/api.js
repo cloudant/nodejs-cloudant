@@ -71,6 +71,17 @@ describe('Initialization', function() {
     });
   });
 
+  it('should detect missing cloudant', function(done) {
+    var mocks = nock(SERVER)
+      .get('/_session').reply(500, {});
+
+    Cloudant({account:ME}, function(er, cloudant, body) {
+      er.should.be.an.Object
+      mocks.done();
+      done();
+    });
+  });
+
   it('uses cookie auth for ping callback', function(done) {
     var mocks = nock(SERVER)
       .get('/_session').reply(200, {ok:true, userCtx:{name:null,roles:[]}})

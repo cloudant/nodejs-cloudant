@@ -261,7 +261,7 @@ function ping(login, callback) {
           if (cookie) {
             cookie = cookie[0];
           }
-          done(null, b);
+          done(e, b);
         });
       } else {
         done(null, null);
@@ -269,18 +269,18 @@ function ping(login, callback) {
     },
     function(done) {
       nano.session(function(e, b, h) {
-        done(null, b);
+        done(e, b);
       });
     }, 
     function(done) {
       nano.relax({db:''}, function(e, b, h) {
-        done(null, b);
+        done(e, b);
       })
     }
   ], function(err, data) {
     var body = (data && data[2]) || {};
     body.userCtx  = (data && data[1] && data[1].userCtx) || {};
-    callback(null, body, cookie);
+    callback(err, body, cookie);
   });
 }
 
