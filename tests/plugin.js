@@ -116,7 +116,7 @@ describe('custom plugin', function() {
       assert.equal(err, null);
       data.should.be.an.Object;
       data.should.have.property.ok;
-      data.ok.should.be.a.boolean;
+      data.ok.should.be.a.Boolean;
       data.ok.should.equal(true);
       done();
     });
