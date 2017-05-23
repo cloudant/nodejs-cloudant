@@ -2,6 +2,8 @@
 
 This is the official Cloudant library for Node.js.
 
+[![Build Status](https://travis-ci.org/cloudant/nodejs-cloudant.svg?branch=master)](https://travis-ci.org/cloudant/nodejs-cloudant)
+
 * [Installation and Usage](#installation-and-usage)
 * [Getting Started](#getting-started)
   * [Initialization](#initialization)
