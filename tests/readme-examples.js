@@ -28,7 +28,7 @@ var should = require('should');
 
 var nock = require('./nock.js');
 var ME = process.env.cloudant_username || 'nodejs';
-var PASSWORD = process.env.cloudant_password || null;
+var PASSWORD = process.env.cloudant_password || 'sjedon';
 var SERVER = 'https://' + ME + '.cloudant.com';
 
 var real_require = require;
@@ -63,7 +63,7 @@ describe('Getting Started', function() {
     var Cloudant = require('cloudant');
 
     var me = ME; // Set this to your own account
-    var password = process.env.cloudant_password;
+    var password = process.env.cloudant_password || 'sjedon';
 
     // Initialize the library with my account.
     var cloudant = Cloudant({account:me, password:password});
@@ -83,7 +83,7 @@ describe('Getting Started', function() {
 
     // Initialize Cloudant with settings from .env
     var username = ME;
-    var password = process.env.cloudant_password;
+    var password = process.env.cloudant_password || 'sjedon';;
     var cloudant = Cloudant({account:username, password:password});
 
     // Remove any existing database called "alice".
@@ -129,7 +129,7 @@ describe('Initialization', function() {
   it('Example 1', function(done) {
     var Cloudant = require('cloudant');
     var me = ME; // Replace with your account.
-    var password = process.env.cloudant_password;
+    var password = process.env.cloudant_password || 'sjedon';
 
     Cloudant({account:me, password:password}, function(err, cloudant) {
       if (err) {
@@ -195,7 +195,7 @@ describe('Authorization and API Keys', function() {
   it('Example 1', function(done) {
     var Cloudant = require('cloudant');
     var me = ME; // Replace with your account.
-    var password = process.env.cloudant_password;
+    var password = process.env.cloudant_password || 'sjedon';
     var cloudant = Cloudant({account:me, password:password});
 
     cloudant.generate_api_key(function(er, api) {
@@ -562,7 +562,7 @@ describe('Cookie Authentication', function() {
   it('Example 1', function(done) {
     var Cloudant = require('cloudant');
     var username = ME; // Set this to your own account
-    var password = process.env.cloudant_password;
+    var password = process.env.cloudant_password || 'sjedon';
     var cloudant = Cloudant({account:username, password:password});
 
     // A global variable to store the cookies. Of course, you can store cookies any way you wish.

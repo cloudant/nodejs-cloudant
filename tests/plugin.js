@@ -26,7 +26,7 @@ var stream = require('stream');
 
 // These globals may potentially be parameterized.
 var ME = process.env.cloudant_username || 'nodejs';
-var PASSWORD = process.env.cloudant_password || null;
+var PASSWORD = process.env.cloudant_password || 'sjedon';
 var SERVER = 'https://' + ME + '.cloudant.com';
 var MYDB = 'mydb';
 var mydb = null;
