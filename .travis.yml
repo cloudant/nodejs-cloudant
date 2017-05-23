@@ -6,10 +6,9 @@ branches:
     - next
     - rewrite
 node_js:
-  - "0.12"
-  - "4.2"
-  - "5"
   - "node"
+  - "6"
+  - "4"
 os:
   - linux
 before_install:
