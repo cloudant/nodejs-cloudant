@@ -16,7 +16,6 @@
 // If CouchDB/Cloudant responds with a 429 HTTP code
 // the library will retry the request up to three
 // times with exponential backoff.
-// This module is unsuitable for streaming requests.
 var async = require('async');
 var debug = require('debug')('cloudant');
 var stream = require('stream');
