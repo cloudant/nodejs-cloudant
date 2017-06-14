@@ -222,11 +222,11 @@ Cloudant({hostname:"companycloudant.local", username:"somebody", password:"someb
 
 This library can be used with one of these `request` plugins:
 
-1. `default` - the default [request](https://www.npmjs.com/package/request) library plugin. This uses Node.js's callbacks to communicate Cloudant's replies 
+1. `default` - the default [request](https://www.npmjs.com/package/request) library plugin. This uses Node.js's callbacks to communicate Cloudant's replies
 back to your app and can be used to stream data using the Node.js [Stream API](https://nodejs.org/api/stream.html).
-2. `promises` - if you'd prefer to write code in the Promises style then the "promises" plugin turns each request into a Promise. This plugin cannot be used 
+2. `promises` - if you'd prefer to write code in the Promises style then the "promises" plugin turns each request into a Promise. This plugin cannot be used to
 stream data because instead of returning the HTTP request, we are simply returning a Promise instead.
-3. `retry` - on occasion, Cloudant's multi-tenant offerring may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. 
+3. `retry` - on occasion, Cloudant's multi-tenant offerring may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time.
 The "retry" plugin will automatically retry your request with exponential back-off. The 'retry' plugin can be used to stream data.
 4. `cookieauth` - this plugin will automatically swap your Cloudant credentials for a cookie transparently for you. It will handle the authentication for you
 and ensure that the cookie is refreshed. The 'cookieauth' plugin can be used to stream data.
@@ -272,7 +272,7 @@ var mydb = cloudant.db.use('mydb');
 
 #### The 'cookieauth' plugin
 
-When initialising the Cloudant library, you can opt to use the 'retry' plugin:
+When initialising the Cloudant library, you can opt to use the 'cookieauth' plugin:
 
 ```js
 var cloudant = Cloudant({url: myurl, plugin:'cookieauth'});
@@ -282,10 +282,10 @@ mydb.get('mydoc', function(err, data) {
 });
 ```
 
-The above code will transparently call `POST /_session` to exchange your credentials for a cookie and then call `GET /mydoc` to fetch the document. 
+The above code will transparently call `POST /_session` to exchange your credentials for a cookie and then call `GET /mydoc` to fetch the document.
 
-Subsequent calls to the same `cloudant` instance will simply use cookie authentication from that point. The library will automatically ensure that the cookie remains 
-up-to-date by calling Cloudant on an hourly basis to refresh the cookie. 
+Subsequent calls to the same `cloudant` instance will simply use cookie authentication from that point. The library will automatically ensure that the cookie remains
+up-to-date by calling Cloudant on an hourly basis to refresh the cookie.
 
 #### Custom plugin
 
@@ -299,7 +299,7 @@ When initialising the Cloudant library, you can supply your own plugin function:
   var cloudant = Cloudant({url: myurl, plugin: doNothingPlugin});
 ```
 
-Whenever the Cloudant library wishes to make an outgoing HTTP request, it will call your function instead of `request`. 
+Whenever the Cloudant library wishes to make an outgoing HTTP request, it will call your function instead of `request`.
 
 ## API Reference
 
@@ -808,7 +808,7 @@ If you want to see all debug messages, including calls made by the underlying `n
 This will log every request and response as in the following example:
 
     nano { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, uri: 'https://xxxx:yyyyy@xxxx.cloudant.com/woof', body: '{"a":1,"b":2}' } +3ms
-    nano { err: null, body: { ok: true, id: '98f178cb8f4fe089f70fa4c92a0c84b1', rev: '1-25f9b97d75a648d1fcd23f0a73d2776e' }, headers: { 'x-couch-request-id': '8220322dee', location: 'http://reader.cloudant.com/woof/98f178cb8f4fe089f70fa4c92a0c84b1', date: 'Mon, 07 Sep 2015 13:06:01 GMT', 'content-type': 'application/json', 'cache-control': 'must-revalidate', 'strict-transport-security': 'max-age=31536000', 'x-content-type-options': 'nosniff;', connection: 'close', statusCode: 201, uri: 'https://xxxx:yyyy@xxxx.cloudant.com/woof' } } 
+    nano { err: null, body: { ok: true, id: '98f178cb8f4fe089f70fa4c92a0c84b1', rev: '1-25f9b97d75a648d1fcd23f0a73d2776e' }, headers: { 'x-couch-request-id': '8220322dee', location: 'http://reader.cloudant.com/woof/98f178cb8f4fe089f70fa4c92a0c84b1', date: 'Mon, 07 Sep 2015 13:06:01 GMT', 'content-type': 'application/json', 'cache-control': 'must-revalidate', 'strict-transport-security': 'max-age=31536000', 'x-content-type-options': 'nosniff;', connection: 'close', statusCode: 201, uri: 'https://xxxx:yyyy@xxxx.cloudant.com/woof' } }
 
 Note that credentials used in the requests are also written to the log.
 
@@ -895,7 +895,7 @@ See the [Attachment Functions](#attachment-functions) section for examples of pi
 
 ## Development and Contribution
 
-This is an open-source library, published under the Apache 2.0 license. We very much welcome contributions to the project so if you would like 
+This is an open-source library, published under the Apache 2.0 license. We very much welcome contributions to the project so if you would like
 to contribute (even if it's fixing a typo in the README!) simply
 
 * fork this repository. Visit https://github.com/cloudant/nodejs-cloudant and click the "Fork" button.
