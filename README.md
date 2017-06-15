@@ -207,10 +207,10 @@ Cloudant({account:me, username:otherUsername, password:otherPassword}, function(
 
 ### Cloudant Local
 
-If you use Cloudant Local, everything works exactly the same, except you provide a *hostname* parameter to indicate which server to use:
+If you use Cloudant Local, everything works exactly the same, except you provide a *url* parameter to indicate which server to use:
 
 ~~~ js
-Cloudant({hostname:"companycloudant.local", username:"somebody", password:"somebody's secret"}, function(er, cloudant, reply) {
+Cloudant({url:"companycloudant.local", username:"somebody", password:"somebody's secret"}, function(er, cloudant, reply) {
   if (er)
     throw er
 
