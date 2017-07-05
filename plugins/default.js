@@ -20,4 +20,4 @@
 module.exports = function(options) {
   var requestDefaults = options.requestDefaults || {jar: false};
   return require('request').defaults(requestDefaults);
-}
+};

@@ -57,7 +57,7 @@ module.exports = function(options) {
           if (statusCode !== 429) {
             s.write(chunk);
           }
-        });  
+        });
       }, timeout);
     }, function() {
       // this function returns false for the first 'maxAttempts' 429s receieved
@@ -68,11 +68,11 @@ module.exports = function(options) {
           timeout *= 2;
         }
         return false;
-      } 
+      }
       return true;
     }, function(e, results) {
       s.end();
-      callback(results[0], results[1], results[2])
+      callback(results[0], results[1], results[2]);
     });
 
     // return the pass-through stream
@@ -81,6 +81,3 @@ module.exports = function(options) {
 
   return myrequest;
 };
-    
-    
-    

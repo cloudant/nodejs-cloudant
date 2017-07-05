@@ -13,13 +13,12 @@
  */
 
 // this the the 'promises' request handler.
-// It is a function that returns a Promise and resolves the promise on success 
+// It is a function that returns a Promise and resolves the promise on success
 // or rejects the Promise on failure
 
 var nullcallback = function() {};
 
 module.exports = function(options) {
-
   var requestDefaults = options.requestDefaults || {jar: false};
   var request = require('request').defaults(requestDefaults);
   var myrequest = function(req, callback) {
@@ -30,7 +29,7 @@ module.exports = function(options) {
       request(req, function(err, h, b) {
         var statusCode = h && h.statusCode || 500;
         if (b) {
-          try { b = JSON.parse(b); } catch (err) {  }
+          try { b = JSON.parse(b); } catch (err) { }
         }
         if (statusCode >= 200 && statusCode < 400) {
           callback(null, h, b);
@@ -41,11 +40,9 @@ module.exports = function(options) {
         }
         reject(err || b);
         callback(err, h, b);
-      })
+      });
     });
   };
 
   return myrequest;
 };
-    
-    
