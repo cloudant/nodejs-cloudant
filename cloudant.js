@@ -1,18 +1,19 @@
-module.exports = Cloudant;
+// Copyright © 2017 IBM Corp. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+'use strict';
 
-/**
- * Copyright (c) 2016 IBM Cloudant, Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language governing permissions
- * and limitations under the License.
- */
+module.exports = Cloudant;
 
 var Nano = require('cloudant-nano');
 var debug = require('debug')('cloudant');
@@ -38,7 +39,7 @@ function Cloudant(options, callback) {
 
   var pkg = require('./package.json');
   var useragent = 'nodejs-cloudant/' + pkg.version + ' (Node.js ' + process.version + ')';
-  var requestDefaults = { headers: { 'User-agent': useragent}, gzip: true };
+  var requestDefaults = { headers: { 'User-agent': useragent }, gzip: true };
   var theurl = null;
   if (typeof options === 'object') {
     if (options.requestDefaults) {
@@ -46,11 +47,11 @@ function Cloudant(options, callback) {
     }
     theurl = reconfigure(options);
   } else {
-    theurl = reconfigure({ url: options});
+    theurl = reconfigure({ url: options });
   }
   if (theurl === null) {
     if (callback) {
-      return callback('invalid url', null);
+      return callback('invalid url', null); // eslint-disable-line standard/no-callback-literal
     } else {
       throw (new Error('invalid url'));
     }
@@ -87,7 +88,7 @@ function Cloudant(options, callback) {
     // Functions added to each db e.g. cloudant.use("mydb")
     // ****************
 
-    var bulk_get = function(options, callback) {
+    var bulk_get = function(options, callback) { // eslint-disable-line camelcase
       return nano.request({ path: encodeURIComponent(db) + '/_bulk_get',
         method: 'post',
         body: options }, callback);
@@ -102,13 +103,13 @@ function Cloudant(options, callback) {
     };
 
     // https://docs.cloudant.com/api.html#viewing-permissions
-    var get_security = function(callback) {
-      var path = '_api/v2/db/' + encodeURIComponent(db) + '/_security';
-      return nano.request({ path: path}, callback);
+    var get_security = function(callback) { // eslint-disable-line camelcase
+      var path = '_api/v2/db/' + encodeURIComponent(db) + '/_security'; // eslint-disable-line camelcase
+      return nano.request({ path: path }, callback);
     };
 
     // https://docs.cloudant.com/api.html#modifying-permissions
-    var set_security = function(permissions, callback) {
+    var set_security = function(permissions, callback) { // eslint-disable-line camelcase
       var path = '_api/v2/db/' + encodeURIComponent(db) + '/_security';
       return nano.request({ path: path,
         method: 'put',
@@ -131,7 +132,7 @@ function Cloudant(options, callback) {
     };
 
     // https://docs.cloudant.com/api.html#deleting-an-index
-    var index_del = function(spec, callback) {
+    var index_del = function(spec, callback) { // eslint-disable-line camelcase
       spec = spec || {};
       if (!spec.ddoc) { throw new Error('index.del() must specify a "ddoc" value'); }
       if (!spec.name) { throw new Error('index.del() must specify a "name" value'); }
@@ -140,7 +141,7 @@ function Cloudant(options, callback) {
                  encodeURIComponent(spec.ddoc) + '/' +
                  encodeURIComponent(type) + '/' +
                  encodeURIComponent(spec.name);
-      return nano.request({ path: path, method: 'delete'}, callback);
+      return nano.request({ path: path, method: 'delete' }, callback);
     };
 
     // https://docs.cloudant.com/api.html#finding-documents-using-an-index
@@ -153,11 +154,11 @@ function Cloudant(options, callback) {
     // add Cloudant special functions
     var obj = nano._use(db);
     obj.geo = geo;
-    obj.bulk_get = bulk_get;
-    obj.get_security = get_security;
-    obj.set_security = set_security;
+    obj.bulk_get = bulk_get; // eslint-disable-line camelcase
+    obj.get_security = get_security; // eslint-disable-line camelcase
+    obj.set_security = set_security; // eslint-disable-line camelcase
     obj.index = index;
-    obj.index.del = index_del;
+    obj.index.del = index_del; // eslint-disable-line camelcase
     obj.find = find;
 
     return obj;
@@ -168,47 +169,47 @@ function Cloudant(options, callback) {
   nano.use = nano.db.use = use;
 
   // https://docs.cloudant.com/api.html#creating-api-keys
-  var generate_api_key = function(callback) {
-    return nano.request({path: '_api/v2/api_keys', method: 'post' }, callback);
+  var generate_api_key = function(callback) { // eslint-disable-line camelcase
+    return nano.request({ path: '_api/v2/api_keys', method: 'post' }, callback);
   };
 
   // https://docs.cloudant.com/api.html#reading-the-cors-configuration
-  var get_cors = function(callback) {
-    return nano.request({path: '_api/v2/user/config/cors' }, callback);
+  var get_cors = function(callback) { // eslint-disable-line camelcase
+    return nano.request({ path: '_api/v2/user/config/cors' }, callback);
   };
 
   // https://docs.cloudant.com/api.html#setting-the-cors-configuration
-  var set_cors = function(configuration, callback) {
+  var set_cors = function(configuration, callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/config/cors',
       method: 'put',
       body: configuration }, callback);
   };
 
   // the /set_permissions API call is deprecated
-  var set_permissions = function(opts, callback) {
+  var set_permissions = function(opts, callback) { // eslint-disable-line camelcase
     console.error('set_permissions is deprecated. use set_security instead');
     callback(null, null);
   };
 
   // https://docs.cloudant.com/api.html#setting-the-cors-configuration
-  var set_cors = function(configuration, callback) {
+  set_cors = function(configuration, callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/config/cors',
       method: 'put',
       body: configuration }, callback);
   };
 
-  var get_virtual_hosts = function(callback) {
+  var get_virtual_hosts = function(callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/virtual_hosts',
       method: 'get'}, callback);
   };
 
-  var add_virtual_host = function(opts, callback) {
+  var add_virtual_host = function(opts, callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/virtual_hosts',
       method: 'post',
       body: opts }, callback);
   };
 
-  var delete_virtual_host = function(opts, callback) {
+  var delete_virtual_host = function(opts, callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/virtual_hosts',
       method: 'delete',
       body: opts }, callback);
@@ -216,13 +217,13 @@ function Cloudant(options, callback) {
 
   // add top-level Cloudant-specific functions
   nano.ping = ping;
-  nano.get_cors = get_cors;
-  nano.set_cors = set_cors;
-  nano.set_permissions = set_permissions;
-  nano.generate_api_key = generate_api_key;
-  nano.get_virtual_hosts = get_virtual_hosts;
-  nano.add_virtual_host = add_virtual_host;
-  nano.delete_virtual_host = delete_virtual_host;
+  nano.get_cors = get_cors; // eslint-disable-line camelcase
+  nano.set_cors = set_cors; // eslint-disable-line camelcase
+  nano.set_permissions = set_permissions; // eslint-disable-line camelcase
+  nano.generate_api_key = generate_api_key; // eslint-disable-line camelcase
+  nano.get_virtual_hosts = get_virtual_hosts; // eslint-disable-line camelcase
+  nano.add_virtual_host = add_virtual_host; // eslint-disable-line camelcase
+  nano.delete_virtual_host = delete_virtual_host; // eslint-disable-line camelcase
 
   if (callback) {
     debug('Automatic ping');
