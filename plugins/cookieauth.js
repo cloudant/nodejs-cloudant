@@ -1,16 +1,18 @@
-/**
- * Copyright (c) 2015 IBM Cloudant, Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language governing permissions
- * and limitations under the License.
- */
+
+// Copyright © 2017 IBM Corp. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+'use strict';
 
 // this the the 'cookieauth' request handler.
 // Instead of passing the authentication credentials using HTTP Basic Auth with every request
@@ -32,8 +34,7 @@ module.exports = function(options) {
   // 1) if we have a cookie or have no credentials, just try the request
   // 2) otherwise, get session cookie
   // 3) then try the request
-  var cookieRequest = function (req, callback) {
-    
+  var cookieRequest = function(req, callback) {
     // deal with absence of callback
     if (typeof callback !== 'function') {
       callback = nullcallback;
@@ -56,12 +57,12 @@ module.exports = function(options) {
         username: bits[0],
         password: bits[1]
       };
-    } 
+    }
     req.url = url;
     delete req.uri;
     delete parsed.path;
     delete parsed.pathname;
-    var stuburl = u.format(parsed).replace(/\/$/,'');
+    var stuburl = u.format(parsed).replace(/\/$/, '');
 
     // to maintain streaming compatiblity, always return a PassThrough stream
     var s = new stream.PassThrough();
@@ -69,9 +70,8 @@ module.exports = function(options) {
     // run these three things in series
     async.series([
 
-      // call the request being asked for 
+      // call the request being asked for
       function(done) {
-
         // do we have cookie for this domain name?
         var cookies = jar.getCookies(stuburl);
         var statusCode = 500;
@@ -85,35 +85,32 @@ module.exports = function(options) {
             if (!auth || (statusCode >= 200 && statusCode < 400)) {
               // returning an err of true stops the async sequence
               // we're good because we didn't get a 4** or 5**
-              done(true, [e,h,b]);
+              done(true, [e, h, b]);
             } else {
-
               // continue with the async chain
-              done(null, [e,h,b]);
+              done(null, [e, h, b]);
             }
           }).on('response', function(r) {
-            statusCode = r && r.statusCode || 500;
+            statusCode = (r && r.statusCode) || 500;
           }).on('data', function(chunk) {
             // only write to the output stream on success
             if (statusCode < 400) {
               s.write(chunk);
             }
-          }); 
-
+          });
         } else {
           debug('we have no cookies - need to authenticate first');
           // we have no cookies so we need to authenticate first
           // i.e. do nothing here
           done(null, null);
         }
-
       },
 
       // call POST /_session to get a cookie
       function(done) {
         debug('need to authenticate - calling POST /_session');
         var r = {
-          url: stuburl + '/_session', 
+          url: stuburl + '/_session',
           method: 'post',
           form: {
             name: credentials.username,
@@ -122,7 +119,7 @@ module.exports = function(options) {
           jar: jar
         };
         request(r, function(e, h, b) {
-          var statusCode = h && h.statusCode || 500;
+          var statusCode = (h && h.statusCode) || 500;
           // if we sucessfully authenticate
           if (statusCode >= 200 && statusCode < 400) {
             // continue to the next stage of the async chain
@@ -140,11 +137,11 @@ module.exports = function(options) {
               cookieRefresh.unref();
             }
 
-            done(null, [e,h,b]);
+            done(null, [e, h, b]);
           } else {
             // failed to authenticate - no point proceeding any further
             debug('authentication failed');
-            done(true, [e,h,b]);
+            done(true, [e, h, b]);
           }
         });
       },
@@ -155,31 +152,29 @@ module.exports = function(options) {
         var statusCode = 500;
         req.jar = jar;
         request(req, function(e, h, b) {
-          done(null, [e,h,b]);
+          done(null, [e, h, b]);
         }).on('response', function(r) {
-          statusCode = r && r.statusCode || 500;
+          statusCode = (r && r.statusCode) || 500;
         }).on('data', function(chunk) {
           if (statusCode < 400) {
             s.write(chunk);
           }
-        }); 
+        });
       }
     ], function(err, data) {
         // callback with the last call we made
-        if (data && data.length > 0) {
-          var reply = data[data.length - 1];
+      if (data && data.length > 0) {
+        var reply = data[data.length - 1];
           // error, headers, body
-          callback(reply[0], reply[1], reply[2]);
-        } else {
-          callback(err, { statusCode: 500 }, null);
-        }
+        callback(reply[0], reply[1], reply[2]);
+      } else {
+        callback(err, { statusCode: 500 }, null);
+      }
     });
 
     // return the pass-through stream
     return s;
   };
 
-
   return cookieRequest;
 };
-

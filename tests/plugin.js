@@ -23,7 +23,6 @@ var nock = require('./nock.js');
 var Cloudant = require('../cloudant.js');
 var stream = require('stream');
 
-
 // These globals may potentially be parameterized.
 var ME = process.env.cloudant_username || 'nodejs';
 var PASSWORD = process.env.cloudant_password || 'sjedon';
@@ -34,24 +33,22 @@ var cc = null;
 var ddoc = null;
 var viewname = null;
 
-
 describe('retry-on-429 plugin', function() {
-
   it('behave normally too', function(done) {
     var mocks = nock(SERVER).get('/' + MYDB).reply(200, {});
-    var cloudant = Cloudant({plugin:'retry', account:ME, password: PASSWORD});
+    var cloudant = Cloudant({plugin: 'retry', account: ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     this.timeout(10000);
     db.info(function(err, data) {
       assert.equal(err, null);
       data.should.be.an.Object;
       done();
-    })
+    });
   });
 
   it('allow no callback', function(done) {
     var mocks = nock(SERVER).get('/' + MYDB).reply(200, {});
-    var cloudant = Cloudant({plugin:'retry', account:ME, password: PASSWORD});
+    var cloudant = Cloudant({plugin: 'retry', account: ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     this.timeout(10000);
     db.info();
@@ -61,7 +58,7 @@ describe('retry-on-429 plugin', function() {
   it('should return a stream', function(done) {
     var mocks = nock(SERVER)
       .get('/' + MYDB).reply(200, { ok: true});
-    var cloudant = Cloudant({plugin:'retry', account:ME, password: PASSWORD});
+    var cloudant = Cloudant({plugin: 'retry', account: ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     var p = db.info(function() {
       done();
@@ -71,11 +68,10 @@ describe('retry-on-429 plugin', function() {
 });
 
 describe('promise plugin', function() {
-
   it('should return a promise', function(done) {
     var mocks = nock(SERVER)
       .get('/' + MYDB).reply(200, { ok: true});
-    var cloudant = Cloudant({plugin:'promises', account:ME, password: PASSWORD});
+    var cloudant = Cloudant({plugin: 'promises', account: ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     var p = db.info().then(function(data) {
       data.should.be.an.Object;
@@ -87,7 +83,7 @@ describe('promise plugin', function() {
   it('should return an error status code', function(done) {
     var mocks = nock(SERVER)
       .get('/' + MYDB).reply(404, { ok: false});
-    var cloudant = Cloudant({plugin:'promises', account:ME, password: PASSWORD});
+    var cloudant = Cloudant({plugin: 'promises', account: ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     var p = db.info().then(function(data) {
       assert(false);
@@ -100,17 +96,15 @@ describe('promise plugin', function() {
     });
     assert.equal(p instanceof Promise, true);
   });
-
 });
 
 describe('custom plugin', function() {
-
   var doNothingPlugin = function(opts, callback) {
-    callback(null, { statusCode:200 }, { ok: true});
+    callback(null, { statusCode: 200 }, { ok: true});
   };
 
   it('should allow custom plugins', function(done) {
-    var cloudant = Cloudant({plugin: doNothingPlugin, account:ME, password: PASSWORD});
+    var cloudant = Cloudant({plugin: doNothingPlugin, account: ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     db.info(function(err, data) {
       assert.equal(err, null);
@@ -120,8 +114,7 @@ describe('custom plugin', function() {
       data.ok.should.equal(true);
       done();
     });
-  })
-
+  });
 });
 
 describe('cookieauth plugin', function() {
@@ -129,7 +122,7 @@ describe('cookieauth plugin', function() {
     var mocks = nock(SERVER)
       .post('/_session').reply(200, { ok: true})
       .get('/' + MYDB).reply(200, { ok: true});
-    var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD});
+    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     var p = db.info(function(err, data) {
       assert.equal(err, null);
@@ -145,7 +138,7 @@ describe('cookieauth plugin', function() {
     var mocks = nock(SERVER)
       .post('/_session', {name: ME, password: PASSWORD}).reply(200, { ok: true, info: { }, userCtx: { name: ME, roles: ['_admin']}})
       .get('/' + MYDB + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true});
-    var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD});
+    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     var p = db.get('mydoc', function(err, data) {
       assert.equal(err, null);
@@ -153,7 +146,7 @@ describe('cookieauth plugin', function() {
       data.should.have.property._id;
       data.should.have.property._rev;
       data.should.have.property.ok;
-    
+
       // check that we use all the nocked API calls
       assert.equal(mocks.isDone(), true);
       done();
@@ -162,15 +155,15 @@ describe('cookieauth plugin', function() {
 
   it('should fail with incorrect authentication', function(done) {
     var mocks = nock(SERVER)
-      .post('/_session', {name: ME, password: PASSWORD}).reply(401, {error:'unauthorized', reason: 'Name or password is incorrect.'});
-    var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD});
+      .post('/_session', {name: ME, password: PASSWORD}).reply(401, {error: 'unauthorized', reason: 'Name or password is incorrect.'});
+    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     var p = db.get('mydoc', function(err, data) {
       assert.equal(data, null);
       err.should.be.an.Object;
       err.should.have.property.error;
       err.should.have.property.reason;
-    
+
       // check that we use all the nocked API calls
       assert.equal(mocks.isDone(), true);
       done();
@@ -182,7 +175,7 @@ describe('cookieauth plugin', function() {
       .post('/_session', {name: ME, password: PASSWORD}).reply(200, { ok: true, info: { }, userCtx: { name: ME, roles: ['_admin']}}, { 'Set-Cookie': 'AuthSession=xyz; Version=1; Path=/; HttpOnly' })
       .get('/' + MYDB + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true})
       .get('/' + MYDB + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true});
-    var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD});
+    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: PASSWORD});
     var db = cloudant.db.use(MYDB);
     var p = db.get('mydoc', function(err, data) {
       assert.equal(err, null);
@@ -190,7 +183,7 @@ describe('cookieauth plugin', function() {
       data.should.have.property._id;
       data.should.have.property._rev;
       data.should.have.property.ok;
-      
+
       db.get('mydoc', function(err, data) {
         assert.equal(err, null);
         data.should.be.an.Object;
@@ -202,14 +195,13 @@ describe('cookieauth plugin', function() {
         assert.equal(mocks.isDone(), true);
         done();
       });
-
     });
   });
 
   it('should not authenticate without credentials', function(done) {
     var mocks = nock(SERVER)
       .get('/' + MYDB + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true});
-    var cloudant = Cloudant({plugin:'cookieauth', url: SERVER});
+    var cloudant = Cloudant({plugin: 'cookieauth', url: SERVER});
     var db = cloudant.db.use(MYDB);
     var p = db.get('mydoc', function(err, data) {
       assert.equal(err, null);
@@ -221,14 +213,13 @@ describe('cookieauth plugin', function() {
       // check that we use all the nocked API calls
       assert.equal(mocks.isDone(), true);
       done();
-
     });
   });
 
   it('should work with asynchronous instantiation', function(done) {
     var mocks = nock(SERVER)
-      .post('/_session').reply(403, { ok: false})
-    var cloudant = Cloudant({plugin:'cookieauth', account:ME, password: PASSWORD}, function(err, data) {
+      .post('/_session').reply(403, { ok: false});
+    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: PASSWORD}, function(err, data) {
       err.should.be.an.Object;
       assert.equal(mocks.isDone(), true);
       done();
@@ -237,12 +228,11 @@ describe('cookieauth plugin', function() {
 
   it('should work with asynchronous instantiation with no credentials', function(done) {
     var mocks = nock(SERVER)
-      .get('/_session').reply(403, { ok: false})
-     var cloudant = Cloudant({plugin:'cookieauth', url: SERVER}, function(err, data) {
+      .get('/_session').reply(403, { ok: false});
+    var cloudant = Cloudant({plugin: 'cookieauth', url: SERVER}, function(err, data) {
       err.should.be.an.Object;
       assert.equal(mocks.isDone(), true);
       done();
     });
   });
-
 });
