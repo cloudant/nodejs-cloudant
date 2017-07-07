@@ -18,7 +18,8 @@ def getEnvForSuite(suiteName) {
   def envVars = [
     "cloudant_username=${env.DB_USER}",
     "cloudant_password=${env.DB_PASSWORD}",
-    "NVM_DIR=${env.HOME}/.nvm"
+    "NVM_DIR=${env.HOME}/.nvm",
+    "MOCHA_TIMEOUT=20000" // 20s
   ]
 
   // Add test suite specific environment variables
@@ -54,7 +55,7 @@ def setupNodeAndTest(version, testSuite='tests') {
             nvm install ${version}
             nvm use ${version}
             npm install mocha-jenkins-reporter --save-dev
-            ./node_modules/mocha/bin/mocha --reporter mocha-jenkins-reporter --reporter-options junit_report_path=./test/test-results.xml,junit_report_stack=true,junit_report_name=${testSuite} ${testSuite}
+            ./node_modules/mocha/bin/mocha --timeout $MOCHA_TIMEOUT --reporter mocha-jenkins-reporter --reporter-options junit_report_path=./test/test-results.xml,junit_report_stack=true,junit_report_name=${testSuite} ${testSuite}
           """
         } finally {
           junit '**/*test-results.xml'
