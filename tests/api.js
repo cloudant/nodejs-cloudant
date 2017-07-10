@@ -34,6 +34,21 @@ var cc = null;
 var ddoc = null;
 var viewname = null;
 
+var newClient = function(req, callback) {
+  if (typeof req !== 'object') {
+    req = {url: req};
+  }
+  return Cloudant(
+    Object.assign(req, {
+      requestDefaults: {
+        headers: {},
+        timeout: 120000 // 2min
+      }
+    }),
+    callback
+  )
+};
+
 describe('Cloudant API', function() {
   it('is a function', function() {
     Cloudant.should.be.type('function');
@@ -46,7 +61,7 @@ describe('Cloudant API', function() {
 describe('Initialization', function() {
   it('runs synchronously with one argument', function() {
     (function() {
-      var db = Cloudant({account: ME});
+      var db = newClient({account: ME});
     }).should.not.throw();
   });
 
@@ -55,7 +70,7 @@ describe('Initialization', function() {
       .get('/_session').reply(200, {ok: true, userCtx: {name: null, roles: []}})
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2'});
 
-    Cloudant({account: ME}, function(er, cloudant, body) {
+    newClient({account: ME}, function(er, cloudant, body) {
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
       body.should.be.an.Object;
@@ -80,7 +95,7 @@ describe('Initialization', function() {
     var mocks = nock(SERVER)
       .get('/_session').reply(500, {});
 
-    Cloudant({account: ME}, function(er, cloudant, body) {
+    newClient({account: ME}, function(er, cloudant, body) {
       er.should.be.an.Object;
       mocks.done();
       done();
@@ -93,7 +108,7 @@ describe('Initialization', function() {
       .post('/_session').reply(200, {ok: true, userCtx: {name: ME, roles: []}})
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2'});
 
-    Cloudant({account: ME, account: ME, password: PASSWORD}, function(er, cloudant, welcome) {
+    newClient({account: ME, account: ME, password: PASSWORD}, function(er, cloudant, welcome) {
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
 
@@ -103,7 +118,7 @@ describe('Initialization', function() {
   });
 
   it('supports instantiation without a callback', function(done) {
-    var c = Cloudant({account: ME});
+    var c = newClient({account: ME});
     // check we get a Nano object back
     c.should.be.an.Object;
     c.should.have.property('use');
@@ -119,7 +134,7 @@ describe('Authentication', function() {
     var mocks = nock(SERVER)
       .post('/_api/v2/api_keys').reply(200, { 'password': 'Eivln4jPiLS8BoTxjXjVukDT', 'ok': true, 'key': 'thandoodstrenterprourete' });
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = newClient({account: ME, password: PASSWORD});
     c.generate_api_key(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -141,7 +156,7 @@ describe('CORS', function() {
     var mocks = nock(SERVER)
       .get('/_api/v2/user/config/cors').reply(200, { 'enable_cors': true, 'allow_credentials': true, 'origins': ['*']});
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = newClient({account: ME, password: PASSWORD});
     c.get_cors(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -161,7 +176,7 @@ describe('CORS', function() {
     var mocks = nock(SERVER)
       .put('/_api/v2/user/config/cors').reply(200, { 'ok': true });
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = newClient({account: ME, password: PASSWORD});
     c.set_cors({ 'enable_cors': true, 'allow_credentials': true, 'origins': ['*']}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -183,7 +198,7 @@ describe('Authorization', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = newClient({account: ME, password: PASSWORD});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -252,7 +267,7 @@ describe('Cloudant-Specific APIs', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = newClient({account: ME, password: PASSWORD});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -362,7 +377,7 @@ describe('Changes query', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = newClient({account: ME, password: PASSWORD});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -478,7 +493,7 @@ describe('Changes follower', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = newClient({account: ME, password: PASSWORD});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -630,7 +645,7 @@ describe('Cloudant Query', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = newClient({account: ME, password: PASSWORD});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -773,7 +788,7 @@ describe('Cloudant Search', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = newClient({account: ME, password: PASSWORD});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -964,7 +979,7 @@ function test_gzip() {
         'content-type': 'text/css'
       });
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = newClient({account: ME, password: PASSWORD});
     var mydb = c.db.use(dbName);
     mydb.attachment.get('x', 'y.css', function(er, data) {
       should(er).equal(null);
@@ -985,7 +1000,7 @@ describe('Virtual Hosts', function() {
     var mocks = nock(SERVER)
       .get('/_api/v2/user/virtual_hosts').reply(200, {'virtual_hosts': []});
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = newClient({account: ME, password: PASSWORD});
     c.get_virtual_hosts(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -1001,7 +1016,7 @@ describe('Virtual Hosts', function() {
     var mocks = nock(SERVER)
       .post('/_api/v2/user/virtual_hosts').reply(200, {'ok': true});
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = newClient({account: ME, password: PASSWORD});
     c.add_virtual_host({ host: myHost, path: '/mypath'}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -1018,7 +1033,7 @@ describe('Virtual Hosts', function() {
     var mocks = nock(SERVER)
       .delete('/_api/v2/user/virtual_hosts').reply(200, { 'ok': true });
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = newClient({account: ME, password: PASSWORD});
     c.delete_virtual_host({ host: myHost, path: '/mypath'}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
