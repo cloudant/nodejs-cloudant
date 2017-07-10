@@ -1,22 +1,26 @@
-/**
- * Copyright (c) 2015 IBM Cloudant, Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language governing permissions
- * and limitations under the License.
- */
+// Copyright © 2015, 2017 IBM Corp. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/* global describe it before after*/
+'use strict';
 
 // Cloudant client API tests
 require('dotenv').config();
 
 var fs = require('fs');
 var should = require('should');
+var uuid = require('uuid/v4');
 
 var nock = require('./nock.js');
 var Cloudant = require('../cloudant.js');
@@ -25,7 +29,6 @@ var Cloudant = require('../cloudant.js');
 var ME = process.env.cloudant_username || 'nodejs';
 var PASSWORD = process.env.cloudant_password || 'sjedon';
 var SERVER = 'https://' + ME + '.cloudant.com';
-var MYDB = 'mydb';
 var mydb = null;
 var cc = null;
 var ddoc = null;
@@ -70,6 +73,10 @@ describe('Initialization', function() {
   });
 
   it('should detect missing cloudant', function(done) {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
+
     var mocks = nock(SERVER)
       .get('/_session').reply(500, {});
 
@@ -168,19 +175,21 @@ describe('CORS', function() {
 });
 
 describe('Authorization', function() {
-  this.timeout(10 * 1000);
+  var dbName;
 
   before(function(done) {
+    const unique = uuid();
+    dbName = 'nodejs_cloudant_test_' + unique;
     var mocks = nock(SERVER)
-      .put('/' + MYDB).reply(200, { 'ok': true });
+      .put('/' + dbName).reply(200, { 'ok': true });
 
     cc = Cloudant({account: ME, password: PASSWORD});
-    cc.db.create(MYDB, function(er, d) {
+    cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
       d.ok.should.be.equal(true);
-      mydb = cc.db.use('mydb');
+      mydb = cc.db.use(dbName);
 
       mocks.done();
       done();
@@ -189,7 +198,7 @@ describe('Authorization', function() {
 
   it('supports Authorization API GET _api/v2/db/<db>/_security', function(done) {
     var mocks = nock(SERVER)
-      .get('/_api/v2/db/' + MYDB + '/_security').reply(200, { });
+      .get('/_api/v2/db/' + dbName + '/_security').reply(200, { });
 
     mydb.get_security(function(er, d) {
       should(er).equal(null);
@@ -203,7 +212,7 @@ describe('Authorization', function() {
 
   it('supports Authorization API - PUT _api/v2/db/<db/_security', function(done) {
     var mocks = nock(SERVER)
-      .put('/_api/v2/db/' + MYDB + '/_security').reply(200, { 'ok': true });
+      .put('/_api/v2/db/' + dbName + '/_security').reply(200, { 'ok': true });
 
     mydb.set_security({ 'nobody': ['_reader']}, function(er, d) {
       should(er).equal(null);
@@ -218,9 +227,9 @@ describe('Authorization', function() {
 
   after(function(done) {
     var mocks = nock(SERVER)
-      .delete('/' + MYDB).reply(200, { 'ok': true });
+      .delete('/' + dbName).reply(200, { 'ok': true });
 
-    cc.db.destroy(MYDB, function(er, d) {
+    cc.db.destroy(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
@@ -235,17 +244,21 @@ describe('Authorization', function() {
 });
 
 describe('Cloudant-Specific APIs', function() {
+  var dbName;
+
   before(function(done) {
+    const unique = uuid();
+    dbName = 'nodejs_cloudant_test_' + unique;
     var mocks = nock(SERVER)
-      .put('/' + MYDB).reply(200, { 'ok': true });
+      .put('/' + dbName).reply(200, { 'ok': true });
 
     cc = Cloudant({account: ME, password: PASSWORD});
-    cc.db.create(MYDB, function(er, d) {
+    cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
       d.ok.should.be.equal(true);
-      mydb = cc.db.use('mydb');
+      mydb = cc.db.use(dbName);
       ddoc = viewname = null;
 
       mocks.done();
@@ -255,7 +268,7 @@ describe('Cloudant-Specific APIs', function() {
 
   it('create query dummy data', function(done) {
     var mocks = nock(SERVER)
-      .post('/' + MYDB + '/_bulk_docs')
+      .post('/' + dbName + '/_bulk_docs')
       .reply(200, [{'id': 'doc1', 'rev': '1-967a00dff5e02add41819138abb3284d'}, {'id': 'doc2', 'rev': '1-967a00dff5e02add41819138abb3284d'},
                    {'id': 'geodoc', 'rev': '1-11da8390b0a7401efda16f63c06b420b'}, {'id': '_design/geodd', 'rev': '1-ff1c0ac66b134edad082d2b7a7d98c9c'}]);
 
@@ -281,7 +294,7 @@ describe('Cloudant-Specific APIs', function() {
 
   it('Has _bulk_get', function(done) {
     var mocks = nock(SERVER)
-      .post('/' + MYDB + '/_bulk_get')
+      .post('/' + dbName + '/_bulk_get')
       .reply(200, {results: [{id: 'doc1', docs: [{ok: {_id: 'doc1', _rev: '1-967a00dff5e02add41819138abb3284d'}}]}, {id: 'non_id', docs: [{error: {id: 'non_id', rev: 'undefined', error: 'not_found', reason: 'missing'}}]}, {id: 'doc2', docs: [{ok: {_id: 'doc2', _rev: '1-967a00dff5e02add41819138abb3284d'}}]}]});
 
     mydb.bulk_get({docs: [{id: 'doc1'}, {id: 'non_id'}, {id: 'doc2'}]}, function(er, body) {
@@ -305,7 +318,7 @@ describe('Cloudant-Specific APIs', function() {
 
   it('Has geo querying', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + MYDB + '/_design/geodd/_geo/points?lat=42.347&lon=-71.137&radius=100&include_docs=true')
+      .get('/' + dbName + '/_design/geodd/_geo/points?lat=42.347&lon=-71.137&radius=100&include_docs=true')
       .reply(200, {'rows': [{'id': 'geodoc', 'geometry': {'type': 'Point', 'coordinates': [-71.13687953, 42.34690635]}, 'doc': {'_id': 'geodoc', '_rev': '1-11da8390b0a7401efda16f63c06b420b', 'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [-71.13687953, 42.34690635]}}}]});
 
     mydb.geo('geodd', 'points', {lat: 42.347, lon: -71.137, radius: 100, include_docs: true}, function(er, body) {
@@ -323,9 +336,9 @@ describe('Cloudant-Specific APIs', function() {
 
   after(function(done) {
     var mocks = nock(SERVER)
-      .delete('/' + MYDB).reply(200, { 'ok': true });
+      .delete('/' + dbName).reply(200, { 'ok': true });
 
-    cc.db.destroy(MYDB, function(er, d) {
+    cc.db.destroy(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
@@ -341,17 +354,21 @@ describe('Cloudant-Specific APIs', function() {
 });
 
 describe('Changes query', function() {
+  var dbName;
+
   before(function(done) {
+    const unique = uuid();
+    dbName = 'nodejs_cloudant_test_' + unique;
     var mocks = nock(SERVER)
-      .put('/' + MYDB).reply(200, { 'ok': true });
+      .put('/' + dbName).reply(200, { 'ok': true });
 
     cc = Cloudant({account: ME, password: PASSWORD});
-    cc.db.create(MYDB, function(er, d) {
+    cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
       d.ok.should.be.equal(true);
-      mydb = cc.db.use('mydb');
+      mydb = cc.db.use(dbName);
       ddoc = viewname = null;
 
       mocks.done();
@@ -361,7 +378,7 @@ describe('Changes query', function() {
 
   it('create query dummy data', function(done) {
     var mocks = nock(SERVER)
-      .post('/' + MYDB + '/_bulk_docs')
+      .post('/' + dbName + '/_bulk_docs')
       .reply(200, [{'id': 'doc1', 'rev': '1-967a00dff5e02add41819138abb3284d'}, {'id': 'doc2', 'rev': '1-967a00dff5e02add41819138abb3284d'}]);
 
     mydb.bulk({docs: [ {_id: 'doc1'}, {_id: 'doc2'} ]}, function(er, d) {
@@ -383,7 +400,7 @@ describe('Changes query', function() {
 
   it('gets a simple changes feed', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + MYDB + '/_changes')
+      .get('/' + dbName + '/_changes')
       .reply(200, { results: [ { seq: '1-g1AAAAEJeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPUhPBnMiYy6Qx25uZm5uYJpGSD-RNuSxAEmGBiAFtGQ_hstM8es7ANEH8lEWACBUVnc', id: 'doc2', changes: [ { rev: '1-967a00dff5e02add41819138abb3284d' } ] }, { seq: '2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN0s2MjZLMyVSe5IDkEyqh5rACDbB3Mzc3MA0jUgT8liAJEMDkAIash_hDgPzNJPEZENUU0zxm3IAYgrQLcxQtxilppilGBkTMiMLAAylXs8', id: 'doc1', changes: [ { rev: '1-967a00dff5e02add41819138abb3284d' } ] } ], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN0s2MjZLMyVSe5IDkEyqh5rACDbB3Mzc3MA0jUgT8liAJEMDkAIash_hDgPzNJPEZENUU0zxm3IAYgqSW4xSU8xSjIyzAPAlU1s', pending: 0 });
 
     mydb.changes(function(er, body) {
@@ -405,7 +422,7 @@ describe('Changes query', function() {
 
   it('supports the "since" parameter', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + MYDB + '/_changes?since=' + firstChange.seq)
+      .get('/' + dbName + '/_changes?since=' + firstChange.seq)
       .reply(200, { results: [ { seq: '2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNKNTBPskTVboZLe5IDkEyqB5vAnMgINsEwKTXVxDKFkH4iHZjHAiQZGoAU0JL9CHemmCVbGqdZkmTKAYgpYN9C3GpiaWhiYmCeBQCL518O', id: 'doc2', changes: [Object] } ], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNKNTBPskTVboZLe5IDkEyqh5rACDbBMCk11cQyhUgH5LEASYYGIAU0ZD_CHSlmyZbGaZYkmXIAYgqSW0wsDU1MDMyzAGgWU5k', pending: 0 });
 
     mydb.changes({since: firstChange.seq}, function(er, body) {
@@ -421,7 +438,7 @@ describe('Changes query', function() {
 
   it('supports since="now"', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + MYDB + '/_changes?since=now')
+      .get('/' + dbName + '/_changes?since=now')
       .reply(200, { results: [], last_seq: '2-g1AAAAETeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgTzNINUkzNCZSe5IDkEyqh5rACDbB1CQpzdI8lUgT8liAJEMDkAIash_hDoMkE7MkAwuSTDkAMQXJLSlpRuaGJiZZADxoU4k', pending: 0 });
 
     mydb.changes({since: 'now'}, function(er, body) {
@@ -435,9 +452,9 @@ describe('Changes query', function() {
 
   after(function(done) {
     var mocks = nock(SERVER)
-      .delete('/' + MYDB).reply(200, { 'ok': true });
+      .delete('/' + dbName).reply(200, { 'ok': true });
 
-    cc.db.destroy(MYDB, function(er, d) {
+    cc.db.destroy(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
@@ -453,17 +470,21 @@ describe('Changes query', function() {
 });
 
 describe('Changes follower', function() {
+  var dbName;
+
   before(function(done) {
+    const unique = uuid();
+    dbName = 'nodejs_cloudant_test_' + unique;
     var mocks = nock(SERVER)
-      .put('/' + MYDB).reply(200, { 'ok': true });
+      .put('/' + dbName).reply(200, { 'ok': true });
 
     cc = Cloudant({account: ME, password: PASSWORD});
-    cc.db.create(MYDB, function(er, d) {
+    cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
       d.ok.should.be.equal(true);
-      mydb = cc.db.use('mydb');
+      mydb = cc.db.use(dbName);
       ddoc = viewname = null;
 
       mocks.done();
@@ -473,7 +494,7 @@ describe('Changes follower', function() {
 
   it('create query dummy data', function(done) {
     var mocks = nock(SERVER)
-      .post('/' + MYDB + '/_bulk_docs')
+      .post('/' + dbName + '/_bulk_docs')
       .reply(200, [{'id': 'doc1', 'rev': '1-967a00dff5e02add41819138abb3284d'}, {'id': 'doc2', 'rev': '1-967a00dff5e02add41819138abb3284d'}]);
 
     mydb.bulk({docs: [ {_id: 'doc1'}, {_id: 'doc2'} ]}, function(er, d) {
@@ -495,10 +516,10 @@ describe('Changes follower', function() {
 
   it('follows changes', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + MYDB)
-      .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
+      .get('/' + dbName)
+      .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: dbName, sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
       .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since=0&feed=continuous&heartbeat=30000
-      .get('/' + MYDB + '/_changes')
+      .get('/' + dbName + '/_changes')
       .reply(200, '{"seq":"1-g1AAAAEleJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqQCYkMRFqZxwIkGRqAFFDbfoTNhomWaSZJxkTaDDHlAMQUoPuZExnBppgZG6clJ5kSMiMLABOLXCo","id":"doc1","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n' +
         '{"seq":"2-g1AAAAFTeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgN7cAQoNkVO1muLQnOQDJpHqwCcyJjGATEi0NkpOTkgnpJ9KBeSxAkqEBSAEt2Y9wp2GiZZpJkjGR7oSYcgBiCpJbzYyN05KTTAmZkQUA7ZNq0w","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n');
 
@@ -525,10 +546,10 @@ describe('Changes follower', function() {
 
   it('supports the "since" parameter', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + MYDB)
-      .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
+      .get('/' + dbName)
+      .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: dbName, sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
       .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since &feed, &heartbeat
-      .get('/' + MYDB + '/_changes')
+      .get('/' + dbName + '/_changes')
       .reply(200, '{"seq":"2-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgNzFIM7c0S0XVboZLe5IDkEyqB5vAnMgINiEtLTHR2MSMkH4iHZjHAiQZGoAU0JL9CHcmGVsmG6amkmTKAYgpYN9C3GqalJpikmKUBQBsbl-8","id":"doc2","changes":[{"rev":"1-967a00dff5e02add41819138abb3284d"}]}\n');
 
     var feed = mydb.follow({since: firstChange.seq}, function(er, change) {
@@ -544,15 +565,19 @@ describe('Changes follower', function() {
   });
 
   it('supports since="now"', function(done) {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
+
     var docId = firstChange.id;
 
     var mocks = nock(SERVER)
-      .get('/' + MYDB)
-      .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: 'mydb', sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
-      .post('/' + MYDB)
+      .get('/' + dbName)
+      .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: dbName, sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
+      .post('/' + dbName)
       .reply(200, {ok: true, id: docId, rev: '2-a1933e6ba0b5ac9868cd6f5adc12dc5f'})
       .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since &feed, &heartbeat
-      .get('/' + MYDB + '/_changes')
+      .get('/' + dbName + '/_changes')
       .reply(200, '{"seq":"3-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgT05OSjQ0SyNSe5IDkEyqB5vAnMgENsHM1CDZPDGFkH4ibchjAZIMDUAKaMl-hDtTLZMMktOMSDLlAMQUsG8ZIaYYWpqmGCVnAQDI71_n","id":"' + docId + '","changes":[{"rev":"2-a1933e6ba0b5ac9868cd6f5adc12dc5f"}]}\n');
 
     // Make an update that will trigger the "since=now" follower.
@@ -579,9 +604,9 @@ describe('Changes follower', function() {
 
   after(function(done) {
     var mocks = nock(SERVER)
-      .delete('/' + MYDB).reply(200, { 'ok': true });
+      .delete('/' + dbName).reply(200, { 'ok': true });
 
-    cc.db.destroy(MYDB, function(er, d) {
+    cc.db.destroy(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
@@ -597,17 +622,21 @@ describe('Changes follower', function() {
 });
 
 describe('Cloudant Query', function() {
+  var dbName;
+
   before(function(done) {
+    const unique = uuid();
+    dbName = 'couchbackup_test_' + unique;
     var mocks = nock(SERVER)
-      .put('/' + MYDB).reply(200, { 'ok': true });
+      .put('/' + dbName).reply(200, { 'ok': true });
 
     cc = Cloudant({account: ME, password: PASSWORD});
-    cc.db.create(MYDB, function(er, d) {
+    cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
       d.ok.should.be.equal(true);
-      mydb = cc.db.use('mydb');
+      mydb = cc.db.use(dbName);
       ddoc = viewname = null;
 
       mocks.done();
@@ -617,7 +646,7 @@ describe('Cloudant Query', function() {
 
   it('create query dummy data', function(done) {
     var mocks = nock(SERVER)
-      .post('/' + MYDB + '/_bulk_docs')
+      .post('/' + dbName + '/_bulk_docs')
       .reply(200, [{'id': 'f400bde9395b9116d108ebc89aa816b8', 'rev': '1-23202479633c2b380f79507a776743d5'}, {'id': 'f400bde9395b9116d108ebc89aa81bb8', 'rev': '1-3975759ccff3842adf690a5c10caee42'}, {'id': 'f400bde9395b9116d108ebc89aa82127', 'rev': '1-027467bd0efec85f21c822a8eb537073'}]);
 
     mydb.bulk({docs: [ {a: 1}, {a: 2}, {a: 3} ]}, function(er, d) {
@@ -636,7 +665,7 @@ describe('Cloudant Query', function() {
 
   it('supports Cloudant Query create indexes - POST /<db/_index API call', function(done) {
     var mocks = nock(SERVER)
-      .post('/' + MYDB + '/_index')
+      .post('/' + dbName + '/_index')
       .reply(200, {'result': 'created', 'id': '_design/32372935e14bed00cc6db4fc9efca0f1537d34a8', 'name': '32372935e14bed00cc6db4fc9efca0f1537d34a8'});
 
     mydb.index({ 'index': {}, 'type': 'text'}, function(er, d) {
@@ -657,7 +686,7 @@ describe('Cloudant Query', function() {
 
   it('supports Cloudant Query get indexes - GET /<db/_index', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + MYDB + '/_index')
+      .get('/' + dbName + '/_index')
       .reply(200, {'indexes': [{'ddoc': null, 'name': '_all_docs', 'type': 'special', 'def': {'fields': [{'_id': 'asc'}]}}, {'ddoc': '_design/32372935e14bed00cc6db4fc9efca0f1537d34a8', 'name': '32372935e14bed00cc6db4fc9efca0f1537d34a8', 'type': 'text', 'def': {'default_analyzer': 'keyword', 'default_field': {}, 'selector': {}, 'fields': []}}]});
 
     mydb.index(function(er, d) {
@@ -682,7 +711,7 @@ describe('Cloudant Query', function() {
   it('supports Cloudant Query - POST /<db/_find API call', function(done) {
     var query = { 'selector': { 'a': { '$gt': 2 }}};
     var mocks = nock(SERVER)
-      .post('/' + MYDB + '/_find', query)
+      .post('/' + dbName + '/_find', query)
       .reply(200, {'docs': [ {'_id': 'f400bde9395b9116d108ebc89aa82127', '_rev': '1-027467bd0efec85f21c822a8eb537073', 'a': 3}], 'bookmark': 'g2wAAAABaANkABxkYmNvcmVAZGIyLm1lYWQuY2xvdWRhbnQubmV0bAAAAAJhAGI_____amgCRj_wAAAAAAAAYQFq'});
 
     mydb.find(query, function(er, d) {
@@ -701,7 +730,7 @@ describe('Cloudant Query', function() {
   });
 
   it('supports deleting a Cloudant Query index - DELETE /db/_design/ddocname/type/viewname', function(done) {
-    var path = '/' + MYDB + '/_index/' + ddoc + '/text/' + viewname;
+    var path = '/' + dbName + '/_index/' + ddoc + '/text/' + viewname;
     var mocks = nock(SERVER)
       .delete(path).reply(200, {'ok': true});
 
@@ -718,9 +747,9 @@ describe('Cloudant Query', function() {
 
   after(function(done) {
     var mocks = nock(SERVER)
-      .delete('/' + MYDB).reply(200, { 'ok': true });
+      .delete('/' + dbName).reply(200, { 'ok': true });
 
-    cc.db.destroy(MYDB, function(er, d) {
+    cc.db.destroy(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
@@ -736,17 +765,21 @@ describe('Cloudant Query', function() {
 });
 
 describe('Cloudant Search', function() {
+  var dbName;
+
   before(function(done) {
+    const unique = uuid();
+    dbName = 'nodejs_cloudant_test_' + unique;
     var mocks = nock(SERVER)
-      .put('/' + MYDB).reply(200, { 'ok': true });
+      .put('/' + dbName).reply(200, { 'ok': true });
 
     cc = Cloudant({account: ME, password: PASSWORD});
-    cc.db.create(MYDB, function(er, d) {
+    cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
       d.ok.should.be.equal(true);
-      mydb = cc.db.use('mydb');
+      mydb = cc.db.use(dbName);
       ddoc = viewname = null;
 
       mocks.done();
@@ -756,7 +789,7 @@ describe('Cloudant Search', function() {
 
   it('create search dummy data', function(done) {
     var mocks = nock(SERVER)
-      .post('/' + MYDB + '/_bulk_docs')
+      .post('/' + dbName + '/_bulk_docs')
       .reply(200, [{id: 'a_tale', rev: '1-3e1f4ff28eaa99dc471ff994051f30ab'}, {id: 'towers', rev: '1-35c7c65df2cbb9a5f501717e78c508ee'}, {id: '_design/library', rev: '1-1f87108fd3f9969a5d47600d6aa5034b'}]);
 
     var index = function(doc) {
@@ -795,7 +828,7 @@ describe('Cloudant Search', function() {
 
   it('searches test data: author:charles', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + MYDB + '/_design/library/_search/books?q=author%3Acharles')
+      .get('/' + dbName + '/_design/library/_search/books?q=author%3Acharles')
       .reply(200, { total_rows: 1, bookmark: 'g2wAAAABaANkAB1kYmNvcmVAZGI2LnNsaW5nLmNsb3VkYW50Lm5ldGwAAAACbgQAAAAAgG4EAP___79qaAJGP8iMWIAAAABhAGo', rows: [ { id: 'a_tale', order: [Object], fields: {} } ] });
 
     mydb.search('library', 'books', {q: 'author:charles'}, function(er, d) {
@@ -815,7 +848,7 @@ describe('Cloudant Search', function() {
 
   it('searches test data: title:two', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + MYDB + '/_design/library/_search/books?q=title%3Atwo')
+      .get('/' + dbName + '/_design/library/_search/books?q=title%3Atwo')
       .reply(200, {total_rows: 2, bookmark: 'g1AAAACIeJzLYWBgYMpgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASlLcgCSSfX____PymBysz_RE9EAFEhkIFJ7HguQZGgAUkAT9oONOLy4igFsRBYAPRQqlQ', rows: [{id: 'towers', order: [Object], fields: {}}, {id: 'a_tale', order: [Object], fields: {}}]});
 
     mydb.search('library', 'books', {q: 'title:two'}, function(er, d) {
@@ -838,9 +871,9 @@ describe('Cloudant Search', function() {
 
   after(function(done) {
     var mocks = nock(SERVER)
-      .delete('/' + MYDB).reply(200, { 'ok': true });
+      .delete('/' + dbName).reply(200, { 'ok': true });
 
-    cc.db.destroy(MYDB, function(er, d) {
+    cc.db.destroy(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
@@ -924,14 +957,15 @@ if (!process.env.NOCK_OFF) {
 }
 function test_gzip() {
   it('checks that the zipped response is unzipped', function(done) {
+    var dbName = 'mydb';
     var mocks = nock(SERVER)
-      .get('/' + MYDB + '/x/y.css').replyWithFile(200, __dirname + '/y.css.gz', {
+      .get('/' + dbName + '/x/y.css').replyWithFile(200, __dirname + '/y.css.gz', {
         'content-encoding': 'gzip',
         'content-type': 'text/css'
       });
 
     var c = Cloudant({account: ME, password: PASSWORD});
-    var mydb = c.db.use(MYDB);
+    var mydb = c.db.use(dbName);
     mydb.attachment.get('x', 'y.css', function(er, data) {
       should(er).equal(null);
       data.should.be.an.Object;
@@ -945,6 +979,8 @@ function test_gzip() {
 }
 
 describe('Virtual Hosts', function() {
+  var myHost = `${uuid()}.myhost.com`;
+
   it('supports virtual hosts API - GET /_api/v2/user/virtual_hosts', function(done) {
     var mocks = nock(SERVER)
       .get('/_api/v2/user/virtual_hosts').reply(200, {'virtual_hosts': []});
@@ -966,7 +1002,7 @@ describe('Virtual Hosts', function() {
       .post('/_api/v2/user/virtual_hosts').reply(200, {'ok': true});
 
     var c = Cloudant({account: ME, password: PASSWORD});
-    c.add_virtual_host({ host: 'myhost.com', path: '/mypath'}, function(er, d) {
+    c.add_virtual_host({ host: myHost, path: '/mypath'}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
@@ -983,7 +1019,7 @@ describe('Virtual Hosts', function() {
       .delete('/_api/v2/user/virtual_hosts').reply(200, { 'ok': true });
 
     var c = Cloudant({account: ME, password: PASSWORD});
-    c.delete_virtual_host({ host: 'myhost.com', path: '/mypath'}, function(er, d) {
+    c.delete_virtual_host({ host: myHost, path: '/mypath'}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');

@@ -1,16 +1,19 @@
-/**
- * Copyright (c) 2015 IBM Cloudant, Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language governing permissions
- * and limitations under the License.
- */
+// Copyright © 2015, 2017 IBM Corp. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/* global describe it before after */
+'use strict';
 
 // These tests are all examples from the README.md. For now, they are manually
 // synchronized with the README document, a situation I would charitably describe
@@ -42,8 +45,6 @@ require = function(module) {
 var console = { log: function() {} };
 
 describe('Getting Started', function() {
-  this.timeout(10 * 1000);
-
   var mocks;
   before(function() {
     mocks = nock(SERVER)
@@ -109,8 +110,6 @@ describe('Getting Started', function() {
 });
 
 describe('Initialization', function() {
-  this.timeout(10 * 1000);
-
   var mocks;
   after(function() { mocks.done(); });
   before(function() {
@@ -118,7 +117,7 @@ describe('Initialization', function() {
       .get('/_session').reply(200, {ok: true, userCtx: {name: ME, roles: []}})
       .post('/_session').reply(200, {XXXXX: 'YYYYYYYYYY', ok: true, userCtx: {name: 'jhs', roles: []}})
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2', cloudant_build: '2488'})
-      .get('/animals/dog').reply(404, {error: 'not_found', reason: 'missing'});
+      .get('/animaldb/dog').reply(404, {error: 'not_found', reason: 'missing'});
   });
 
   it('Example 1', function(done) {
@@ -131,7 +130,7 @@ describe('Initialization', function() {
         return console.log('Failed to initialize Cloudant: ' + err.message);
       }
 
-      var db = cloudant.db.use('animals');
+      var db = cloudant.db.use('animaldb');
       db.get('dog', function(err, data) {
         // The rest of your code goes here. For example:
         err.should.be.an.Object.have.a.property('error').equal('not_found');
@@ -152,6 +151,10 @@ describe('Password authentication', function() {
   });
 
   it('Example 1', function(done) {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
+
     var Cloudant = require('cloudant');
     var me = ME;         // Substitute with your Cloudant user account.
     var otherUsername = 'jhs'; // Substitute with some other Cloudant user account.
@@ -173,17 +176,15 @@ describe('Cloudant Local', function() {
 });
 
 describe('Authorization and API Keys', function() {
-  this.timeout(20 * 1000);
-
   var mocks;
   after(function() { mocks.done(); });
   before(function() {
     mocks = nock(SERVER)
       .post('/_api/v2/api_keys')
       .reply(200, { 'password': 'Eivln4jPiLS8BoTxjXjVukDT', 'ok': true, 'key': 'thandoodstrenterprourete' })
-      .put('/_api/v2/db/animals/_security')
+      .put('/_api/v2/db/animaldb/_security')
       .reply(200, {ok: true})
-      .get('/_api/v2/db/animals/_security')
+      .get('/_api/v2/db/animaldb/_security')
       .reply(200, {cloudant: {nobody: [], thandoodstrenterprourete: ['_reader', '_writer'], fred: ['_reader', '_writer', '_admin', '_replicator']}});
   });
 
@@ -204,7 +205,7 @@ describe('Authorization and API Keys', function() {
       console.log('');
 
       // Set the security for three users: nobody, fred, and the above API key.
-      var db = 'animals';
+      var db = 'animaldb';
       var security = {
         nobody: [],
         fred: [ '_reader', '_writer', '_admin', '_replicator' ]
@@ -239,8 +240,6 @@ describe('Authorization and API Keys', function() {
 });
 
 describe('CORS', function() {
-  this.timeout(10 * 1000);
-
   var mocks;
   after(function() { mocks.done(); });
   before(function() {
@@ -298,8 +297,6 @@ describe('CORS', function() {
 });
 
 describe('Virtual Hosts', function() {
-  this.timeout(10 * 1000);
-
   var mocks;
   after(function() { mocks.done(); });
   before(function() {
@@ -321,6 +318,9 @@ describe('Virtual Hosts', function() {
   it('Example 1', function(done) {
     cloudant.add_virtual_host({ host: 'mysubdomain.mydomain.com', path: '/mypath'}, function(err, data) {
       console.log(err, data);
+      if (err) {
+        return done(err);
+      }
       data.should.have.a.property('ok').which.is.equal(true);
       done();
     });
@@ -329,6 +329,9 @@ describe('Virtual Hosts', function() {
   it('Example 2', function(done) {
     cloudant.get_virtual_hosts(function(err, data) {
       console.log(err, data);
+      if (err) {
+        return done(err);
+      }
       data.should.have.a.property('virtual_hosts').which.is.an.Array;
       done();
     });
@@ -337,6 +340,9 @@ describe('Virtual Hosts', function() {
   it('Example 3', function(done) {
     cloudant.delete_virtual_host({ host: 'mysubdomain.mydomain.com', path: '/mypath'}, function(err, data) {
       console.log(err, data);
+      if (err) {
+        return done(err);
+      }
       data.should.have.a.property('ok').which.is.equal(true);
       done();
     });
@@ -344,8 +350,6 @@ describe('Virtual Hosts', function() {
 });
 
 describe('Cloudant Query', function() {
-  this.timeout(10 * 1000);
-
   var mocks;
   before(function() {
     mocks = nock(SERVER)
@@ -426,8 +430,6 @@ describe('Cloudant Query', function() {
 });
 
 describe('Cloudant Search', function() {
-  this.timeout(10 * 1000);
-
   var mocks;
   before(function() {
     mocks = nock(SERVER)
@@ -531,9 +533,9 @@ describe('Cloudant Search', function() {
 });
 
 describe('Cookie Authentication', function() {
-  this.timeout(10 * 1000);
-
+  var cloudant;
   var mocks;
+
   before(function() {
     mocks = nock(SERVER)
       .post('/_session')
