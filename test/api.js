@@ -515,6 +515,9 @@ describe('Changes follower', function() {
   var firstChange = null;
 
   it('follows changes', function(done) {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
     var mocks = nock(SERVER)
       .get('/' + dbName)
       .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: dbName, sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
@@ -545,6 +548,9 @@ describe('Changes follower', function() {
   });
 
   it('supports the "since" parameter', function(done) {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
     var mocks = nock(SERVER)
       .get('/' + dbName)
       .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: dbName, sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
