@@ -38,8 +38,14 @@ function Cloudant(options, callback) {
   var cookie = options.cookie;
 
   var pkg = require('./package.json');
-  var useragent = 'nodejs-cloudant/' + pkg.version + ' (Node.js ' + process.version + ')';
-  var requestDefaults = { headers: { 'User-agent': useragent }, gzip: true };
+  var requestDefaults = {
+    gzip: true,
+    headers: {
+      // set library UA header
+      'User-Agent': `nodejs-cloudant/${pkg.version} (Node.js ${process.version})`
+    },
+    jar: false
+  };
   var theurl = null;
   if (typeof options === 'object') {
     if (options.requestDefaults) {
@@ -60,7 +66,11 @@ function Cloudant(options, callback) {
   // keep connections alive by default
   if (requestDefaults && !requestDefaults.agent) {
     var protocol = (theurl.match(/^https/)) ? require('https') : require('http');
-    var agent = new protocol.Agent({ keepAlive: true });
+    var agent = new protocol.Agent({
+      keepAlive: true,
+      keepAliveMsecs: 30000,
+      maxSockets: 6
+    });
     requestDefaults.agent = agent;
   }
 
