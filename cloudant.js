@@ -92,20 +92,19 @@ function Cloudant(options, callback) {
   debug('Create underlying Nano instance, options=%j requestDefaults=%j', options, requestDefaults);
   var nano = Nano({url: theurl, request: plugin, requestDefaults: requestDefaults, cookie: cookie, log: nanodebug});
 
-  // our own implementation of 'use' e.g. nano.use or nano.db.use
-  // it includes all db-level functions
-  var use = function(db) {
-    // ****************
-    // Functions added to each db e.g. cloudant.use("mydb")
-    // ****************
+  // ===========================
+  // Cloudant Database Functions
+  // ===========================
 
+  var use = function(db) {
+    // https://console.bluemix.net/docs/services/Cloudant/api/document.html#the-_bulk_get-endpoint
     var bulk_get = function(options, callback) { // eslint-disable-line camelcase
       return nano.request({ path: encodeURIComponent(db) + '/_bulk_get',
         method: 'post',
         body: options }, callback);
     };
 
-    // https://docs.cloudant.com/geo.html
+    // https://console.bluemix.net/docs/services/Cloudant/api/cloudant-geo.html#cloudant-geospatial
     var geo = function(docName, indexName, query, callback) {
       var path = encodeURIComponent(db) + '/_design/' +
                  encodeURIComponent(docName) + '/_geo/' +
@@ -113,13 +112,13 @@ function Cloudant(options, callback) {
       return nano.request({path: path, qs: query}, callback);
     };
 
-    // https://docs.cloudant.com/api.html#viewing-permissions
+    // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#viewing-permissions
     var get_security = function(callback) { // eslint-disable-line camelcase
       var path = '_api/v2/db/' + encodeURIComponent(db) + '/_security'; // eslint-disable-line camelcase
       return nano.request({ path: path }, callback);
     };
 
-    // https://docs.cloudant.com/api.html#modifying-permissions
+   // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#modifying-permissions
     var set_security = function(permissions, callback) { // eslint-disable-line camelcase
       var path = '_api/v2/db/' + encodeURIComponent(db) + '/_security';
       return nano.request({ path: path,
@@ -127,8 +126,7 @@ function Cloudant(options, callback) {
         body: {cloudant: permissions} }, callback);
     };
 
-    // https://docs.cloudant.com/api.html#list-all-indexes &
-    // https://docs.cloudant.com/api.html#creating-a-new-index
+    // https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#query
     var index = function(definition, callback) {
       // if no definition is provided, then the user wants see all the indexes
       if (typeof definition === 'function') {
@@ -142,7 +140,7 @@ function Cloudant(options, callback) {
       }
     };
 
-    // https://docs.cloudant.com/api.html#deleting-an-index
+    // https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#deleting-an-index
     var index_del = function(spec, callback) { // eslint-disable-line camelcase
       spec = spec || {};
       if (!spec.ddoc) { throw new Error('index.del() must specify a "ddoc" value'); }
@@ -155,14 +153,13 @@ function Cloudant(options, callback) {
       return nano.request({ path: path, method: 'delete' }, callback);
     };
 
-    // https://docs.cloudant.com/api.html#finding-documents-using-an-index
+    // https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#finding-documents-by-using-an-index
     var find = function(query, callback) {
       return nano.request({ path: encodeURIComponent(db) + '/_find',
         method: 'post',
         body: query}, callback);
     };
 
-    // add Cloudant special functions
     var obj = nano._use(db);
     obj.geo = geo;
     obj.bulk_get = bulk_get; // eslint-disable-line camelcase
@@ -175,44 +172,50 @@ function Cloudant(options, callback) {
     return obj;
   };
 
-  // intercept calls to 'nano.use' to plugin our extensions
+  // =================================
+  // Cloudant Administrative Functions
+  // =================================
+
   nano._use = nano.use;
   nano.use = nano.db.use = use;
 
-  // https://docs.cloudant.com/api.html#creating-api-keys
+  // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#api-keys
   var generate_api_key = function(callback) { // eslint-disable-line camelcase
     return nano.request({ path: '_api/v2/api_keys', method: 'post' }, callback);
   };
 
-  // https://docs.cloudant.com/api.html#reading-the-cors-configuration
+  // https://console.bluemix.net/docs/services/Cloudant/api/cors.html#reading-the-cors-configuration
   var get_cors = function(callback) { // eslint-disable-line camelcase
     return nano.request({ path: '_api/v2/user/config/cors' }, callback);
   };
 
-  // https://docs.cloudant.com/api.html#setting-the-cors-configuration
+  // https://console.bluemix.net/docs/services/Cloudant/api/cors.html#setting-the-cors-configuration
   var set_cors = function(configuration, callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/config/cors',
       method: 'put',
       body: configuration }, callback);
   };
 
-  // the /set_permissions API call is deprecated
+  // WARNING: 'set_permissions' API is deprecated. Use 'set_security'.
   var set_permissions = function(opts, callback) { // eslint-disable-line camelcase
     console.error('set_permissions is deprecated. use set_security instead');
     callback(null, null);
   };
 
+  // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#listing-virtual-hosts
   var get_virtual_hosts = function(callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/virtual_hosts',
       method: 'get'}, callback);
   };
 
+  // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#creating-a-virtual-host
   var add_virtual_host = function(opts, callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/virtual_hosts',
       method: 'post',
       body: opts }, callback);
   };
 
+  // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#deleting-a-virtual-host
   var delete_virtual_host = function(opts, callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/virtual_hosts',
       method: 'delete',
