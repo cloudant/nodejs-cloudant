@@ -19,7 +19,7 @@ def getEnvForSuite(suiteName) {
     "cloudant_username=${env.DB_USER}",
     "cloudant_password=${env.DB_PASSWORD}",
     "NVM_DIR=${env.HOME}/.nvm",
-    "MOCHA_TIMEOUT=20000" // 20s
+    "MOCHA_TIMEOUT=60000" // 60s
   ]
 
   // Add test suite specific environment variables
