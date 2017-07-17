@@ -21,8 +21,6 @@ var async = require('async');
 var debug = require('debug')('cloudant');
 var stream = require('stream');
 
-var nullcallback = function() {};
-
 module.exports = function(options) {
   var requestDefaults = options.requestDefaults || {jar: false};
   var request = require('request').defaults(requestDefaults);
@@ -32,48 +30,63 @@ module.exports = function(options) {
     var maxAttempts = options.retryAttempts || 3;
     var firstTimeout = options.retryTimeout || 500; // ms
     var timeout = 0; // ms
-    var statusCode = null;
-
-    if (typeof callback !== 'function') {
-      callback = nullcallback;
-    }
+    var retry;
 
     // create a pass-through stream in case the caller wishes
     // to pipe data using Node.js streams
     var s = new stream.PassThrough();
 
-    // do the first function until the second function returns true
-    async.doUntil(function(done) {
-      statusCode = 500;
+    // add error listener
+    s.on('error', function(err) {
+      debug(err);
+    });
+
+    // do the first function until the second function returns false
+    async.doWhilst(function(done) {
       attempts++;
+      retry = false;
+
       if (attempts >= 1) {
         debug('attempt', attempts, 'timeout', timeout);
       }
+
       setTimeout(function() {
-        request(req, function(e, h, b) {
-          done(null, [e, h, b]);
-        }).on('response', function(r) {
-          statusCode = (r && r.statusCode) || 500;
-        }).on('data', function(chunk) {
-          if (statusCode !== 429) {
-            s.write(chunk);
-          }
-        });
+        var thisRequest = request(req, callback);
+        thisRequest
+          .on('error', function(err) {
+            s.emit('error', err);
+            s.end();
+            done();
+          })
+          .on('response', function(r) {
+            if (r.statusCode === 429 && attempts < maxAttempts) {
+              retry = true;
+              thisRequest.abort();
+            } else {
+              s.emit('response', r);
+            }
+          })
+          .on('data', function(chunk) {
+            if (!retry) {
+              s.write(chunk);
+            }
+          })
+          .on('end', function() {
+            if (!retry) {
+              s.end();
+            }
+            done();
+          });
       }, timeout);
     }, function() {
-      // this function returns false for the first 'maxAttempts' 429s receieved
-      if (statusCode === 429 && attempts < maxAttempts) {
+      if (retry) {
         if (attempts === 1) {
           timeout = firstTimeout;
         } else {
           timeout *= 2;
         }
-        return false;
       }
-      return true;
-    }, function(e, results) {
-      s.end();
-      callback(results[0], results[1], results[2]);
+      return retry;
     });
 
     // return the pass-through stream
