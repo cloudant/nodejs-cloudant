@@ -74,13 +74,14 @@ stage('Build') {
   }
 }
 
-stage('QA') {
-  def axes = [
-    Node4x:{ setupNodeAndTest('lts/argon') }, //4.x LTS
-    Node6x:{ setupNodeAndTest('lts/boron') }, // 6.x LTS
-    Node:{ setupNodeAndTest('node') } // Current
-  ]
+stage('QA: Node4x') {
+  setupNodeAndTest('lts/argon') //4.x LTS
+}
 
-  // Run the required axes in parallel
-  parallel(axes)
+stage('QA: Node6x') {
+  setupNodeAndTest('lts/boron') // 6.x LTS
+}
+
+stage('QA: Node') {
+  setupNodeAndTest('node') // Current
 }
