@@ -253,7 +253,9 @@ describe('Retry429 Plugin', function() {
         .on('end', function() {
           assert.equal(responseCount, 1);
           assert.equal(dataCount, 1);
-
+        })
+        .pipe(dataFile)
+        .on('finish', function() {
           // validate file contents
           var obj = JSON.parse(fs.readFileSync('data.json', 'utf8'));
           assert.equal(obj.doc_count, 0);
@@ -261,8 +263,7 @@ describe('Retry429 Plugin', function() {
 
           mocks.done();
           done();
-        })
-        .pipe(dataFile);
+        });
     });
 
     it('performs request and returns error', function(done) {
@@ -349,7 +350,9 @@ describe('Retry429 Plugin', function() {
           // validate retry delay
           var now = (new Date()).getTime();
           assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
-
+        })
+        .pipe(dataFile)
+        .on('finish', function() {
           // validate file contents
           var obj = JSON.parse(fs.readFileSync('data.json', 'utf8'));
           assert.equal(obj.doc_count, 0);
@@ -357,8 +360,7 @@ describe('Retry429 Plugin', function() {
 
           mocks.done();
           done();
-        })
-        .pipe(dataFile);
+        });
     });
 
     it('fails to retry request on 429 response and returns error', function(done) {
@@ -498,7 +500,9 @@ describe('Retry429 Plugin', function() {
         .on('end', function() {
           assert.equal(responseCount, 1);
           assert.equal(dataCount, 1);
-
+        })
+        .pipe(dataFile)
+        .on('finish', function() {
           // validate file contents
           var obj = JSON.parse(fs.readFileSync('data.json', 'utf8'));
           assert.equal(obj.doc_count, 0);
@@ -506,8 +510,7 @@ describe('Retry429 Plugin', function() {
 
           mocks.done();
           done();
-        })
-        .pipe(dataFile);
+        });
     });
 
     it('performs request and returns error', function(done) {
@@ -601,7 +604,9 @@ describe('Retry429 Plugin', function() {
           // validate retry delay
           var now = (new Date()).getTime();
           assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
-
+        })
+        .pipe(dataFile)
+        .on('finish', function() {
           // validate file contents
           var obj = JSON.parse(fs.readFileSync('data.json', 'utf8'));
           assert.equal(obj.doc_count, 0);
@@ -609,8 +614,7 @@ describe('Retry429 Plugin', function() {
 
           mocks.done();
           done();
-        })
-        .pipe(dataFile);
+        });
     });
 
     it('fails to retry request on 429 response and returns error', function(done) {
