@@ -46,16 +46,26 @@ var console = { log: function() {} };
 
 describe('Getting Started', function() {
   var mocks;
+  after(function(done) {
+    var Cloudant = require('cloudant');
+    var cloudant = Cloudant({account: ME, password: PASSWORD});
+    cloudant.db.destroy('alice', function(er, d) {
+      should(er).equal(null);
+      d.should.be.an.Object;
+      d.should.have.a.property('ok');
+      d.ok.should.be.equal(true);
+
+      mocks.done();
+      done();
+    });
+  });
   before(function() {
     mocks = nock(SERVER)
       .get('/_all_dbs').reply(200, ['database_changes', 'third_party_db'])
       .delete('/alice').reply(404, {error: 'not_found', reason: 'Database does not exist.'})
       .put('/alice').reply(201, {ok: true})
-      .put('/alice/rabbit').reply(201, {ok: true, id: 'rabbit', rev: '1-6e4cb465d49c0368ac3946506d26335d'});
-  });
-
-  after(function() {
-    mocks.done();
+      .put('/alice/rabbit').reply(201, {ok: true, id: 'rabbit', rev: '1-6e4cb465d49c0368ac3946506d26335d'})
+      .delete('/alice').reply(200, {ok: true});
   });
 
   it('Example 1', function(done) {
@@ -111,7 +121,9 @@ describe('Getting Started', function() {
 
 describe('Initialization', function() {
   var mocks;
-  after(function() { mocks.done(); });
+  after(function() {
+    mocks.done();
+  });
   before(function() {
     mocks = nock(SERVER)
       .get('/_session').reply(200, {ok: true, userCtx: {name: ME, roles: []}})
@@ -142,8 +154,15 @@ describe('Initialization', function() {
 
 describe('Password authentication', function() {
   var mocks;
-  after(function() { mocks.done(); });
+  after(function() {
+    if (!process.env.NOCK_OFF) {
+      mocks.done();
+    }
+  });
   before(function() {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
     mocks = nock(SERVER)
       .get('/_session').reply(200, {XXXXX: 'YYYYYYYYYY', ok: true, userCtx: {name: 'jhs', roles: []}})
       // .post('/_session').reply(200, {XXXXX:'YYYYYYYYYY', ok:true, userCtx:{name:'jhs', roles:[]}})
@@ -151,10 +170,6 @@ describe('Password authentication', function() {
   });
 
   it('Example 1', function(done) {
-    if (process.env.NOCK_OFF) {
-      this.skip();
-    }
-
     var Cloudant = require('cloudant');
     var me = ME;         // Substitute with your Cloudant user account.
     var otherUsername = 'jhs'; // Substitute with some other Cloudant user account.
@@ -177,8 +192,15 @@ describe('Cloudant Local', function() {
 
 describe('Authorization and API Keys', function() {
   var mocks;
-  after(function() { mocks.done(); });
+  after(function() {
+    if (!process.env.NOCK_OFF) {
+      mocks.done();
+    }
+  });
   before(function() {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
     mocks = nock(SERVER)
       .post('/_api/v2/api_keys')
       .reply(200, { 'password': 'Eivln4jPiLS8BoTxjXjVukDT', 'ok': true, 'key': 'thandoodstrenterprourete' })
@@ -535,23 +557,27 @@ describe('Cloudant Search', function() {
 describe('Cookie Authentication', function() {
   var cloudant;
   var mocks;
-
-  before(function() {
+  after(function(done) {
+    var Cloudant = require('cloudant');
+    cloudant = Cloudant({account: ME, password: process.env.cloudant_password});
+    cloudant.db.destroy('alice', function() {
+      mocks.done();
+      done();
+    });
+  });
+  before(function(done) {
     mocks = nock(SERVER)
-      .post('/_session')
-      .reply(200, { ok: true, name: ME, roles: [] },
-        {'set-cookie': ['AuthSession=bm9kZWpzOjU1RTA1NDdEOsUsoq9lykQCEBhwTpIyEbgmYpvX; Version=1; Expires=Sat, 29 Aug 2015 12:30:53 GMT; Max-Age=86400; Path=/; HttpOnly; Secure']})
-      .post('/alice')
-      .reply(200, { ok: true, id: '72e0367f3e195340e239948164bbb7e7', rev: '1-feb5539029f4fc50dc3f827b164a2088' })
-      .get('/_session')
-      .reply(200, {ok: true, userCtx: {name: ME, roles: ['_admin', '_reader', '_writer']}});
+      .post('/_session').reply(200, { ok: true, name: ME, roles: [] }, {'set-cookie': ['AuthSession=bm9kZWpzOjU1RTA1NDdEOsUsoq9lykQCEBhwTpIyEbgmYpvX; Version=1; Expires=Sat, 29 Aug 2015 12:30:53 GMT; Max-Age=86400; Path=/; HttpOnly; Secure']})
+      .put('/alice').reply(200, { ok: true })
+      .post('/alice').reply(200, { ok: true, id: '72e0367f3e195340e239948164bbb7e7', rev: '1-feb5539029f4fc50dc3f827b164a2088' })
+      .get('/_session').reply(200, {ok: true, userCtx: {name: ME, roles: ['_admin', '_reader', '_writer']}})
+      .delete('/alice').reply(200, {ok: true});
 
     var Cloudant = require('cloudant');
     cloudant = Cloudant({account: ME, password: process.env.cloudant_password});
-  });
-
-  after(function() {
-    mocks.done();
+    cloudant.db.create('alice', function() {
+      done();
+    });
   });
 
   var cookies;

@@ -19,12 +19,12 @@ def getEnvForSuite(suiteName) {
     "cloudant_username=${env.DB_USER}",
     "cloudant_password=${env.DB_PASSWORD}",
     "NVM_DIR=${env.HOME}/.nvm",
-    "MOCHA_TIMEOUT=20000" // 20s
+    "MOCHA_TIMEOUT=60000" // 60s
   ]
 
   // Add test suite specific environment variables
   switch(suiteName) {
-    case 'tests':
+    case 'test':
       envVars.add("NOCK_OFF=true")
       break
     default:
@@ -34,7 +34,7 @@ def getEnvForSuite(suiteName) {
   return envVars
 }
 
-def setupNodeAndTest(version, testSuite='tests') {
+def setupNodeAndTest(version, testSuite='test') {
   node {
     // Install NVM
     sh 'wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash'
@@ -55,10 +55,10 @@ def setupNodeAndTest(version, testSuite='tests') {
             nvm install ${version}
             nvm use ${version}
             npm install mocha-jenkins-reporter --save-dev
-            ./node_modules/mocha/bin/mocha --timeout $MOCHA_TIMEOUT --reporter mocha-jenkins-reporter --reporter-options junit_report_path=./test/test-results.xml,junit_report_stack=true,junit_report_name=${testSuite} ${testSuite}
+            ./node_modules/mocha/bin/mocha --timeout $MOCHA_TIMEOUT --reporter mocha-jenkins-reporter --reporter-options junit_report_path=./${testSuite}/test-results.xml,junit_report_stack=true,junit_report_name=${testSuite} ${testSuite}
           """
         } finally {
-          junit '**/*test-results.xml'
+          junit '**/test-results.xml'
         }
       }
     }
@@ -74,13 +74,14 @@ stage('Build') {
   }
 }
 
-stage('QA') {
-  def axes = [
-    Node4x:{ setupNodeAndTest('lts/argon') }, //4.x LTS
-    Node6x:{ setupNodeAndTest('lts/boron') }, // 6.x LTS
-    Node:{ setupNodeAndTest('node') } // Current
-  ]
+stage('QA: Node4x') {
+  setupNodeAndTest('lts/argon') //4.x LTS
+}
 
-  // Run the required axes in parallel
-  parallel(axes)
+stage('QA: Node6x') {
+  setupNodeAndTest('lts/boron') // 6.x LTS
+}
+
+stage('QA: Node') {
+  setupNodeAndTest('node') // Current
 }
