@@ -56,10 +56,11 @@ function Cloudant(options, callback) {
     theurl = reconfigure({ url: options });
   }
   if (theurl === null) {
+    var err = new Error('Invalid URL');
     if (callback) {
-      return callback('invalid url', null); // eslint-disable-line standard/no-callback-literal
+      return callback(err);
     } else {
-      throw (new Error('invalid url'));
+      throw err;
     }
   }
 
