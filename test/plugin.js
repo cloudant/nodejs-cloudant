@@ -154,28 +154,6 @@ describe('promise plugin', function() {
   });
 });
 
-describe('custom plugin', function() {
-  before(onBefore);
-  after(onAfter);
-
-  var doNothingPlugin = function(opts, callback) {
-    callback(null, { statusCode: 200 }, { ok: true });
-  };
-
-  it('should allow custom plugins', function(done) {
-    var cloudant = Cloudant({plugin: doNothingPlugin, account: ME, password: PASSWORD});
-    var db = cloudant.db.use(dbName);
-    db.info(function(err, data) {
-      assert.equal(err, null);
-      data.should.be.an.Object;
-      data.should.have.property.ok;
-      data.ok.should.be.a.Boolean;
-      data.ok.should.equal(true);
-      done();
-    });
-  });
-});
-
 describe('cookieauth plugin', function() {
   before(onBefore);
   after(onAfter);
