@@ -5,6 +5,5 @@ docs/
 jsdoc/
 node_modules/
 templates/
-test/
-tests/
+test/legacy/
 tmp/
