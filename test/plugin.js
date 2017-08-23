@@ -254,30 +254,4 @@ describe('cookieauth plugin', function() {
       done();
     });
   });
-
-  it('should work with asynchronous instantiation', function(done) {
-    if (process.env.NOCK_OFF) {
-      this.skip();
-    }
-    var mocks = nock(SERVER)
-        .post('/_session').reply(403, { ok: false });
-    var cloudant = Cloudant({ plugin: 'cookieauth', account: ME, password: PASSWORD }, function(err, data) {
-      err.should.be.an.Object;
-      mocks.done();
-      done();
-    });
-  });
-
-  it('should work with asynchronous instantiation with no credentials', function(done) {
-    if (process.env.NOCK_OFF) {
-      this.skip();
-    }
-    var mocks = nock(SERVER)
-        .get('/_session').reply(403, { ok: false });
-    var cloudant = Cloudant({plugin: 'cookieauth', url: SERVER}, function(err, data) {
-      err.should.be.an.Object;
-      mocks.done();
-      done();
-    });
-  });
 });
