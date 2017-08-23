@@ -22,6 +22,13 @@ const stream = require('stream');
 const EventPipe = require('../lib/eventpipe.js');
 
 describe('EventPipe', function() {
+  it('does not throw errors for an undefined source', function() {
+    var target = new stream.PassThrough();
+    var ep = new EventPipe(undefined, target);
+    ep.clear();
+    ep.resume();
+  });
+
   it('pipes all events from source to target', function(done) {
     var source = new events.EventEmitter();
     var target = new stream.PassThrough();
