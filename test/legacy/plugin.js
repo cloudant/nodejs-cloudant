@@ -23,8 +23,8 @@ var should = require('should');
 var assert = require('assert');
 var uuid = require('uuid/v4');
 
-var nock = require('./nock.js');
-var Cloudant = require('../cloudant.js');
+var nock = require('../nock.js');
+var Cloudant = require('../../cloudant.js');
 var stream = require('stream');
 
 // These globals may potentially be parameterized.

@@ -22,8 +22,8 @@ var fs = require('fs');
 var should = require('should');
 var uuid = require('uuid/v4');
 
-var nock = require('./nock.js');
-var Cloudant = require('../cloudant.js');
+var nock = require('../nock.js');
+var Cloudant = require('../../cloudant.js');
 
 // These globals may potentially be parameterized.
 var ME = process.env.cloudant_username || 'nodejs';
@@ -907,7 +907,7 @@ describe('User Agent tests', function() {
       data.should.be.an.Object;
       data.should.have.a.property('user-agent');
       data['user-agent'].should.be.a.String;
-      var pkg = require('../package.json');
+      var pkg = require('../../package.json');
       data['user-agent'].should.match(/^nodejs-cloudant/);
       data['user-agent'].should.containEql('Node.js');
       data['user-agent'].should.containEql(process.version); // node.js version number

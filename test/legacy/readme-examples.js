@@ -29,7 +29,7 @@ require('dotenv').config();
 
 var should = require('should');
 
-var nock = require('./nock.js');
+var nock = require('../nock.js');
 var ME = process.env.cloudant_username || 'nodejs';
 var PASSWORD = process.env.cloudant_password || 'sjedon';
 var SERVER = 'https://' + ME + '.cloudant.com';
@@ -37,7 +37,7 @@ var SERVER = 'https://' + ME + '.cloudant.com';
 var real_require = require;
 require = function(module) {
   return (module == 'cloudant')
-    ? real_require('../cloudant.js')
+    ? real_require('../../cloudant.js')
     : real_require.apply(this, arguments);
 };
 
