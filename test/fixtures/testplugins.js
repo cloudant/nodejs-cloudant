@@ -81,6 +81,41 @@ class AlwaysRetry extends BasePlugin {
   }
 }
 
+// AlwaysRetry for testing
+//   - onRequest:  noop
+//   - onError:    always retries (with retry delay)
+//   - onResponse: always retries (with retry delay)
+
+function AlwaysRetry(client, opts) {
+  AlwaysRetry.super_.apply(this, arguments);
+  this.onRequestCallCount = 0;
+  this.onErrorCallCount = 0;
+  this.onResponseCallCount = 0;
+}
+AlwaysRetry.super_ = BasePlugin;
+AlwaysRetry.prototype = Object.create(BasePlugin.prototype);
+
+AlwaysRetry.prototype.onError = function(state, error, callback) {
+  this.onErrorCallCount++;
+  state.retry = true;
+  if (state.attempt === 1) {
+    state.retryDelay = 500;
+  } else {
+    state.retryDelay *= 2;
+  }
+  callback(state);
+};
+AlwaysRetry.prototype.onResponse = function(state, response, callback) {
+  this.onResponseCallCount++;
+  state.retry = true;
+  if (state.attempt === 1) {
+    state.retryDelay = 500;
+  } else {
+    state.retryDelay *= 2;
+  }
+  callback(state);
+};
+
 // ComplexPlugin1 for testing
 //   - onRequest:  sets method to 'PUT'
 //                 adds 'ComplexPlugin1: foo' header
