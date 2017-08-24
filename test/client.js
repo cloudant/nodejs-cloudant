@@ -124,6 +124,42 @@ describe('CloudantClient', function() {
     });
   });
 
+  describe('aborts request', function() {
+    it('during plugin execution phase', function(done) {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
+      var mocks = nock(SERVER)
+          .get(DBNAME)
+          .times(4)
+          .reply(200, {doc_count: 0});
+
+      var cloudantClient = new Client({
+        maxAttempt: 5,
+        plugin: testPlugin.AlwaysRetry
+      });
+      assert.equal(cloudantClient._plugins.length, 1);
+
+      var options = {
+        url: SERVER + DBNAME,
+        auth: { username: ME, password: PASSWORD },
+        method: 'GET'
+      };
+      var resp = cloudantClient.request(options, function() {
+        assert.fail('Unexpected callback execution by Cloudant client');
+      });
+
+      // allow enough time for 4 retry attempts
+      setTimeout(function() { resp.abort(); }, 500 + 1000 + 2000 + 2000);
+
+      setTimeout(function() {
+        mocks.done();
+        done();
+      }, 8000);
+    });
+  });
+
   describe('using callbacks', function() {
     describe('with no plugins', function() {
       it('performs request and returns response', function(done) {
