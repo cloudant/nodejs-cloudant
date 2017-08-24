@@ -220,28 +220,66 @@ Cloudant({url:"companycloudant.local", username:"somebody", password:"somebody's
 
 ### Request Plugins
 
-This library can be used with one of these `request` plugins:
+This library can be used with one (or more) of the following `request` plugins:
 
-1. `default` - the default [request](https://www.npmjs.com/package/request) library plugin. This uses Node.js's callbacks to communicate Cloudant's replies
-back to your app and can be used to stream data using the Node.js [Stream API](https://nodejs.org/api/stream.html).
-2. `promises` - if you'd prefer to write code in the Promises style then the "promises" plugin turns each request into a Promise. This plugin cannot be used to
-stream data because instead of returning the HTTP request, we are simply returning a Promise instead.
-3. `retry` - on occasion, Cloudant's multi-tenant offerring may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time.
-The "retry" plugin will automatically retry your request with exponential back-off. The 'retry' plugin can be used to stream data.
-4. `cookieauth` - this plugin will automatically swap your Cloudant credentials for a cookie transparently for you. It will handle the authentication for you
-and ensure that the cookie is refreshed. The 'cookieauth' plugin can be used to stream data.
-5. custom plugin - you may also supply your own function which will be called to make API calls.
+1. `cookieauth`
 
-#### The 'promises' Plugins
+   This plugin will automatically swap your Cloudant credentials for a cookie. It will handle the authentication for you and ensure that the cookie is refreshed when required.
+2. `promises`
 
-When initialising the Cloudant library, you can opt to use the 'promises' plugin:
+   If you'd prefer to write code in the _Promises_ style then the `promises` plugin turns each request into a _Promise_.
+3. `retry429` (or `retry`)
+
+   On occasion Cloudant's multi-tenant offering may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. The `retry429` plugin will automatically retry your request with an exponential back-off.
+4. `retry5xx`
+
+   The plugin will automatically retry 5xx responses with an exponential back-off.
+5. `retryerror`
+
+   The plugin will automatically retry request errors (e.g. connection reset errors) with an exponential back-off.
+
+_Want to use multiple plugins?_ Not a problem. Simply pass the plugins as an array instead:
 
 ```js
-var cloudant = Cloudant({url: myurl, plugin:'promises'});
+var cloudant = new Cloudant({ url: myurl, plugins: [ 'cookieauth', 'promises', 'retry5xx' ] });
+var mydb = cloudant.db.use('mydb');
+mydb.get('mydoc', function(err, data) {
+  console.log(`Document contents: ${data.toString('utf8')}`);
+});
+```
+
+The plugins are _always_ executed in the order they are specified. Remember that all plugins are respected. If one requests a retry then it cannot be overruled by another. If two plugins request different delay times before the next retry attempt then the largest delay time is honoured.
+
+Be aware that if you don't specify any plugins then the `cookieauth` plugin will automatically be added. To disable all plugins you can pass an empty array as the plugin list, i.e. `Cloudant({ url: myurl, plugins: [] })`.
+
+#### The `cookieauth` plugin
+
+For example:
+
+```js
+var cloudant = new Cloudant({ url: 'http://user:pass@localhost:5984', plugin: 'cookieauth' });
+var mydb = cloudant.db.use('mydb');
+mydb.get('mydoc', function(err, data) {
+  console.log(`Document contents: ${data.toString('utf8')}`);
+});
+```
+
+The plugin will transparently call `POST /_session` to exchange your credentials for a cookie before proceeding with the document fetch.
+
+Note that all subsequent requests made using this client will also use cookie authentication. The library will automatically refresh the cookie on any `401` or `403` response.
+
+If you don't specify a username and password during the client construction then cookie authentication is disabled.
+
+#### The `promises` plugin
+
+For example:
+
+```js
+var cloudant = new Cloudant({ url: myurl, plugin: 'promises' });
 var mydb = cloudant.db.use('mydb');
 ```
 
-Then the library will return a Promise for every asynchronous call:
+Then the library will return a _Promise_ for every asynchronous call:
 
 ```js
 mydb.list().then(function(data) {
@@ -251,55 +289,31 @@ mydb.list().then(function(data) {
 });
 ```
 
-#### The 'retry' plugin
+#### The retry plugins
 
-When initialising the Cloudant library, you can opt to use the 'retry' plugin:
+1. `retry429`
+2. `retry5xx`
+3. `retryerror`
+
+For example, when initialising the Cloudant library you can opt to use the `retry429` plugin:
 
 ```js
-var cloudant = Cloudant({url: myurl, plugin:'retry'});
+var cloudant = new Cloudant({ url: myurl, plugin: 'retry429' });
 var mydb = cloudant.db.use('mydb');
 ```
 
 Then use the Cloudant library normally. You may also opt to configure the retry parameters:
 
-- retryAttempts - the maximum number of times the request will be attempted (default 3)
-- retryTimeout - the number of milliseconds after the first attempt that the second request will be tried; the timeout doubling with each subsequent attempt  (default 500)
+- `maxAttempt` (or `retryAttempts`) - the maximum number of times the request will be attempted _(default: 3)_.
+- `retryInitialDelayMsecs` (or `retryTimeout`) - the initial retry delay in milliseconds _(default: 500)_.
+- `retryDelayMultiplier` - the multiplication factor used for increasing the timeout after each subsequent attempt _(default: 2)_.
+
+For example:
 
 ```js
-var cloudant = Cloudant({url: myurl, plugin:'retry', retryAttempts:5, retryTimeout:1000 });
+var cloudant = new Cloudant({ url: myurl, plugin: 'retry429', maxAttempt: 5, retryInitialDelayMsecs: 1000 });
 var mydb = cloudant.db.use('mydb');
 ```
-
-#### The 'cookieauth' plugin
-
-When initialising the Cloudant library, you can opt to use the 'cookieauth' plugin:
-
-```js
-var cloudant = Cloudant({url: myurl, plugin:'cookieauth'});
-var mydb = cloudant.db.use('mydb');
-mydb.get('mydoc', function(err, data) {
-
-});
-```
-
-The above code will transparently call `POST /_session` to exchange your credentials for a cookie and then call `GET /mydoc` to fetch the document.
-
-Subsequent calls to the same `cloudant` instance will simply use cookie authentication from that point. The library will automatically ensure that the cookie remains
-up-to-date by calling Cloudant on an hourly basis to refresh the cookie.
-
-#### Custom plugin
-
-When initialising the Cloudant library, you can supply your own plugin function:
-
-```js  
-  var doNothingPlugin = function(opts, callback) {
-    // don't do anything, just pretend that everything's ok.
-    callback(null, { statusCode:200 }, { ok: true});
-  };
-  var cloudant = Cloudant({url: myurl, plugin: doNothingPlugin});
-```
-
-Whenever the Cloudant library wishes to make an outgoing HTTP request, it will call your function instead of `request`.
 
 ## API Reference
 
