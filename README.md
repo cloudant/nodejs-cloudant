@@ -106,12 +106,12 @@ cloudant.db.destroy('alice', function(err) {
     var alice = cloudant.db.use('alice')
 
     // ...and insert a document in it.
-    alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
+    alice.insert({ crazy: true }, 'panda', function(err, body, header) {
       if (err) {
         return console.log('[alice.insert] ', err.message);
       }
 
-      console.log('You have inserted the rabbit.');
+      console.log('You have inserted the panda.');
       console.log(body);
     });
   });
@@ -120,9 +120,9 @@ cloudant.db.destroy('alice', function(err) {
 
 If you run this example, you will see:
 
-    You have inserted the rabbit.
+    You have inserted the panda.
     { ok: true,
-      id: 'rabbit',
+      id: 'panda',
       rev: '1-6e4cb465d49c0368ac3946506d26335d' }
 
 You can find a further CRUD example in the [example](https://github.com/cloudant/nodejs-cloudant/tree/master/example) directory of this project.
@@ -868,18 +868,18 @@ var cloudant = require('cloudant')({account:"me", password:"secret", requestDefa
 
 Cloudant is minimalistic but you can add your own features with `cloudant.request(opts, callback)`
 
-For example, to create a function to retrieve a specific revision of the `rabbit` document:
+For example, to create a function to retrieve a specific revision of the `panda` document:
 
 ~~~ js
-function getrabbitrev(rev, callback) {
+function getpandarev(rev, callback) {
   cloudant.request({ db: 'alice',
-                     doc: 'rabbit',
+                     doc: 'panda',
                      method: 'get',
                      params: { rev: rev }
                    }, callback)
 }
 
-getrabbitrev('4-2e6cdc4c7e26b745c2881a24e0eeece2', function(err, body) {
+getpandarev('4-2e6cdc4c7e26b745c2881a24e0eeece2', function(err, body) {
   if (!err)
     console.log(body)
 })
@@ -887,7 +887,7 @@ getrabbitrev('4-2e6cdc4c7e26b745c2881a24e0eeece2', function(err, body) {
 
 ### Pipes
 
-You can pipe in Cloudant like in any other stream.  for example if our `rabbit` document has an attachment with name `picture.png` (with a picture of our white rabbit, of course!) you can pipe it to a `writable
+You can pipe in Cloudant like in any other stream.  for example if our `panda` document has an attachment with name `picture.png` (with a picture of our white panda, of course!) you can pipe it to a `writable
 stream`
 
 See the [Attachment Functions](#attachment-functions) section for examples of piping to and from attachments.
@@ -974,11 +974,11 @@ Cloudant({account:me, password:password}, function(er, cloudant) {
       // specify the database we are going to use
       var alice = cloudant.db.use('alice')
       // and insert a document in it
-      alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
+      alice.insert({ crazy: true }, 'panda', function(err, body, header) {
         if (err)
           return console.log('[alice.insert] ', err.message)
 
-        console.log('you have inserted the rabbit.')
+        console.log('you have inserted the panda.')
         console.log(body)
       })
     })
@@ -988,9 +988,9 @@ Cloudant({account:me, password:password}, function(er, cloudant) {
 
 If you run this example, you will see:
 
-    you have inserted the rabbit.
+    you have inserted the panda.
     { ok: true,
-      id: 'rabbit',
+      id: 'panda',
       rev: '1-6e4cb465d49c0368ac3946506d26335d' }
 
 ## License
