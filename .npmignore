@@ -1,3 +1,38 @@
-example
-test
-tests
+# https://docs.npmjs.com/misc/developers#keeping-files-out-of-your-package
+
+# build tool config
+.travis.yml
+Jenkinsfile
+
+# code examples
+example*
+
+# docs
+CONTRIBUTING.md
+DCO1.1.txt
+
+# github config
+.github
+
+# IDEs
+.idea
+.vscode
+
+# linters
+.eslintrc*
+
+# npm
+.npmignore
+
+# tests
+.env
+citest
+test*
+toxytests
+
+# test logs
+*.log
+*.dump
+logs
+out
+tmp
