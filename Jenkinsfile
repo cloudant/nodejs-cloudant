@@ -16,8 +16,6 @@
 def getEnvForSuite(suiteName) {
   // Base environment variables
   def envVars = [
-    "cloudant_username=${env.DB_USER}",
-    "cloudant_password=${env.DB_PASSWORD}",
     "NVM_DIR=${env.HOME}/.nvm",
     "MOCHA_TIMEOUT=60000" // 60s
   ]
@@ -42,7 +40,7 @@ def setupNodeAndTest(version, testSuite='test') {
     unstash name: 'built'
 
     // Run tests using creds
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'clientlibs-test', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASSWORD']]) {
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'clientlibs-test', usernameVariable: 'cloudant_username', passwordVariable: 'cloudant_password']]) {
       withEnv(getEnvForSuite("${testSuite}")) {
         try {
           // Actions:
