@@ -21,27 +21,29 @@ const SERVER = `https://${ME}.cloudant.com`;
 
 // NoopPlugin for testing
 
-function NoopPlugin(client, opts) {
-  NoopPlugin.super_.apply(this, arguments);
-  this.onRequestCallCount = 0;
-  this.onErrorCallCount = 0;
-  this.onResponseCallCount = 0;
-}
-NoopPlugin.super_ = BasePlugin;
-NoopPlugin.prototype = Object.create(BasePlugin.prototype);
+class NoopPlugin extends BasePlugin {
+  constructor(client, opts) {
+    super(client, opts);
+    this.onRequestCallCount = 0;
+    this.onErrorCallCount = 0;
+    this.onResponseCallCount = 0;
+  }
 
-NoopPlugin.prototype.onRequest = function(state, request, callback) {
-  this.onRequestCallCount++;
-  callback(state); // noop
-};
-NoopPlugin.prototype.onError = function(state, error, callback) {
-  this.onErrorCallCount++;
-  callback(state); // noop
-};
-NoopPlugin.prototype.onResponse = function(state, response, callback) {
-  this.onResponseCallCount++;
-  callback(state); // noop
-};
+  onRequest(state, request, callback) {
+    this.onRequestCallCount++;
+    callback(state); // noop
+  }
+
+  onError(state, error, callback) {
+    this.onErrorCallCount++;
+    callback(state); // noop
+  }
+
+  onResponse(state, response, callback) {
+    this.onResponseCallCount++;
+    callback(state); // noop
+  }
+}
 
 // ComplexPlugin1 for testing
 //   - onRequest:  sets method to 'PUT'
@@ -49,36 +51,38 @@ NoopPlugin.prototype.onResponse = function(state, response, callback) {
 //   - onError:    always retries
 //   - onResponse: always retries with retry delay
 
-function ComplexPlugin1(client, opts) {
-  ComplexPlugin1.super_.apply(this, arguments);
-  this.onRequestCallCount = 0;
-  this.onErrorCallCount = 0;
-  this.onResponseCallCount = 0;
-}
-ComplexPlugin1.super_ = BasePlugin;
-ComplexPlugin1.prototype = Object.create(BasePlugin.prototype);
-
-ComplexPlugin1.prototype.onRequest = function(state, request, callback) {
-  this.onRequestCallCount++;
-  request.method = 'PUT';
-  request.headers = { 'ComplexPlugin1': 'foo' };
-  callback(state);
-};
-ComplexPlugin1.prototype.onError = function(state, error, callback) {
-  this.onErrorCallCount++;
-  state.retry = true;
-  callback(state);
-};
-ComplexPlugin1.prototype.onResponse = function(state, response, callback) {
-  this.onResponseCallCount++;
-  state.retry = true;
-  if (state.attempt === 1) {
-    state.retryDelay = 10;
-  } else {
-    state.retryDelay *= 2;
+class ComplexPlugin1 extends BasePlugin {
+  constructor(client, opts) {
+    super(client, opts);
+    this.onRequestCallCount = 0;
+    this.onErrorCallCount = 0;
+    this.onResponseCallCount = 0;
   }
-  callback(state);
-};
+
+  onRequest(state, request, callback) {
+    this.onRequestCallCount++;
+    request.method = 'PUT';
+    request.headers = { 'ComplexPlugin1': 'foo' };
+    callback(state);
+  }
+
+  onError(state, error, callback) {
+    this.onErrorCallCount++;
+    state.retry = true;
+    callback(state);
+  }
+
+  onResponse(state, response, callback) {
+    this.onResponseCallCount++;
+    state.retry = true;
+    if (state.attempt === 1) {
+      state.retryDelay = 10;
+    } else {
+      state.retryDelay *= 2;
+    }
+    callback(state);
+  }
+}
 
 // ComplexPlugin2 for testing
 //   - onRequest:  sets method to 'GET'
@@ -86,64 +90,66 @@ ComplexPlugin1.prototype.onResponse = function(state, response, callback) {
 //   - onError:    submits GET /bar and returns response
 //   - onResponse: retries 401 responses once
 
-function ComplexPlugin2(client, opts) {
-  ComplexPlugin2.super_.apply(this, arguments);
-  this.onRequestCallCount = 0;
-  this.onErrorCallCount = 0;
-  this.onResponseCallCount = 0;
-}
-ComplexPlugin2.super_ = BasePlugin;
-ComplexPlugin2.prototype = Object.create(BasePlugin.prototype);
-
-ComplexPlugin2.prototype.onRequest = function(state, request, callback) {
-  this.onRequestCallCount++;
-  request.method = 'GET';
-  request.headers = { 'ComplexPlugin2': 'bar' };
-  callback(state);
-};
-ComplexPlugin2.prototype.onError = function(state, error, callback) {
-  this.onErrorCallCount++;
-  this._client(SERVER + '/bar', function(error, response, body) {
-    state.abortWithResponse = [error, response, body];
-    callback(state);
-  });
-};
-ComplexPlugin2.prototype.onResponse = function(state, response, callback) {
-  this.onResponseCallCount++;
-  if (state.attempt < state.maxAttempt) {
-    if (state.attempt === 1 && response.statusCode === 401) {
-      state.retry = true;
-    }
+class ComplexPlugin2 extends BasePlugin {
+  constructor(client, opts) {
+    super(client, opts);
+    this.onRequestCallCount = 0;
+    this.onErrorCallCount = 0;
+    this.onResponseCallCount = 0;
   }
-  callback(state);
-};
 
-// ComplexPlugin3 for testing
-//   - onResponse: retries 5xx responses once, submitting a DELETE /bar on failure
-
-function ComplexPlugin3(client, opts) {
-  ComplexPlugin3.super_.apply(this, arguments);
-  this.onResponseCallCount = 0;
-}
-ComplexPlugin3.super_ = BasePlugin;
-ComplexPlugin3.prototype = Object.create(BasePlugin.prototype);
-
-ComplexPlugin3.prototype.onResponse = function(state, response, callback) {
-  this.onResponseCallCount++;
-  if (response.statusCode < 500) {
-    return callback(state);
-  }
-  if (state.attempt === 1) {
-    state.retry = true;
+  onRequest(state, request, callback) {
+    this.onRequestCallCount++;
+    request.method = 'GET';
+    request.headers = { 'ComplexPlugin2': 'bar' };
     callback(state);
-  } else {
-    var options = { url: SERVER + '/bar', method: 'DELETE' };
-    this._client(options, function(error, response, body) {
+  }
+
+  onError(state, error, callback) {
+    this.onErrorCallCount++;
+    this._client(SERVER + '/bar', function(error, response, body) {
       state.abortWithResponse = [error, response, body];
       callback(state);
     });
   }
-};
+
+  onResponse(state, response, callback) {
+    this.onResponseCallCount++;
+    if (state.attempt < state.maxAttempt) {
+      if (state.attempt === 1 && response.statusCode === 401) {
+        state.retry = true;
+      }
+    }
+    callback(state);
+  }
+}
+
+// ComplexPlugin3 for testing
+//   - onResponse: retries 5xx responses once, submitting a DELETE /bar on failure
+
+class ComplexPlugin3 extends BasePlugin {
+  constructor(client, opts) {
+    super(client, opts);
+    this.onResponseCallCount = 0;
+  }
+
+  onResponse(state, response, callback) {
+    this.onResponseCallCount++;
+    if (response.statusCode < 500) {
+      return callback(state);
+    }
+    if (state.attempt === 1) {
+      state.retry = true;
+      callback(state);
+    } else {
+      var options = { url: SERVER + '/bar', method: 'DELETE' };
+      this._client(options, function(error, response, body) {
+        state.abortWithResponse = [error, response, body];
+        callback(state);
+      });
+    }
+  }
+}
 
 // PluginA for testing
 //  - attempt 1
@@ -153,42 +159,39 @@ ComplexPlugin3.prototype.onResponse = function(state, response, callback) {
 //  - attempt 3
 //      * retryDelay set to 1000
 
-function PluginA(client, opts) {
-  PluginA.super_.apply(this, arguments);
-}
-PluginA.super_ = BasePlugin;
-PluginA.prototype = Object.create(BasePlugin.prototype);
-
-PluginA.prototype._hook = function(state, callback) {
-  switch (state.attempt) {
-    case 1:
-      assert.equal(state.retry, false);
-      assert.equal(state.retryDelay, 0);
-      state.retry = true;
-      state.retryDelay = 10;
-      break;
-    case 2:
-      assert.equal(state.retry, false);
-      assert.equal(state.retryDelay, 40);
-      state.retryDelay = 100;
-      break;
-    case 3:
-      assert.equal(state.retry, false);
-      assert.equal(state.retryDelay, 400);
-      state.retryDelay = 1000;
-      break;
-    default:
-      assert.fail('Too many attempts');
+class PluginA extends BasePlugin {
+  _hook(state, callback) {
+    switch (state.attempt) {
+      case 1:
+        assert.equal(state.retry, false);
+        assert.equal(state.retryDelay, 0);
+        state.retry = true;
+        state.retryDelay = 10;
+        break;
+      case 2:
+        assert.equal(state.retry, false);
+        assert.equal(state.retryDelay, 40);
+        state.retryDelay = 100;
+        break;
+      case 3:
+        assert.equal(state.retry, false);
+        assert.equal(state.retryDelay, 400);
+        state.retryDelay = 1000;
+        break;
+      default:
+        assert.fail('Too many attempts');
+    }
+    callback(state);
   }
-  callback(state);
-};
 
-PluginA.prototype.onError = function(state, error, callback) {
-  this._hook(state, callback);
-};
-PluginA.prototype.onResponse = function(state, response, callback) {
-  this._hook(state, callback);
-};
+  onError(state, error, callback) {
+    this._hook(state, callback);
+  }
+
+  onResponse(state, response, callback) {
+    this._hook(state, callback);
+  }
+}
 
 // PluginB for testing
 //  - attempt 1
@@ -198,42 +201,39 @@ PluginA.prototype.onResponse = function(state, response, callback) {
 //  - attempt 3
 //      * retryDelay set to 2000
 
-function PluginB(client, opts) {
-  PluginB.super_.apply(this, arguments);
-}
-PluginB.super_ = BasePlugin;
-PluginB.prototype = Object.create(BasePlugin.prototype);
-
-PluginB.prototype._hook = function(state, callback) {
-  switch (state.attempt) {
-    case 1:
-      assert.equal(state.retry, true);
-      assert.equal(state.retryDelay, 10);
-      state.retryDelay = 20;
-      break;
-    case 2:
-      assert.equal(state.retry, false);
-      assert.equal(state.retryDelay, 100);
-      state.retry = true;
-      state.retryDelay = 200;
-      break;
-    case 3:
-      assert.equal(state.retry, false);
-      assert.equal(state.retryDelay, 1000);
-      state.retryDelay = 2000;
-      break;
-    default:
-      assert.fail('Too many attempts');
+class PluginB extends BasePlugin {
+  _hook(state, callback) {
+    switch (state.attempt) {
+      case 1:
+        assert.equal(state.retry, true);
+        assert.equal(state.retryDelay, 10);
+        state.retryDelay = 20;
+        break;
+      case 2:
+        assert.equal(state.retry, false);
+        assert.equal(state.retryDelay, 100);
+        state.retry = true;
+        state.retryDelay = 200;
+        break;
+      case 3:
+        assert.equal(state.retry, false);
+        assert.equal(state.retryDelay, 1000);
+        state.retryDelay = 2000;
+        break;
+      default:
+        assert.fail('Too many attempts');
+    }
+    callback(state);
   }
-  callback(state);
-};
 
-PluginB.prototype.onError = function(state, error, callback) {
-  this._hook(state, callback);
-};
-PluginB.prototype.onResponse = function(state, response, callback) {
-  this._hook(state, callback);
-};
+  onError(state, error, callback) {
+    this._hook(state, callback);
+  }
+
+  onResponse(state, response, callback) {
+    this._hook(state, callback);
+  }
+}
 
 // PluginC for testing
 //  - attempt 1
@@ -243,42 +243,39 @@ PluginB.prototype.onResponse = function(state, response, callback) {
 //  - attempt 3
 //      * retryDelay set to 3000
 
-function PluginC(client, opts) {
-  PluginC.super_.apply(this, arguments);
-}
-PluginC.super_ = BasePlugin;
-PluginC.prototype = Object.create(BasePlugin.prototype);
-
-PluginC.prototype._hook = function(state, callback) {
-  switch (state.attempt) {
-    case 1:
-      assert.equal(state.retry, true);
-      assert.equal(state.retryDelay, 20);
-      state.retryDelay = 30;
-      break;
-    case 2:
-      assert.equal(state.retry, true);
-      assert.equal(state.retryDelay, 200);
-      state.retryDelay = 300;
-      break;
-    case 3:
-      assert.equal(state.retry, false);
-      assert.equal(state.retryDelay, 2000);
-      state.retry = true;
-      state.retryDelay = 3000;
-      break;
-    default:
-      assert.fail('Too many attempts');
+class PluginC extends BasePlugin {
+  _hook(state, callback) {
+    switch (state.attempt) {
+      case 1:
+        assert.equal(state.retry, true);
+        assert.equal(state.retryDelay, 20);
+        state.retryDelay = 30;
+        break;
+      case 2:
+        assert.equal(state.retry, true);
+        assert.equal(state.retryDelay, 200);
+        state.retryDelay = 300;
+        break;
+      case 3:
+        assert.equal(state.retry, false);
+        assert.equal(state.retryDelay, 2000);
+        state.retry = true;
+        state.retryDelay = 3000;
+        break;
+      default:
+        assert.fail('Too many attempts');
+    }
+    callback(state);
   }
-  callback(state);
-};
 
-PluginC.prototype.onError = function(state, error, callback) {
-  this._hook(state, callback);
-};
-PluginC.prototype.onResponse = function(state, response, callback) {
-  this._hook(state, callback);
-};
+  onError(state, error, callback) {
+    this._hook(state, callback);
+  }
+
+  onResponse(state, response, callback) {
+    this._hook(state, callback);
+  }
+}
 
 // PluginD for testing
 //  - attempt 1
@@ -288,40 +285,37 @@ PluginC.prototype.onResponse = function(state, response, callback) {
 //  - attempt 3
 //      * <no action taken>
 
-function PluginD(client, opts) {
-  PluginD.super_.apply(this, arguments);
-}
-PluginD.super_ = BasePlugin;
-PluginD.prototype = Object.create(BasePlugin.prototype);
-
-PluginD.prototype._hook = function(state, callback) {
-  switch (state.attempt) {
-    case 1:
-      assert.equal(state.retry, true);
-      assert.equal(state.retryDelay, 30);
-      state.retryDelay = 40;
-      break;
-    case 2:
-      assert.equal(state.retry, true);
-      assert.equal(state.retryDelay, 300);
-      state.retryDelay = 400;
-      break;
-    case 3:
-      assert.equal(state.retry, true);
-      assert.equal(state.retryDelay, 3000);
-      break;
-    default:
-      assert.fail('Too many attempts');
+class PluginD extends BasePlugin {
+  _hook(state, callback) {
+    switch (state.attempt) {
+      case 1:
+        assert.equal(state.retry, true);
+        assert.equal(state.retryDelay, 30);
+        state.retryDelay = 40;
+        break;
+      case 2:
+        assert.equal(state.retry, true);
+        assert.equal(state.retryDelay, 300);
+        state.retryDelay = 400;
+        break;
+      case 3:
+        assert.equal(state.retry, true);
+        assert.equal(state.retryDelay, 3000);
+        break;
+      default:
+        assert.fail('Too many attempts');
+    }
+    callback(state);
   }
-  callback(state);
-};
 
-PluginD.prototype.onError = function(state, error, callback) {
-  this._hook(state, callback);
-};
-PluginD.prototype.onResponse = function(state, response, callback) {
-  this._hook(state, callback);
-};
+  onError(state, error, callback) {
+    this._hook(state, callback);
+  }
+
+  onResponse(state, response, callback) {
+    this._hook(state, callback);
+  }
+}
 
 module.exports = {
   NoopPlugin: NoopPlugin,
