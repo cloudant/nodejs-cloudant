@@ -19,9 +19,11 @@
  * @param {Object} client - HTTP client.
  * @param {Object} opts - Plugin options.
  */
-function BasePlugin(client, opts) {
-  this._client = client;
-  this._opts = opts;
+class BasePlugin {
+  constructor(client, opts) {
+    this._client = client;
+    this._opts = opts;
+  }
 }
 
 module.exports = BasePlugin;
