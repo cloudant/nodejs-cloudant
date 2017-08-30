@@ -17,13 +17,17 @@
  * Cloudant base plugin.
  *
  * @param {Object} client - HTTP client.
- * @param {Object} opts - Plugin options.
  */
 class BasePlugin {
-  constructor(client, opts) {
+  constructor(client) {
     this._client = client;
-    this._opts = opts;
+  }
+
+  get id() {
+    return this.constructor.id;
   }
 }
+
+BasePlugin.id = 'base';
 
 module.exports = BasePlugin;
