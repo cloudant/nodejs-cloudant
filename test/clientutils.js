@@ -48,11 +48,11 @@ describe('Client Utilities', function() {
 
       var r = { response: request.get(SERVER) };
       r.state = {
-        attempt: 1,
         abortWithResponse: undefined,
-        maxAttempt: 3,
+        attempt: 1,
+        cfg: { maxAttempt: 3, retryDelay: 0 },
         retry: true,
-        retryDelay: 0
+        sending: true
       };
       utils.processState(r, function(stop) {
         assert.equal(stop, undefined);
@@ -97,11 +97,11 @@ describe('Client Utilities', function() {
 
       var r = { abort: false, clientStream: {}, response: request.get(SERVER) };
       r.state = {
-        attempt: 3,
         abortWithResponse: undefined,
-        maxAttempt: 3,
+        attempt: 3,
+        cfg: { maxAttempt: 3, retryDelay: 0 },
         retry: true,
-        retryDelay: 0
+        sending: true
       };
       utils.processState(r, function(stop) {
         assert.equal(stop.message, 'No retry requested');
@@ -116,14 +116,72 @@ describe('Client Utilities', function() {
 
       var r = { abort: false, clientStream: {}, response: request.get(SERVER) };
       r.state = {
-        attempt: 1,
         abortWithResponse: undefined,
-        maxAttempt: 3,
+        attempt: 1,
+        cfg: { maxAttempt: 3, retryDelay: 0 },
         retry: false,
-        retryDelay: 0
+        sending: true
       };
       utils.processState(r, function(stop) {
         assert.equal(stop.message, 'No retry requested');
+        done();
+      });
+    });
+
+    it('calls back without error if retry and sending false', function(done) {
+      nock(SERVER)
+          .get('/')
+          .reply(200, {couchdb: 'Welcome'});
+
+      var r = { response: request.get(SERVER) };
+      r.state = {
+        abortWithResponse: undefined,
+        attempt: 1,
+        cfg: { maxAttempt: 3, retryDelay: 0 },
+        retry: true,
+        sending: false
+      };
+      utils.processState(r, function(stop) {
+        assert.equal(stop, undefined);
+        done();
+      });
+    });
+
+    it('calls back without error if no retry and sending false', function(done) {
+      nock(SERVER)
+          .get('/')
+          .reply(200, {couchdb: 'Welcome'});
+
+      var r = { response: request.get(SERVER) };
+      r.state = {
+        abortWithResponse: undefined,
+        attempt: 1,
+        cfg: { maxAttempt: 3, retryDelay: 0 },
+        retry: false,
+        sending: false
+      };
+      utils.processState(r, function(stop) {
+        assert.equal(stop, undefined);
+        done();
+      });
+    });
+
+    it('calls back without error if too many retries and sending false', function(done) {
+      nock(SERVER)
+          .get('/')
+          .reply(200, {couchdb: 'Welcome'});
+
+      var r = { response: request.get(SERVER) };
+      r.state = {
+        abortWithResponse: undefined,
+        attempt: 3,
+        cfg: { maxAttempt: 3, retryDelay: 0 },
+        retry: true,
+        sending: false
+      };
+      utils.processState(r, function(stop) {
+        assert.equal(stop, undefined);
+        assert.equal(r.state.retry, false);
         done();
       });
     });
@@ -141,11 +199,11 @@ describe('Client Utilities', function() {
       var plugin = new testPlugin.NoopPlugin(null, {});
       var r = { plugins: [ plugin ] };
       r.state = {
-        attempt: 1,
         abortWithResponse: undefined,
-        maxAttempt: 3,
-        retry: false,
-        retryDelay: 0
+        attempt: 1,
+        cfg: { maxAttempt: 3, retryDelay: 0 },
+        retry: true,
+        sending: true
       };
       utils.runHooks('onRequest', r, 'request', function(err) {
         assert.equal(plugin.onRequestCallCount, 1);
@@ -195,11 +253,11 @@ describe('Client Utilities', function() {
         plugins: [ plugin ]
       };
       r.state = {
-        attempt: 1,
         abortWithResponse: undefined,
-        maxAttempt: 3,
+        attempt: 1,
+        cfg: { maxAttempt: 3, retryDelay: 0 },
         retry: false,
-        retryDelay: 0
+        sending: true
       };
       r.response = request.get(SERVER, utils.wrapCallback(r, function(stop) {
         assert.equal(stop.message, 'No retry requested');
@@ -218,11 +276,11 @@ describe('Client Utilities', function() {
       };
       var r = { clientCallback: cb, plugins: [ plugin ] };
       r.state = {
-        attempt: 1,
         abortWithResponse: undefined,
-        maxAttempt: 3,
+        attempt: 1,
+        cfg: { maxAttempt: 3, retryDelay: 0 },
         retry: true,
-        retryDelay: 0
+        sending: true
       };
       r.response = request.get(SERVER, utils.wrapCallback(r, function(stop) {
         done(stop);
