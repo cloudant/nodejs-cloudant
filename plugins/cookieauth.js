@@ -18,7 +18,7 @@
 // we exchange the credentials for a cookie which we remember and pass back with each
 // subsequent request.
 var async = require('async');
-var debug = require('debug')('cloudant');
+var debug = require('debug')('cloudant:cookieauth');
 var stream = require('stream');
 var u = require('url');
 var nullcallback = function() {};
