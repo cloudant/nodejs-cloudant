@@ -22,12 +22,14 @@ class RetryErrorPlugin extends BasePlugin {
   onError(state, error, callback) {
     state.retry = true;
     if (state.attempt === 1) {
-      state.retryDelay = this._opts.retryInitialDelay || 500;
+      state.retryDelayMsecs = state.cfg.retryInitialDelayMsecs;
     } else {
-      state.retryDelay *= this._opts.retryDelayMultiplier || 2;
+      state.retryDelayMsecs *= state.cfg.retryDelayMultiplier;
     }
     callback(state);
   }
 }
+
+RetryErrorPlugin.id = 'retryerror';
 
 module.exports = RetryErrorPlugin;
