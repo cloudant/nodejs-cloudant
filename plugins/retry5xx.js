@@ -20,18 +20,18 @@ const BasePlugin = require('./base.js');
  */
 class Retry5xxPlugin extends BasePlugin {
   onResponse(state, response, callback) {
-    if (response.statusCode < 500) {
-      state.retry = false; // success
-    } else {
+    if (response.statusCode >= 500) {
       state.retry = true;
       if (state.attempt === 1) {
-        state.retryDelay = this._opts.retryInitialDelay || 500;
+        state.retryDelayMsecs = state.cfg.retryInitialDelayMsecs;
       } else {
-        state.retryDelay *= this._opts.retryDelayMultiplier || 2;
+        state.retryDelayMsecs *= state.cfg.retryDelayMultiplier;
       }
     }
     callback(state);
   }
 }
+
+Retry5xxPlugin.id = 'retry5xx';
 
 module.exports = Retry5xxPlugin;

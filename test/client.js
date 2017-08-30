@@ -67,6 +67,22 @@ describe('CloudantClient', function() {
     });
   });
 
+  describe('supports legacy configuration', function() {
+    it('supports legacy option retryAttempts', function() {
+      var cfg = { retryAttempts: 123 };
+      var cloudantClient = new Client(cfg);
+      cloudantClient._support_legacy_keys(cfg);
+      assert.equal(cfg.maxAttempt, 123);
+    });
+
+    it('supports legacy option retryTimeout', function() {
+      var cfg = { retryTimeout: 321 };
+      var cloudantClient = new Client(cfg);
+      cloudantClient._support_legacy_keys(cfg);
+      assert.equal(cfg.retryInitialDelayMsecs, 321);
+    });
+  });
+
   describe('plugin support', function() {
     it('allows plugins to be added seperately', function() {
       var cloudantClient = new Client();
@@ -86,19 +102,19 @@ describe('CloudantClient', function() {
     it('allows a single plugin to be added via "plugin" options', function() {
       var cloudantClient = new Client({ plugin: ['cookieauth'] });
       assert.equal(cloudantClient._plugins.length, 1);
-      assert.equal(cloudantClient._usePromises, false);
+      assert.equal(cloudantClient._cfg.usePromises, false);
     });
 
     it('allows a single plugin to be added via "plugins" options', function() {
       var cloudantClient = new Client({ plugins: ['cookieauth'] });
       assert.equal(cloudantClient._plugins.length, 1);
-      assert.equal(cloudantClient._usePromises, false);
+      assert.equal(cloudantClient._cfg.usePromises, false);
     });
 
     it('allows an array of plugins to be added via "plugin" options', function() {
       var cloudantClient = new Client({
         plugin: [
-          'promises', // sets cloudantClient._usePromises -> true
+          'promises', // sets cloudantClient._cfg.usePromises -> true
           'retry', // plugin 1
           'cookieauth', // plugin 2
           'default', // ignored
@@ -106,13 +122,13 @@ describe('CloudantClient', function() {
         ]
       });
       assert.equal(cloudantClient._plugins.length, 2);
-      assert.ok(cloudantClient._usePromises);
+      assert.ok(cloudantClient._cfg.usePromises);
     });
 
     it('allows an array of plugins to be added via "plugins" options', function() {
       var cloudantClient = new Client({
         plugins: [
-          'promises', // sets cloudantClient._usePromises -> true
+          'promises', // sets cloudantClient._cfg.usePromises -> true
           'retry', // plugin 1
           'cookieauth', // plugin 2
           'default', // ignored
@@ -120,7 +136,176 @@ describe('CloudantClient', function() {
         ]
       });
       assert.equal(cloudantClient._plugins.length, 2);
-      assert.ok(cloudantClient._usePromises);
+      assert.ok(cloudantClient._cfg.usePromises);
+    });
+  });
+
+  describe('specifying client configuration at request time', function() {
+    it('errors when attempting to override https', function() {
+      var cloudantClient = new Client();
+      assert.throws(
+        () => {
+          cloudantClient.request('http://localhost:5984', { https: false });
+        },
+        /Cannot specify 'https' at request time/,
+        'did not throw with expected message'
+      );
+    });
+
+    it('errors when attempting to override plugin', function() {
+      var cloudantClient = new Client();
+      assert.throws(
+        () => {
+          cloudantClient.request('http://localhost:5984', { plugin: [ 'retry429' ] });
+        },
+        /Cannot specify 'plugin' at request time/,
+        'did not throw with expected message'
+      );
+    });
+
+    it('errors when attempting to override plugins', function() {
+      var cloudantClient = new Client();
+      assert.throws(
+        () => {
+          cloudantClient.request('http://localhost:5984', { plugins: [ 'retry429' ] });
+        },
+        /Cannot specify 'plugins' at request time/,
+        'did not throw with expected message'
+      );
+    });
+
+    it('errors when attempting to override requestDefaults', function() {
+      var cloudantClient = new Client();
+      assert.throws(
+        () => {
+          cloudantClient.request(
+            'http://localhost:5984', { requestDefaults: { gzip: false } }
+          );
+        },
+        /Cannot specify 'requestDefaults' at request time/,
+        'did not throw with expected message'
+      );
+    });
+
+    it('successfully overrides maxAttempt', function(done) {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
+      var mocks = nock(SERVER)
+          .get(DBNAME)
+          .times(2)
+          .reply(200, {doc_count: 0});
+
+      var cloudantClient = new Client();
+      cloudantClient.addPlugins(testPlugin.AlwaysRetry);
+      assert.equal(cloudantClient._plugins.length, 1);
+
+      var options = {
+        url: SERVER + DBNAME,
+        auth: { username: ME, password: PASSWORD },
+        method: 'GET'
+      };
+      cloudantClient.request(options, { maxAttempt: 2 }, function(err, resp, data) {
+        assert.equal(cloudantClient._plugins[0].onResponseCallCount, 2);
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 200);
+        assert.ok(data.indexOf('"doc_count":0') > -1);
+        mocks.done();
+        done();
+      });
+    });
+
+    it('successfully overrides retryDelayMultiplier', function(done) {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
+      var mocks = nock(SERVER)
+          .get(DBNAME)
+          .times(3)
+          .reply(200, {doc_count: 0});
+
+      var cloudantClient = new Client();
+      cloudantClient.addPlugins(testPlugin.AlwaysRetry);
+      assert.equal(cloudantClient._plugins.length, 1);
+
+      var startTs = (new Date()).getTime();
+      var options = {
+        url: SERVER + DBNAME,
+        auth: { username: ME, password: PASSWORD },
+        method: 'GET'
+      };
+      cloudantClient.request(options, { retryDelayMultiplier: 3 }, function(err, resp, data) {
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 200);
+        assert.ok(data.indexOf('"doc_count":0') > -1);
+
+        // validate retry delay
+        var now = (new Date()).getTime();
+        assert.ok(now - startTs > (500 + 1500));
+
+        mocks.done();
+        done();
+      });
+    });
+
+    it('successfully overrides retryInitialDelayMsecs', function(done) {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
+      var mocks = nock(SERVER)
+          .get(DBNAME)
+          .times(3)
+          .reply(200, {doc_count: 0});
+
+      var cloudantClient = new Client();
+      cloudantClient.addPlugins(testPlugin.AlwaysRetry);
+      assert.equal(cloudantClient._plugins.length, 1);
+
+      var startTs = (new Date()).getTime();
+      var options = {
+        url: SERVER + DBNAME,
+        auth: { username: ME, password: PASSWORD },
+        method: 'GET'
+      };
+      cloudantClient.request(options, { retryInitialDelayMsecs: 750 }, function(err, resp, data) {
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 200);
+        assert.ok(data.indexOf('"doc_count":0') > -1);
+
+        // validate retry delay
+        var now = (new Date()).getTime();
+        assert.ok(now - startTs > (750 + 1500));
+
+        mocks.done();
+        done();
+      });
+    });
+
+    it('successfully overrides usePromises', function(done) {
+      var mocks = nock(SERVER)
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
+
+      var cloudantClient = new Client();
+      assert.equal(cloudantClient._plugins.length, 0);
+      assert.equal(cloudantClient._cfg.usePromises, false);
+
+      var options = {
+        url: SERVER + DBNAME,
+        auth: { username: ME, password: PASSWORD },
+        method: 'GET'
+      };
+      var p = cloudantClient.request(options, { usePromises: true }).then(function(data) {
+        assert.equal(data.doc_count, 0);
+        mocks.done();
+        done();
+      }).catch(function(err) {
+        assert.fail(`Unexpected reject: ${err}`);
+      });
+      assert.ok(p instanceof Promise);
     });
   });
 
@@ -1127,14 +1312,14 @@ describe('CloudantClient', function() {
 
   describe('using promises', function() {
     describe('with no other plugins', function() {
-      it('performs request and returns response', function(done) {
+      it('performs request and returns response with promise client', function(done) {
         var mocks = nock(SERVER)
             .get(DBNAME)
             .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ plugin: 'promises' });
         assert.equal(cloudantClient._plugins.length, 0);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1162,7 +1347,7 @@ describe('CloudantClient', function() {
 
         var cloudantClient = new Client({ plugin: 'promises' });
         assert.equal(cloudantClient._plugins.length, 0);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1189,7 +1374,7 @@ describe('CloudantClient', function() {
 
         var cloudantClient = new Client({ plugins: ['promises', testPlugin.NoopPlugin] });
         assert.equal(cloudantClient._plugins.length, 1);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1222,7 +1407,7 @@ describe('CloudantClient', function() {
 
         var cloudantClient = new Client({ plugins: ['promises', testPlugin.NoopPlugin] });
         assert.equal(cloudantClient._plugins.length, 1);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1259,7 +1444,7 @@ describe('CloudantClient', function() {
           testPlugin.NoopPlugin  // plugin 3
         ]});
         assert.equal(cloudantClient._plugins.length, 3);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1299,7 +1484,7 @@ describe('CloudantClient', function() {
           testPlugin.NoopPlugin  // plugin 3
         ]});
         assert.equal(cloudantClient._plugins.length, 3);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1343,7 +1528,7 @@ describe('CloudantClient', function() {
           plugins: ['promises', testPlugin.ComplexPlugin1]
         });
         assert.equal(cloudantClient._plugins.length, 1);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1386,7 +1571,7 @@ describe('CloudantClient', function() {
           plugins: ['promises', testPlugin.ComplexPlugin1]
         });
         assert.equal(cloudantClient._plugins.length, 1);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1429,7 +1614,7 @@ describe('CloudantClient', function() {
           plugins: ['promises', testPlugin.ComplexPlugin2]
         });
         assert.equal(cloudantClient._plugins.length, 1);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1469,7 +1654,7 @@ describe('CloudantClient', function() {
           plugins: ['promises', testPlugin.ComplexPlugin2]
         });
         assert.equal(cloudantClient._plugins.length, 1);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1513,7 +1698,7 @@ describe('CloudantClient', function() {
           plugins: ['promises', testPlugin.ComplexPlugin3]
         });
         assert.equal(cloudantClient._plugins.length, 1);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1547,7 +1732,7 @@ describe('CloudantClient', function() {
           plugins: ['promises', testPlugin.ComplexPlugin3]
         });
         assert.equal(cloudantClient._plugins.length, 1);
-        assert.ok(cloudantClient._usePromises);
+        assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
           url: SERVER + DBNAME,
