@@ -13,17 +13,25 @@
 // limitations under the License.
 'use strict';
 
+const BasePlugin = require('./base.js');
+
 /**
- * Cloudant base plugin.
- *
- * @param {Object} client - HTTP client.
- * @param {Object} opts - Plugin options.
+ * Retry 5xx response plugin.
  */
-class BasePlugin {
-  constructor(client, opts) {
-    this._client = client;
-    this._opts = opts;
+class Retry5xxPlugin extends BasePlugin {
+  onResponse(state, response, callback) {
+    if (response.statusCode < 500) {
+      state.retry = false; // success
+    } else {
+      state.retry = true;
+      if (state.attempt === 1) {
+        state.retryDelay = this._opts.retryInitialDelay || 500;
+      } else {
+        state.retryDelay *= this._opts.retryDelayMultiplier || 2;
+      }
+    }
+    callback(state);
   }
 }
 
-module.exports = BasePlugin;
+module.exports = Retry5xxPlugin;

@@ -26,7 +26,7 @@ const PASSWORD = process.env.cloudant_password || 'sjedon';
 const SERVER = 'https://' + ME + '.cloudant.com';
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 
-describe('Retry429 Plugin', function() {
+describe('RetryError Plugin', function() {
   before(function(done) {
     var mocks = nock(SERVER)
         .put(DBNAME)
@@ -74,7 +74,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retry' });
+      var cloudantClient = new Client({ plugin: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -89,41 +89,18 @@ describe('Retry429 Plugin', function() {
       });
     });
 
-    it('performs request and returns error', function(done) {
-      if (process.env.NOCK_OFF) {
-        this.skip();
-      }
-
-      var mocks = nock(SERVER)
-          .get(DBNAME)
-          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
-
-      var cloudantClient = new Client();
-      var req = {
-        url: SERVER + DBNAME,
-        auth: { username: ME, password: PASSWORD },
-        method: 'GET'
-      };
-      cloudantClient.request(req, function(err, resp, data) {
-        assert.equal(err.code, 'ECONNRESET');
-        assert.equal(err.message, 'socket hang up');
-        mocks.done();
-        done();
-      });
-    });
-
-    it('successfully retries request on 429 response and returns 200 response', function(done) {
+    it('successfully retries request error and returns 200 response', function(done) {
       if (process.env.NOCK_OFF) {
         this.skip();
       }
 
       var mocks = nock(SERVER)
           .get(DBNAME).times(4)
-          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
 
       var req = {
         url: SERVER + DBNAME,
@@ -146,48 +123,16 @@ describe('Retry429 Plugin', function() {
       });
     });
 
-    it('fails to retry request on 429 response and returns error', function(done) {
-      if (process.env.NOCK_OFF) {
-        this.skip();
-      }
-
-      var mocks = nock(SERVER)
-          .get(DBNAME).times(4)
-          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
-          .get(DBNAME)
-          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
-
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
-      var req = {
-        url: SERVER + DBNAME,
-        auth: { username: ME, password: PASSWORD },
-        method: 'GET'
-      };
-
-      var startTs = (new Date()).getTime();
-      cloudantClient.request(req, function(err, resp, data) {
-        assert.equal(err.code, 'ECONNRESET');
-        assert.equal(err.message, 'socket hang up');
-
-        // validate retry delay
-        var now = (new Date()).getTime();
-        assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
-
-        mocks.done();
-        done();
-      });
-    });
-
-    it('fails to retry request on 429 response and returns 429 response', function(done) {
+    it('fails to retry request error response and returns error', function(done) {
       if (process.env.NOCK_OFF) {
         this.skip();
       }
 
       var mocks = nock(SERVER)
           .get(DBNAME).times(5)
-          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'});
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -196,9 +141,8 @@ describe('Retry429 Plugin', function() {
 
       var startTs = (new Date()).getTime();
       cloudantClient.request(req, function(err, resp, data) {
-        assert.equal(err, null);
-        assert.equal(resp.statusCode, 429);
-        assert.ok(data.indexOf('"error":"too_many_requests"') > -1);
+        assert.equal(err.code, 'ECONNRESET');
+        assert.equal(err.message, 'socket hang up');
 
         // validate retry delay
         var now = (new Date()).getTime();
@@ -217,7 +161,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retry' });
+      var cloudantClient = new Client({ plugin: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -257,49 +201,18 @@ describe('Retry429 Plugin', function() {
         });
     });
 
-    it('performs request and returns error', function(done) {
-      if (process.env.NOCK_OFF) {
-        this.skip();
-      }
-
-      var mocks = nock(SERVER)
-          .get(DBNAME)
-          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
-
-      var cloudantClient = new Client();
-      var req = {
-        url: SERVER + DBNAME,
-        auth: { username: ME, password: PASSWORD },
-        method: 'GET'
-      };
-
-      cloudantClient.request(req)
-        .on('error', function(err) {
-          assert.equal(err.code, 'ECONNRESET');
-          assert.equal(err.message, 'socket hang up');
-          mocks.done();
-          done();
-        })
-        .on('response', function(resp) {
-          assert.fail('Unexpected response from server');
-        })
-        .on('data', function(data) {
-          assert.fail('Unexpected data from server');
-        });
-    });
-
-    it('successfully retries request on 429 response and returns 200 response', function(done) {
+    it('successfully retries request error and returns 200 response', function(done) {
       if (process.env.NOCK_OFF) {
         this.skip();
       }
 
       var mocks = nock(SERVER)
           .get(DBNAME).times(4)
-          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -344,80 +257,27 @@ describe('Retry429 Plugin', function() {
         });
     });
 
-    it('fails to retry request on 429 response and returns error', function(done) {
-      if (process.env.NOCK_OFF) {
-        this.skip();
-      }
-
-      var mocks = nock(SERVER)
-          .get(DBNAME).times(4)
-          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
-          .get(DBNAME)
-          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
-
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
-      var req = {
-        url: SERVER + DBNAME,
-        auth: { username: ME, password: PASSWORD },
-        method: 'GET'
-      };
-
-      var startTs = (new Date()).getTime();
-      cloudantClient.request(req)
-        .on('error', function(err) {
-          assert.equal(err.code, 'ECONNRESET');
-          assert.equal(err.message, 'socket hang up');
-
-          // validate retry delay
-          var now = (new Date()).getTime();
-          assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
-
-          mocks.done();
-          done();
-        })
-        .on('response', function(resp) {
-          assert.fail('Unexpected response from server');
-        })
-        .on('data', function(data) {
-          assert.fail('Unexpected data from server');
-        });
-    });
-
-    it('fails to retry request on 429 response and returns 429 response', function(done) {
+    it('fails to retry request error and returns error', function(done) {
       if (process.env.NOCK_OFF) {
         this.skip();
       }
 
       var mocks = nock(SERVER)
           .get(DBNAME).times(5)
-          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'});
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
         method: 'GET'
       };
 
-      var dataCount = 0;
-      var responseCount = 0;
-
       var startTs = (new Date()).getTime();
       cloudantClient.request(req)
         .on('error', function(err) {
-          assert.fail(`Unexpected error: ${err}`);
-        })
-        .on('response', function(resp) {
-          responseCount++;
-          assert.equal(resp.statusCode, 429);
-        })
-        .on('data', function(data) {
-          dataCount++;
-          assert.ok(data.toString('utf8').indexOf('"error":"too_many_requests"') > -1);
-        })
-        .on('end', function() {
-          assert.equal(responseCount, 1);
-          assert.equal(dataCount, 1);
+          assert.equal(err.code, 'ECONNRESET');
+          assert.equal(err.message, 'socket hang up');
 
           // validate retry delay
           var now = (new Date()).getTime();
@@ -425,6 +285,12 @@ describe('Retry429 Plugin', function() {
 
           mocks.done();
           done();
+        })
+        .on('response', function(resp) {
+          assert.fail('Unexpected response from server');
+        })
+        .on('data', function(data) {
+          assert.fail('Unexpected data from server');
         });
     });
   });
@@ -436,7 +302,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retry' });
+      var cloudantClient = new Client({ plugin: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -480,52 +346,18 @@ describe('Retry429 Plugin', function() {
         });
     });
 
-    it('performs request and returns error', function(done) {
-      if (process.env.NOCK_OFF) {
-        this.skip();
-      }
-
-      var mocks = nock(SERVER)
-          .get(DBNAME)
-          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
-
-      var cloudantClient = new Client();
-      var req = {
-        url: SERVER + DBNAME,
-        auth: { username: ME, password: PASSWORD },
-        method: 'GET'
-      };
-
-      cloudantClient.request(req, function(err, resp, data) {
-        assert.equal(err.code, 'ECONNRESET');
-        assert.equal(err.message, 'socket hang up');
-      })
-        .on('error', function(err) {
-          assert.equal(err.code, 'ECONNRESET');
-          assert.equal(err.message, 'socket hang up');
-          mocks.done();
-          done();
-        })
-        .on('response', function(resp) {
-          assert.fail('Unexpected response from server');
-        })
-        .on('data', function(data) {
-          assert.fail('Unexpected data from server');
-        });
-    });
-
-    it('successfully retries request on 429 response and returns 200 response', function(done) {
+    it('successfully retries request error and returns 200 response', function(done) {
       if (process.env.NOCK_OFF) {
         this.skip();
       }
 
       var mocks = nock(SERVER)
           .get(DBNAME).times(4)
-          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -574,87 +406,31 @@ describe('Retry429 Plugin', function() {
         });
     });
 
-    it('fails to retry request on 429 response and returns error', function(done) {
-      if (process.env.NOCK_OFF) {
-        this.skip();
-      }
-
-      var mocks = nock(SERVER)
-          .get(DBNAME).times(4)
-          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
-          .get(DBNAME)
-          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
-
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
-      var req = {
-        url: SERVER + DBNAME,
-        auth: { username: ME, password: PASSWORD },
-        method: 'GET'
-      };
-
-      var startTs = (new Date()).getTime();
-      cloudantClient.request(req, function(err, resp, data) {
-        assert.equal(err.code, 'ECONNRESET');
-        assert.equal(err.message, 'socket hang up');
-      })
-        .on('error', function(err) {
-          assert.equal(err.code, 'ECONNRESET');
-          assert.equal(err.message, 'socket hang up');
-
-          // validate retry delay
-          var now = (new Date()).getTime();
-          assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
-
-          mocks.done();
-          done();
-        })
-        .on('response', function(resp) {
-          assert.fail('Unexpected response from server');
-        })
-        .on('data', function(data) {
-          assert.fail('Unexpected data from server');
-        });
-    });
-
-    it('fails to retry request on 429 response and returns 429 response', function(done) {
+    it('fails to retry request error and returns error', function(done) {
       if (process.env.NOCK_OFF) {
         this.skip();
       }
 
       var mocks = nock(SERVER)
           .get(DBNAME).times(5)
-          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'});
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
         method: 'GET'
       };
 
-      var dataCount = 0;
-      var responseCount = 0;
-
       var startTs = (new Date()).getTime();
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
-        assert.equal(resp.statusCode, 429);
-        assert.ok(data.indexOf('"error":"too_many_requests"') > -1);
+        assert.equal(resp.statusCode, 500);
+        assert.ok(data.indexOf('"error":"internal_server_error"') > -1);
       })
         .on('error', function(err) {
-          assert.fail(`Unexpected error: ${err}`);
-        })
-        .on('response', function(resp) {
-          responseCount++;
-          assert.equal(resp.statusCode, 429);
-        })
-        .on('data', function(data) {
-          dataCount++;
-          assert.ok(data.toString('utf8').indexOf('"error":"too_many_requests"') > -1);
-        })
-        .on('end', function() {
-          assert.equal(responseCount, 1);
-          assert.equal(dataCount, 1);
+          assert.equal(err.code, 'ECONNRESET');
+          assert.equal(err.message, 'socket hang up');
 
           // validate retry delay
           var now = (new Date()).getTime();
@@ -662,6 +438,12 @@ describe('Retry429 Plugin', function() {
 
           mocks.done();
           done();
+        })
+        .on('response', function(resp) {
+          assert.fail('Unexpected response from server');
+        })
+        .on('data', function(data) {
+          assert.fail('Unexpected data from server');
         });
     });
   });
