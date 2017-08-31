@@ -197,7 +197,7 @@ describe('Client Utilities', function() {
 
     it('runs all plugin hooks', function(done) {
       var plugin = new testPlugin.NoopPlugin(null, {});
-      var r = { plugins: [ plugin ] };
+      var r = { plugins: [ plugin ], plugin_stash: { noop: {} } };
       r.state = {
         abortWithResponse: undefined,
         attempt: 1,
@@ -250,7 +250,8 @@ describe('Client Utilities', function() {
         abort: false,
         clientCallback: cb,
         clientStream: {},
-        plugins: [ plugin ]
+        plugins: [ plugin ],
+        plugin_stash: { noop: {} }
       };
       r.state = {
         abortWithResponse: undefined,
@@ -274,7 +275,11 @@ describe('Client Utilities', function() {
       var cb = function(e, r, d) {
         assert.fail('Unexpected client callback execution');
       };
-      var r = { clientCallback: cb, plugins: [ plugin ] };
+      var r = {
+        clientCallback: cb,
+        plugins: [ plugin ],
+        plugin_stash: { noop: {} }
+      };
       r.state = {
         abortWithResponse: undefined,
         attempt: 1,
@@ -305,7 +310,8 @@ describe('Client Utilities', function() {
       var r = {
         clientCallback: cb,
         clientStream: new stream.PassThrough(),
-        plugins: [ plugin ]
+        plugins: [ plugin ],
+        plugin_stash: { noop: {} }
       };
 
       r.clientStream.on('error', function(e) {
