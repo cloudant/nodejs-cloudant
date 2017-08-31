@@ -211,17 +211,22 @@ class PluginA extends BasePlugin {
       case 1:
         assert.equal(state.retry, false);
         assert.equal(state.retryDelayMsecs, 0);
+        assert.equal(typeof state.stash.foo, 'undefined');
         state.retry = true;
         state.retryDelayMsecs = 10;
+        state.stash.foo = 'pluginA -- this hook has been called once';
         break;
       case 2:
         assert.equal(state.retry, false);
         assert.equal(state.retryDelayMsecs, 40);
+        assert.equal(state.stash.foo, 'pluginA -- this hook has been called once');
         state.retryDelayMsecs = 100;
+        state.stash.foo = 'pluginA -- this hook has been called twice';
         break;
       case 3:
         assert.equal(state.retry, false);
         assert.equal(state.retryDelayMsecs, 400);
+        assert.equal(state.stash.foo, 'pluginA -- this hook has been called twice');
         state.retryDelayMsecs = 1000;
         break;
       default:
@@ -255,17 +260,22 @@ class PluginB extends BasePlugin {
       case 1:
         assert.equal(state.retry, true);
         assert.equal(state.retryDelayMsecs, 10);
+        assert.equal(typeof state.stash.foo, 'undefined');
         state.retryDelayMsecs = 20;
+        state.stash.foo = 'pluginB -- this hook has been called once';
         break;
       case 2:
         assert.equal(state.retry, false);
         assert.equal(state.retryDelayMsecs, 100);
+        assert.equal(state.stash.foo, 'pluginB -- this hook has been called once');
         state.retry = true;
         state.retryDelayMsecs = 200;
+        state.stash.foo = 'pluginB -- this hook has been called twice';
         break;
       case 3:
         assert.equal(state.retry, false);
         assert.equal(state.retryDelayMsecs, 1000);
+        assert.equal(state.stash.foo, 'pluginB -- this hook has been called twice');
         state.retryDelayMsecs = 2000;
         break;
       default:
@@ -299,16 +309,21 @@ class PluginC extends BasePlugin {
       case 1:
         assert.equal(state.retry, true);
         assert.equal(state.retryDelayMsecs, 20);
+        assert.equal(typeof state.stash.foo, 'undefined');
         state.retryDelayMsecs = 30;
+        state.stash.foo = 'pluginC -- this hook has been called once';
         break;
       case 2:
         assert.equal(state.retry, true);
         assert.equal(state.retryDelayMsecs, 200);
+        assert.equal(state.stash.foo, 'pluginC -- this hook has been called once');
         state.retryDelayMsecs = 300;
+        state.stash.foo = 'pluginC -- this hook has been called twice';
         break;
       case 3:
         assert.equal(state.retry, false);
         assert.equal(state.retryDelayMsecs, 2000);
+        assert.equal(state.stash.foo, 'pluginC -- this hook has been called twice');
         state.retry = true;
         state.retryDelayMsecs = 3000;
         break;
@@ -343,16 +358,21 @@ class PluginD extends BasePlugin {
       case 1:
         assert.equal(state.retry, true);
         assert.equal(state.retryDelayMsecs, 30);
+        assert.equal(typeof state.stash.foo, 'undefined');
         state.retryDelayMsecs = 40;
+        state.stash.foo = 'pluginD -- this hook has been called once';
         break;
       case 2:
         assert.equal(state.retry, true);
         assert.equal(state.retryDelayMsecs, 300);
+        assert.equal(state.stash.foo, 'pluginD -- this hook has been called once');
         state.retryDelayMsecs = 400;
+        state.stash.foo = 'pluginD -- this hook has been called twice';
         break;
       case 3:
         assert.equal(state.retry, true);
         assert.equal(state.retryDelayMsecs, 3000);
+        assert.equal(state.stash.foo, 'pluginD -- this hook has been called twice');
         break;
       default:
         assert.fail('Too many attempts');
