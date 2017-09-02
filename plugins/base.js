@@ -17,9 +17,10 @@
  * Cloudant base plugin.
  *
  * @param {Object} client - HTTP client.
+ * @param {Object} cfg - Client configuration.
  */
 class BasePlugin {
-  constructor(client) {
+  constructor(client, cfg) {
     this._client = client;
   }
 
