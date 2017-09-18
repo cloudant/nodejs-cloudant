@@ -40,7 +40,7 @@ def setupNodeAndTest(version, testSuite='test') {
     unstash name: 'built'
 
     // Run tests using creds
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'clientlibs-test', usernameVariable: 'cloudant_username', passwordVariable: 'cloudant_password']]) {
+    withCredentials([usernamePassword(credentialsId: 'clientlibs-test', usernameVariable: 'cloudant_username', passwordVariable: 'cloudant_password'), string(credentialsId: 'clientlibs-test-iam', variable: 'cloudant_iam_api_key')]) {
       withEnv(getEnvForSuite("${testSuite}")) {
         try {
           // Actions:
