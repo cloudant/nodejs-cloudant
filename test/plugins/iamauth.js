@@ -585,4 +585,15 @@ describe('IAMAuth Plugin', function() {
       done();
     });
   });
+
+  it('throws error for unspecified IAM API key', function() {
+    var cloudantClient = new Client({ plugin: 'iamauth' });
+    assert.throws(
+      () => {
+        cloudantClient.request({ url: SERVER + DBNAME });
+      },
+      /Missing IAM API key from configuration/,
+      'did not throw with expected message'
+    );
+  });
 });
