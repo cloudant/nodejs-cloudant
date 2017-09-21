@@ -26,7 +26,7 @@
     "async": "2.1.2",
     "cloudant-nano": "6.5.0",
     "debug": "2.2.0",
-    "lockfile": "1.0.3",
+    "lockfile": "^1.0.3",
     "request": "^2.81.0",
     "tmp": "0.0.33"
   },
