@@ -54,6 +54,10 @@ class IAMPlugin extends BasePlugin {
   onRequest(state, req, callback) {
     var self = this;
 
+    if (typeof state.cfg.iamApiKey === 'undefined') {
+      throw new Error('Missing IAM API key from configuration');
+    }
+
     if (state.cfg.iamApiKey !== self.iamApiKey) {
       debug('New credentials identified. Renewing session cookie...');
       self.shouldApplyIAMAuth = self.refreshRequired = true;
