@@ -14,40 +14,10 @@
 'use strict';
 
 const debug = require('debug')('cloudant:plugins:cookieauth');
-const lockFile = require('lockfile');
 const request = require('request');
-const tmp = require('tmp');
 const u = require('url');
 
 const BasePlugin = require('./base.js');
-
-function noop() {}
-
-// Close and unlink the file lock.
-function releaseLock(lockFilePath) {
-  lockFile.unlock(lockFilePath, function(error) {
-    if (error) {
-      debug(`Failed to release lock: ${error}`);
-    }
-  });
-}
-
-// Acquire a file lock on the specified path. Release the file lock on
-// completion of the callback.
-function withLock(lockFilePath, cfg, callback) {
-  var opts = {
-    stale: cfg.cookieLockStaleMsecs || 1500,  // default: 1.5secs
-    wait: cfg.cookieLockWaitMsecs || 1000     // default: 1sec
-  };
-  debug('Acquiring lock...');
-  lockFile.lock(lockFilePath, opts, function(error) {
-    if (error) {
-      callback(error, noop);
-    } else {
-      callback(null, function() { releaseLock(lockFilePath); });
-    }
-  });
-}
 
 /**
  * Cookie Authentication plugin.
@@ -60,7 +30,6 @@ class CookiePlugin extends BasePlugin {
     self.baseUrl = null;
     self.cookieJar = request.jar();
     self.credentials = {};
-    self.lockFile = tmp.tmpNameSync({ postfix: '.lock' });
     self.useCookieAuth = true;
 
     if (typeof cfg.baseUrl !== 'undefined' &&
@@ -190,7 +159,10 @@ class CookiePlugin extends BasePlugin {
   refreshCookie(state, callback) {
     var self = this;
 
-    withLock(self.lockFile, state.cfg, function(error, done) {
+    self.withLock({
+      stale: state.cfg.cookieLockStaleMsecs || 1500, // 1.5 secs
+      wait: state.cfg.cookieLockWaitMsecs || 1000 // 1 sec
+    }, function(error, done) {
       if (error) {
         debug(`Failed to acquire lock: ${error}`); // refresh cookie without lock
       }
