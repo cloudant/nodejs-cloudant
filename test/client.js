@@ -32,7 +32,7 @@ describe('CloudantClient', function() {
         .put(DBNAME)
         .reply(201, {ok: true});
 
-    var cloudantClient = new Client();
+    var cloudantClient = new Client({ plugin: 'retryerror' });
 
     var options = {
       url: SERVER + DBNAME,
@@ -52,7 +52,7 @@ describe('CloudantClient', function() {
         .delete(DBNAME)
         .reply(200, {ok: true});
 
-    var cloudantClient = new Client();
+    var cloudantClient = new Client({ plugin: 'retryerror' });
 
     var options = {
       url: SERVER + DBNAME,
