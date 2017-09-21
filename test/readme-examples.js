@@ -48,7 +48,7 @@ describe('Getting Started', function() {
   var mocks;
   after(function(done) {
     var Cloudant = require('cloudant');
-    var cloudant = Cloudant({account: ME, password: PASSWORD});
+    var cloudant = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     cloudant.db.destroy('alice', function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -76,7 +76,7 @@ describe('Getting Started', function() {
     var password = process.env.cloudant_password || 'sjedon';
 
     // Initialize the library with my account.
-    var cloudant = Cloudant({account: me, password: password});
+    var cloudant = Cloudant({account: me, password: password, plugin: 'retryerror'});
 
     cloudant.db.list(function(err, allDbs) {
       should(err).equal(null);
@@ -92,7 +92,7 @@ describe('Getting Started', function() {
     // Initialize Cloudant with settings from .env
     var username = ME;
     var password = process.env.cloudant_password || 'sjedon';
-    var cloudant = Cloudant({account: username, password: password});
+    var cloudant = Cloudant({account: username, password: password, plugin: 'retryerror'});
 
     // Remove any existing database called "alice".
     cloudant.db.destroy('alice', function(err) {
@@ -147,7 +147,7 @@ describe('Authorization and API Keys', function() {
     var Cloudant = require('cloudant');
     var me = ME; // Replace with your account.
     var password = process.env.cloudant_password || 'sjedon';
-    var cloudant = Cloudant({account: me, password: password});
+    var cloudant = Cloudant({account: me, password: password, plugin: 'retryerror'});
 
     cloudant.generate_api_key(function(er, api) {
       if (er) {
@@ -212,7 +212,7 @@ describe('CORS', function() {
   var cloudant;
   before(function() {
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password});
+    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugin: 'retryerror'});
   });
 
   it('Example 1', function(done) {
@@ -267,7 +267,7 @@ describe('Virtual Hosts', function() {
   var cloudant;
   before(function() {
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password});
+    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugin: 'retryerror'});
   });
 
   it('Example 1', function(done) {
@@ -323,7 +323,7 @@ describe('Cloudant Query', function() {
   var cloudant, db;
   before(function(done) {
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password});
+    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugin: 'retryerror'});
     cloudant.db.create('my_db', function(er) {
       if (er) throw er;
       db = cloudant.db.use('my_db');
@@ -405,7 +405,7 @@ describe('Cloudant Search', function() {
   var cloudant, db;
   before(function(done) {
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password});
+    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugin: 'retryerror'});
     cloudant.db.create('my_db', function(er) {
       if (er) throw er;
       db = cloudant.db.use('my_db');

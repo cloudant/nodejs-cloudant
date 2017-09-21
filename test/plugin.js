@@ -46,7 +46,7 @@ var onBefore = function(done) {
       .put('/' + dbName).reply(200, { 'ok': true })
       .put('/' + dbName + '/mydoc').reply(200, { id: 'mydoc', rev: '1-1' });
 
-  cc = Cloudant({account: ME, password: PASSWORD});
+  cc = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
   cc.db.create(dbName, function(er, d) {
     should(er).equal(null);
     d.should.be.an.Object;
