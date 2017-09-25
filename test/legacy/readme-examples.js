@@ -126,7 +126,6 @@ describe('Initialization', function() {
   });
   before(function() {
     mocks = nock(SERVER)
-      .get('/_session').reply(200, {ok: true, userCtx: {name: ME, roles: []}})
       .post('/_session').reply(200, {XXXXX: 'YYYYYYYYYY', ok: true, userCtx: {name: 'jhs', roles: []}})
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2', cloudant_build: '2488'})
       .get('/animaldb/dog').reply(404, {error: 'not_found', reason: 'missing'});
@@ -164,23 +163,18 @@ describe('Password authentication', function() {
       this.skip();
     }
     mocks = nock(SERVER)
-      .get('/_session').reply(200, {XXXXX: 'YYYYYYYYYY', ok: true, userCtx: {name: 'jhs', roles: []}})
-      // .post('/_session').reply(200, {XXXXX:'YYYYYYYYYY', ok:true, userCtx:{name:'jhs', roles:[]}})
+      .post('/_session').reply(200, {ok:true})
       .get('/').reply(200, {couchdb: 'Welcome!!!!!', version: '1.0.2', cloudant_build: '2488'});
   });
 
   it('Example 1', function(done) {
     var Cloudant = require('cloudant');
-    var me = ME;         // Substitute with your Cloudant user account.
-    var otherUsername = 'jhs'; // Substitute with some other Cloudant user account.
-    var otherPassword = process.env.other_cloudant_password;
 
-    Cloudant({account: me, username: otherUsername, password: otherPassword}, function(er, cloudant, reply) {
+    Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, reply) {
       if (er) {
         throw er;
       }
-
-      reply.userCtx.should.be.an.Object.have.a.property('name').equal(otherUsername);
+      reply.should.be.an.Object.have.a.property('couchdb')
       done();
     });
   });
