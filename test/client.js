@@ -84,7 +84,7 @@ describe('CloudantClient', function() {
   });
 
   describe('plugin support', function() {
-    it('allows plugins to be added seperately', function() {
+    it('allows plugins to be added separately', function() {
       var cloudantClient = new Client();
       cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
       cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
@@ -99,7 +99,7 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._plugins.length, 3);
     });
 
-    it('deduplicates plugins when added seperately', function() {
+    it('deduplicates plugins when added separately', function() {
       var cloudantClient = new Client();
       cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 1
       cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 2
