@@ -20,41 +20,21 @@ var debug = require('debug')('cloudant:cloudant');
 var nanodebug = require('debug')('nano');
 var async = require('async');
 
-// function from the old Cloudant library to
-// parse an object { account: "myaccount", password: "mypassword"}
-// and return a URL
+const Client = require('./lib/client.js');
+
+// Parse an object (i.e. { account: "myaccount", password: "mypassword" }) and
+// return a URL.
 var reconfigure = require('./lib/reconfigure.js');
 
 // This IS the Cloudant API. It is mostly nano, with a few functions.
 function Cloudant(options, callback) {
   debug('Initialize', options);
 
-  // Save the username and password for potential conversion to cookie auth.
-  var login = reconfigure.getOptions(options);
-
-  // Convert the credentials into a URL that will work for cloudant. The
-  // credentials object will become squashed into a string, which is fine
-  // except for the .cookie option.
-  var cookie = options.cookie;
-
-  var pkg = require('./package.json');
-  var requestDefaults = {
-    gzip: true,
-    headers: {
-      // set library UA header
-      'User-Agent': `nodejs-cloudant/${pkg.version} (Node.js ${process.version})`
-    },
-    jar: false
-  };
-  var theurl = null;
-  if (typeof options === 'object') {
-    if (options.requestDefaults) {
-      requestDefaults = options.requestDefaults;
-    }
-    theurl = reconfigure(options);
-  } else {
-    theurl = reconfigure({ url: options });
+  if (typeof options !== 'object') {
+    options = { url: options };
   }
+
+  var theurl = reconfigure(options);
   if (theurl === null) {
     var err = new Error('Invalid URL');
     if (callback) {
@@ -64,33 +44,23 @@ function Cloudant(options, callback) {
     }
   }
 
-  // keep connections alive by default
-  if (requestDefaults && !requestDefaults.agent) {
-    var protocol = (theurl.match(/^https/)) ? require('https') : require('http');
-    var agent = new protocol.Agent({
-      keepAlive: true,
-      keepAliveMsecs: 30000,
-      maxSockets: 6
-    });
-    requestDefaults.agent = agent;
+  if (theurl.match(/^http:/)) {
+    options.https = false;
   }
 
-  // plugin a request library
-  var plugin = null;
-  if (options.plugin) {
-    options.requestDefaults = requestDefaults;
-    if (typeof options.plugin === 'string') {
-      var plugintype = options.plugin || 'default';
-      debug('Using the "' + plugintype + '" plugin');
-      plugin = require('./plugins/' + plugintype)(options);
-    } else if (typeof options.plugin === 'function') {
-      debug('Using a custom plugin');
-      plugin = options.plugin;
-    }
+  debug('Creating Cloudant client with options: %j', options);
+  var cloudantClient = new Client(options);
+  var cloudantRequest = function(req, callback) {
+    return cloudantClient.request(req, callback);
+  };
+
+  var nanoOptions = { url: theurl, request: cloudantRequest, log: nanodebug };
+  if (options.cookie) {
+    nanoOptions.cookie = options.cookie // legacy - sets 'X-CouchDB-WWW-Authenticate' header
   }
 
-  debug('Create underlying Nano instance, options=%j requestDefaults=%j', options, requestDefaults);
-  var nano = Nano({url: theurl, request: plugin, requestDefaults: requestDefaults, cookie: cookie, log: nanodebug});
+  debug('Creating Nano instance with options: %j', nanoOptions);
+  var nano = Nano(nanoOptions);
 
   // ===========================
   // Cloudant Database Functions
