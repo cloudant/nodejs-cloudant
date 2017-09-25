@@ -52,21 +52,16 @@ describe('Initialization', function() {
 
   it('supports a ping callback', function(done) {
     var mocks = nock(SERVER)
-      .get('/_session').reply(200, {ok: true, userCtx: {name: null, roles: []}})
+      .post('/_session').reply(200, {ok: true})
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2'});
 
-    Cloudant({account: ME}, function(er, cloudant, body) {
+    Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, body) {
+      console.log(body)
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
       body.should.be.an.Object;
       body.should.have.a.property('couchdb');
       body.should.have.a.property('version');
-      body.should.have.a.property('userCtx');
-      body.userCtx.should.be.an.Object;
-      body.userCtx.should.have.a.property('name');
-      body.userCtx.should.have.a.property('roles');
-      body.userCtx.roles.should.be.an.Array;
-
       mocks.done();
       done();
     });
@@ -78,9 +73,9 @@ describe('Initialization', function() {
     }
 
     var mocks = nock(SERVER)
-      .get('/_session').reply(500, {});
+      .post('/_session').reply(500, {});
 
-    Cloudant({account: ME}, function(er, cloudant, body) {
+    Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, body) {
       er.should.be.an.Object;
       mocks.done();
       done();
@@ -89,11 +84,10 @@ describe('Initialization', function() {
 
   it('uses cookie auth for ping callback', function(done) {
     var mocks = nock(SERVER)
-      .get('/_session').reply(200, {ok: true, userCtx: {name: null, roles: []}})
       .post('/_session').reply(200, {ok: true, userCtx: {name: ME, roles: []}})
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2'});
 
-    Cloudant({account: ME, account: ME, password: PASSWORD}, function(er, cloudant, welcome) {
+    Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, welcome) {
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
 
@@ -574,22 +568,11 @@ describe('Changes follower', function() {
     var mocks = nock(SERVER)
       .get('/' + dbName)
       .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: dbName, sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
-      .post('/' + dbName)
-      .reply(200, {ok: true, id: docId, rev: '2-a1933e6ba0b5ac9868cd6f5adc12dc5f'})
       .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since &feed, &heartbeat
       .get('/' + dbName + '/_changes')
       .reply(200, '{"seq":"3-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgT05OSjQ0SyNSe5IDkEyqB5vAnMgENsHM1CDZPDGFkH4ibchjAZIMDUAKaMl-hDtTLZMMktOMSDLlAMQUsG8ZIaYYWpqmGCVnAQDI71_n","id":"' + docId + '","changes":[{"rev":"2-a1933e6ba0b5ac9868cd6f5adc12dc5f"}]}\n');
 
-    // Make an update that will trigger the "since=now" follower.
-    setTimeout(update_doc, 1);
     var feed = mydb.follow({since: 'now'}, on_change);
-
-    function update_doc() {
-      var newDoc = {_id: docId, _rev: firstChange.changes[0].rev, newField: 'newValue'};
-      mydb.insert(newDoc, function(er, result) {
-        should(er).equal(null);
-      });
-    }
 
     function on_change(er, change) {
       should(er).equal(null);
