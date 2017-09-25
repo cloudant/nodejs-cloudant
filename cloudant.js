@@ -61,6 +61,8 @@ function Cloudant(options, callback) {
   debug('Creating Nano instance with options: %j', nanoOptions);
   var nano = Nano(nanoOptions);
 
+  nano.cc = cloudantClient;  // expose Cloudant client
+
   // ===========================
   // Cloudant Database Functions
   // ===========================
@@ -207,17 +209,9 @@ function Cloudant(options, callback) {
   nano.delete_virtual_host = delete_virtual_host; // eslint-disable-line camelcase
 
   if (callback) {
-    debug('Automatic ping');
-    nano.ping(login, function(er, pong, cookie) {
-      if (er) {
-        callback(er);
-      } else {
-        if (cookie) {
-          requestDefaults.headers.cookie = cookie;
-        }
-
-        callback(null, nano, pong);
-      }
+    nano.cc.addPlugins('cookieauth');
+    nano.ping(function(error, pong) {
+      callback(error, nano, pong);
     });
   }
 
