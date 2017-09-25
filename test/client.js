@@ -86,17 +86,32 @@ describe('CloudantClient', function() {
   describe('plugin support', function() {
     it('allows plugins to be added seperately', function() {
       var cloudantClient = new Client();
-      cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 1
-      cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 2
-      cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 3
+      cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
+      cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
+      cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
       assert.equal(cloudantClient._plugins.length, 3);
     });
 
     it('allows an array of plugins to be added', function() {
       var cloudantClient = new Client();
-      var plugins = [testPlugin.NoopPlugin, testPlugin.NoopPlugin, testPlugin.NoopPlugin];
+      var plugins = [testPlugin.NoopPlugin1, testPlugin.NoopPlugin2, testPlugin.NoopPlugin3];
       cloudantClient.addPlugins(plugins);
       assert.equal(cloudantClient._plugins.length, 3);
+    });
+
+    it('deduplicates plugins when added seperately', function() {
+      var cloudantClient = new Client();
+      cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 1
+      cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 2
+      cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 3
+      assert.equal(cloudantClient._plugins.length, 1);
+    });
+
+    it('deduplicates plugins when added as array', function() {
+      var cloudantClient = new Client();
+      var plugins = [testPlugin.NoopPlugin, testPlugin.NoopPlugin, testPlugin.NoopPlugin];
+      cloudantClient.addPlugins(plugins);
+      assert.equal(cloudantClient._plugins.length, 1);
     });
 
     it('allows a single plugin to be added via "plugin" options', function() {
@@ -462,9 +477,9 @@ describe('CloudantClient', function() {
             .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client();
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 1
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 2
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 3
+        cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
+        cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
+        cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
         assert.equal(cloudantClient._plugins.length, 3);
 
         var options = {
@@ -498,9 +513,9 @@ describe('CloudantClient', function() {
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client();
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 1
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 2
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 3
+        cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
+        cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
+        cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
         assert.equal(cloudantClient._plugins.length, 3);
 
         var options = {
@@ -934,9 +949,9 @@ describe('CloudantClient', function() {
             .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client();
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 1
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 2
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 3
+        cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
+        cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
+        cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
         assert.equal(cloudantClient._plugins.length, 3);
 
         var options = {
@@ -973,9 +988,9 @@ describe('CloudantClient', function() {
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client();
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 1
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 2
-        cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 3
+        cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
+        cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
+        cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
         assert.equal(cloudantClient._plugins.length, 3);
 
         var options = {
@@ -1439,9 +1454,9 @@ describe('CloudantClient', function() {
 
         var cloudantClient = new Client({ plugins: [
           'promises',
-          testPlugin.NoopPlugin, // plugin 1
-          testPlugin.NoopPlugin, // plugin 2
-          testPlugin.NoopPlugin  // plugin 3
+          testPlugin.NoopPlugin1, // plugin 1
+          testPlugin.NoopPlugin2, // plugin 2
+          testPlugin.NoopPlugin3  // plugin 3
         ]});
         assert.equal(cloudantClient._plugins.length, 3);
         assert.ok(cloudantClient._cfg.usePromises);
@@ -1479,9 +1494,9 @@ describe('CloudantClient', function() {
 
         var cloudantClient = new Client({plugins: [
           'promises',
-          testPlugin.NoopPlugin, // plugin 1
-          testPlugin.NoopPlugin, // plugin 2
-          testPlugin.NoopPlugin  // plugin 3
+          testPlugin.NoopPlugin1, // plugin 1
+          testPlugin.NoopPlugin2, // plugin 2
+          testPlugin.NoopPlugin3  // plugin 3
         ]});
         assert.equal(cloudantClient._plugins.length, 3);
         assert.ok(cloudantClient._cfg.usePromises);

@@ -47,6 +47,15 @@ class NoopPlugin extends BasePlugin {
 
 NoopPlugin.id = 'noop';
 
+class NoopPlugin1 extends NoopPlugin {}
+NoopPlugin1.id = 'noop1';
+
+class NoopPlugin2 extends NoopPlugin {}
+NoopPlugin2.id = 'noop2';
+
+class NoopPlugin3 extends NoopPlugin {}
+NoopPlugin3.id = 'noop3';
+
 // AlwaysRetry for testing
 //   - onRequest:  noop
 //   - onError:    always retries (with retry delay)
@@ -393,6 +402,9 @@ PluginD.id = 'pluginD';
 
 module.exports = {
   NoopPlugin: NoopPlugin,
+  NoopPlugin1: NoopPlugin1,
+  NoopPlugin2: NoopPlugin2,
+  NoopPlugin3: NoopPlugin3,
   AlwaysRetry: AlwaysRetry,
   ComplexPlugin1: ComplexPlugin1,
   ComplexPlugin2: ComplexPlugin2,
