@@ -202,13 +202,6 @@ function Cloudant(options, callback) {
     callback(null, null);
   };
 
-  // https://docs.cloudant.com/api.html#setting-the-cors-configuration
-  set_cors = function(configuration, callback) { // eslint-disable-line camelcase
-    return nano.request({path: '_api/v2/user/config/cors',
-      method: 'put',
-      body: configuration }, callback);
-  };
-
   var get_virtual_hosts = function(callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/virtual_hosts',
       method: 'get'}, callback);
