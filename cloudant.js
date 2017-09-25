@@ -18,7 +18,6 @@ module.exports = Cloudant;
 var Nano = require('cloudant-nano');
 var debug = require('debug')('cloudant:cloudant');
 var nanodebug = require('debug')('nano');
-var async = require('async');
 
 const Client = require('./lib/client.js');
 
@@ -149,6 +148,11 @@ function Cloudant(options, callback) {
   nano._use = nano.use;
   nano.use = nano.db.use = use;
 
+  // https://console.bluemix.net/docs/services/Cloudant/api/account.html#ping
+  var ping = function(callback) {
+    return nano.request({ path: '', method: 'GET' }, callback);
+  };
+
   // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#api-keys
   var generate_api_key = function(callback) { // eslint-disable-line camelcase
     return nano.request({ path: '_api/v2/api_keys', method: 'post' }, callback);
@@ -218,40 +222,4 @@ function Cloudant(options, callback) {
   }
 
   return nano;
-}
-
-function ping(login, callback) {
-  var nano = this;
-  var cookie = null;
-
-  async.series([
-    function(done) {
-      if (login && login.username && login.password) {
-        done.auth = false;
-        nano.auth(login.username, login.password, function(e, b, h) {
-          cookie = (h && h['set-cookie']) || null;
-          if (cookie) {
-            cookie = cookie[0];
-          }
-          done(e, b);
-        });
-      } else {
-        done(null, null);
-      }
-    },
-    function(done) {
-      nano.session(function(e, b, h) {
-        done(e, b);
-      });
-    },
-    function(done) {
-      nano.relax({db: ''}, function(e, b, h) {
-        done(e, b);
-      });
-    }
-  ], function(err, data) {
-    var body = (data && data[2]) || {};
-    body.userCtx = (data && data[1] && data[1].userCtx) || {};
-    callback(err, body, cookie);
-  });
 }
