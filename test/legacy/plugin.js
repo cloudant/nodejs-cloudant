@@ -88,8 +88,12 @@ describe('retry-on-429 plugin', function() {
   after(onAfter);
 
   it('behave normally too', function(done) {
-    var mocks = nock(SERVER).get('/' + dbName).reply(200, {});
+    var mocks = nock(SERVER)
+    if (typeof(process.env.NOCK_OFF) === 'undefined') {
+      mocks.persist().get('/' + dbName).reply(200, {});
+    }
     var cloudant = Cloudant({plugin: 'retry', account: ME, password: PASSWORD});
+    cloudant.cc.addPlugins('retryerror'); // retry socket hang up errors
     var db = cloudant.db.use(dbName);
     this.timeout(10000);
     db.info(function(err, data) {
@@ -151,28 +155,6 @@ describe('promise plugin', function() {
       done();
     });
     assert.equal(p instanceof Promise, true);
-  });
-});
-
-describe('custom plugin', function() {
-  before(onBefore);
-  after(onAfter);
-
-  var doNothingPlugin = function(opts, callback) {
-    callback(null, { statusCode: 200 }, { ok: true });
-  };
-
-  it('should allow custom plugins', function(done) {
-    var cloudant = Cloudant({plugin: doNothingPlugin, account: ME, password: PASSWORD});
-    var db = cloudant.db.use(dbName);
-    db.info(function(err, data) {
-      assert.equal(err, null);
-      data.should.be.an.Object;
-      data.should.have.property.ok;
-      data.ok.should.be.a.Boolean;
-      data.ok.should.equal(true);
-      done();
-    });
   });
 });
 
@@ -295,9 +277,11 @@ describe('cookieauth plugin', function() {
       this.skip();
     }
     var mocks = nock(SERVER)
-        .get('/_session').reply(403, { ok: false });
-    var cloudant = Cloudant({plugin: 'cookieauth', url: SERVER}, function(err, data) {
-      err.should.be.an.Object;
+      .get('/')
+      .reply(200, { couchdb: 'Welcome', version: '1.0.2', cloudant_build: '2488' });
+    var cloudant = Cloudant({plugin: 'cookieauth', url: SERVER}, function(err, cloudant, data) {
+      cloudant.should.be.an.Object;
+      data.should.be.an.Object.have.a.property('couchdb');
       mocks.done();
       done();
     });
