@@ -16,7 +16,7 @@
 'use strict';
 
 // Cloudant client API tests
-require('dotenv').config();
+require('dotenv').config({silent: true});
 
 var fs = require('fs');
 var should = require('should');

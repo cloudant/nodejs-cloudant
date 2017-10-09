@@ -25,7 +25,7 @@
 //   1. Append should() calls after console.log() to actually confirm the results
 //   2. Insert a call to done() when the tests are complete
 
-require('dotenv').config();
+require('dotenv').config({silent: true});
 
 var should = require('should');
 
