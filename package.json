@@ -25,7 +25,7 @@
   "dependencies": {
     "async": "2.1.2",
     "cloudant-nano": "6.5.0",
-    "debug": "2.2.0",
+    "debug": "3.1.0",
     "request": "^2.81.0"
   },
   "devDependencies": {
