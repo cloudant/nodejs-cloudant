@@ -92,6 +92,14 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._plugins.length, 3);
     });
 
+    it('allows plugins to be added separately using alias', function() {
+      var cloudantClient = new Client();
+      cloudantClient.addPlugin(testPlugin.NoopPlugin1); // plugin 1
+      cloudantClient.addPlugin(testPlugin.NoopPlugin2); // plugin 2
+      cloudantClient.addPlugin(testPlugin.NoopPlugin3); // plugin 3
+      assert.equal(cloudantClient._plugins.length, 3);
+    });
+
     it('allows an array of plugins to be added', function() {
       var cloudantClient = new Client();
       var plugins = [testPlugin.NoopPlugin1, testPlugin.NoopPlugin2, testPlugin.NoopPlugin3];
@@ -152,6 +160,49 @@ describe('CloudantClient', function() {
       });
       assert.equal(cloudantClient._plugins.length, 2);
       assert.ok(cloudantClient._cfg.usePromises);
+    });
+
+    it('allows plugins to be added and removed separately', function() {
+      var cloudantClient = new Client();
+      cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
+      cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
+      cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
+
+      cloudantClient.removePlugins(testPlugin.NoopPlugin1); // plugin 1
+      cloudantClient.removePlugins(testPlugin.NoopPlugin2); // plugin 2
+
+      assert.equal(cloudantClient._plugins.length, 1);
+      assert.equal(cloudantClient._plugins[0].id, 'noop3');
+    });
+
+    it('allows plugins to be added and removed separately using alias', function() {
+      var cloudantClient = new Client();
+      cloudantClient.addPlugin(testPlugin.NoopPlugin1); // plugin 1
+      cloudantClient.addPlugin(testPlugin.NoopPlugin2); // plugin 2
+      cloudantClient.addPlugin(testPlugin.NoopPlugin3); // plugin 3
+
+      cloudantClient.removePlugin(testPlugin.NoopPlugin1); // plugin 1
+      cloudantClient.removePlugin(testPlugin.NoopPlugin2); // plugin 2
+
+      assert.equal(cloudantClient._plugins.length, 1);
+      assert.equal(cloudantClient._plugins[0].id, 'noop3');
+    });
+
+    it('allows plugins to be added and removed as array', function() {
+      var cloudantClient = new Client();
+      cloudantClient.addPlugins([
+        testPlugin.NoopPlugin1, // plugin 1
+        testPlugin.NoopPlugin2, // plugin 2
+        testPlugin.NoopPlugin3  // plugin 3
+      ]);
+
+      cloudantClient.removePlugins([
+        testPlugin.NoopPlugin1, // plugin 1
+        testPlugin.NoopPlugin2  // plugin 2
+      ]);
+
+      assert.equal(cloudantClient._plugins.length, 1);
+      assert.equal(cloudantClient._plugins[0].id, 'noop3');
     });
   });
 
