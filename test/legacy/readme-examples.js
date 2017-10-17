@@ -553,7 +553,7 @@ describe('Cookie Authentication', function() {
   var mocks;
   after(function(done) {
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password});
+    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: []});
     cloudant.db.destroy('alice', function() {
       mocks.done();
       done();
@@ -568,7 +568,7 @@ describe('Cookie Authentication', function() {
       .delete('/alice').reply(200, {ok: true});
 
     var Cloudant = require('cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password});
+    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: []});
     cloudant.db.create('alice', function() {
       done();
     });
@@ -580,7 +580,7 @@ describe('Cookie Authentication', function() {
     var Cloudant = require('cloudant');
     var username = ME; // Set this to your own account
     var password = process.env.cloudant_password || 'sjedon';
-    var cloudant = Cloudant({account: username, password: password});
+    var cloudant = Cloudant({account: username, password: password, plugins: []});
 
     // A global variable to store the cookies. Of course, you can store cookies any way you wish.
     // var cookies = {}
@@ -609,7 +609,7 @@ describe('Cookie Authentication', function() {
     // Make a new connection with the cookie.
     var Cloudant = require('cloudant');
     var username = ME; // Set this to your own account
-    var other_cloudant = Cloudant({account: username, cookie: cookies[username]});
+    var other_cloudant = Cloudant({account: username, cookie: cookies[username], plugins: []});
 
     var alice = other_cloudant.db.use('alice');
     alice.insert({'I use cookies': true}, function(er, body, headers) {
@@ -634,7 +634,7 @@ describe('Cookie Authentication', function() {
 
     var Cloudant = require('cloudant');
     var username = ME; // Set this to your own account
-    var cloudant = Cloudant({account: username, cookie: cookies[username]});
+    var cloudant = Cloudant({account: username, cookie: cookies[username], plugins: []});
 
     cloudant.session(function(er, session) {
       if (er) {
