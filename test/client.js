@@ -92,6 +92,14 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._plugins.length, 3);
     });
 
+    it('allows plugins to be added separately using alias', function() {
+      var cloudantClient = new Client();
+      cloudantClient.addPlugin(testPlugin.NoopPlugin1); // plugin 1
+      cloudantClient.addPlugin(testPlugin.NoopPlugin2); // plugin 2
+      cloudantClient.addPlugin(testPlugin.NoopPlugin3); // plugin 3
+      assert.equal(cloudantClient._plugins.length, 3);
+    });
+
     it('allows an array of plugins to be added', function() {
       var cloudantClient = new Client();
       var plugins = [testPlugin.NoopPlugin1, testPlugin.NoopPlugin2, testPlugin.NoopPlugin3];
