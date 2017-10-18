@@ -15,9 +15,10 @@
 
 module.exports = Cloudant;
 
-var Nano = require('cloudant-nano');
-var debug = require('debug')('cloudant:cloudant');
-var nanodebug = require('debug')('nano');
+const async = require('async');
+const Nano = require('cloudant-nano');
+const debug = require('debug')('cloudant:cloudant');
+const nanodebug = require('debug')('nano');
 
 const Client = require('./lib/client.js');
 
@@ -28,6 +29,8 @@ var reconfigure = require('./lib/reconfigure.js');
 // This IS the Cloudant API. It is mostly nano, with a few functions.
 function Cloudant(options, callback) {
   debug('Initialize', options);
+
+  var login = reconfigure.getOptions(options); // legacy - store user/pass for cookie auth
 
   if (typeof options !== 'object') {
     options = { url: options };
@@ -47,15 +50,51 @@ function Cloudant(options, callback) {
     options.https = false;
   }
 
-  debug('Creating Cloudant client with options: %j', options);
-  var cloudantClient = new Client(options);
-  var cloudantRequest = function(req, callback) {
-    return cloudantClient.request(req, callback);
+  var cloudantClient, cloudantRequest;
+  var requestDefaults = {jar: false}; // default
+
+  if (typeof options.plugin === 'function') {
+    // legacy code path
+    debug('Using legacy custom plugin');
+    cloudantRequest = options.plugin;
+
+    if (options.requestDefaults) {
+      requestDefaults = options.requestDefaults;
+    } else {
+      requestDefaults = { gzip: true, jar: false };
+    }
+
+    // set library UA header
+    var pkg = require('./package.json');
+    requestDefaults.headers = { 'User-Agent': `nodejs-cloudant/${pkg.version} (Node.js ${process.version})` };
+
+    // keep connections alive by default
+    if (!requestDefaults.agent) {
+      var protocol = (theurl.match(/^https/)) ? require('https') : require('http');
+      var agent = new protocol.Agent({
+        keepAlive: true,
+        keepAliveMsecs: 30000,
+        maxSockets: 6
+      });
+      requestDefaults.agent = agent;
+    }
+  } else {
+    debug('Creating Cloudant client with options: %j', options);
+    cloudantClient = new Client(options);
+    cloudantRequest = function(req, callback) {
+      return cloudantClient.request(req, callback);
+    };
+  }
+
+  var nanoOptions = {
+    url: theurl,
+    request: cloudantRequest,
+    requestDefaults: requestDefaults,
+    log: nanodebug
   };
 
-  var nanoOptions = { url: theurl, request: cloudantRequest, log: nanodebug };
   if (options.cookie) {
-    nanoOptions.cookie = options.cookie // legacy - sets 'X-CouchDB-WWW-Authenticate' header
+    nanoOptions.cookie = options.cookie; // legacy - sets 'X-CouchDB-WWW-Authenticate' header
   }
 
   debug('Creating Nano instance with options: %j', nanoOptions);
@@ -209,11 +248,64 @@ function Cloudant(options, callback) {
   nano.delete_virtual_host = delete_virtual_host; // eslint-disable-line camelcase
 
   if (callback) {
-    nano.cc.addPlugins('cookieauth');
-    nano.ping(function(error, pong) {
-      callback(error, nano, pong);
-    });
+    if (nano.cc) {
+      nano.cc.addPlugins('cookieauth');
+      nano.ping(function(error, pong) {
+        callback(error, nano, pong);
+      });
+    } else {
+      // legacy login
+      nano.legacyLogin = legacyLogin;
+      debug('Running legacy login');
+      nano.legacyLogin(login, function(er, pong, cookie) {
+        if (er) {
+          callback(er);
+        } else {
+          if (cookie) {
+            requestDefaults.headers.cookie = cookie;
+          }
+          callback(null, nano, pong);
+        }
+      });
+    }
   }
 
   return nano;
+}
+
+// legacy login callback
+function legacyLogin(login, callback) {
+  var nano = this;
+  var cookie = null;
+
+  async.series([
+    function(done) {
+      if (login && login.username && login.password) {
+        done.auth = false;
+        nano.auth(login.username, login.password, function(e, b, h) {
+          cookie = (h && h['set-cookie']) || null;
+          if (cookie) {
+            cookie = cookie[0];
+          }
+          done(e, b);
+        });
+      } else {
+        done(null, null);
+      }
+    },
+    function(done) {
+      nano.session(function(e, b, h) {
+        done(e, b);
+      });
+    },
+    function(done) {
+      nano.relax({db: ''}, function(e, b, h) {
+        done(e, b);
+      });
+    }
+  ], function(err, data) {
+    var body = (data && data[2]) || {};
+    body.userCtx = (data && data[1] && data[1].userCtx) || {};
+    callback(err, body, cookie);
+  });
 }
