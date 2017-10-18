@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* global describe it before after */
+/* global describe it before beforeEach after */
 'use strict';
 
 const assert = require('assert');
@@ -64,6 +64,12 @@ const MOCK_SET_IAM_SESSION_HEADER = {
 };
 
 describe('IAMAuth Plugin', function() {
+  beforeEach(function() {
+    if (process.env.SKIP_IAM_TESTS) {
+      this.skip();
+    }
+  });
+
   before(function(done) {
     var mocks = nock(SERVER)
       .put(DBNAME)
