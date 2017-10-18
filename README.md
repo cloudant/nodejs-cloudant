@@ -334,7 +334,6 @@ This library adds documentation for the following:
 - [Cloudant Query](#cloudant-query)
 - [Cloudant Search](#cloudant-search)
 - [Cloudant Geospatial](#cloudant-geospatial)
-- [Cookie Authentication](#cookie-authentication)
 - [Advanced Features](#advanced-features)
   - [Advanced Configuration](#advanced-configuration)
   - [Pool size and open sockets](#pool-size-and-open-sockets)
@@ -729,81 +728,7 @@ db.geo('city', 'city_points', query, function(er, result) {
 });
 ~~~
 
-
-## Cookie Authentication
-
-Cloudant supports making requests using Cloudant's [cookie authentication](https://docs.cloudant.com/authentication.html#cookie-authentication).
-
-~~~ js
-var Cloudant = require('cloudant');
-var username = 'nodejs'; // Set this to your own account
-var password = process.env.cloudant_password;
-var cloudant = Cloudant({account:username, password:password});
-
-// A global variable to store the cookies. Of course, you can store cookies any way you wish.
-var cookies = {}
-
-
-// In this example, we authenticate using the same username/userpass as above.
-// However, you can use a different combination to authenticate as other users
-// in your database. This can be useful for using a less-privileged account.
-cloudant.auth(username, password, function(er, body, headers) {
-  if (er) {
-    return console.log('Error authenticating: ' + er.message);
-  }
-
-  console.log('Got cookie for %s: %s', username, headers['set-cookie']);
-
-  // Store the authentication cookie for later.
-  cookies[username] = headers['set-cookie'];
-});
-~~~
-
-To reuse a cookie:
-
-~~~ js
-// (Presuming the "cookies" global from the above example is still in scope.)
-
-var Cloudant = require('cloudant');
-var username = 'nodejs'; // Set this to your own account
-var other_cloudant = Cloudant({account:username, cookie:cookies[username]});
-
-var alice = other_cloudant.db.use('alice')
-alice.insert({_id:"my_doc"}, function (er, body, headers) {
-  if (er) {
-    return console.log('Failed to insert into alice database: ' + er.message);
-  }
-
-  // Change the cookie if Cloudant tells us to.
-  if (headers && headers['set-cookie']) {
-    cookies[username] = headers['set-cookie'];
-  }
-});
-~~~
-
-Getting current session:
-
-~~~ js
-// (Presuming the "cookie" global from the above example is still in scope.)
-
-var Cloudant = require('cloudant');
-var username = 'nodejs'; // Set this to your own account
-var cloudant = Cloudant({account:username, cookie:cookies[username]});
-
-cloudant.session(function(er, session) {
-  if (er) {
-    return console.log('oh noes!');
-  }
-
-  console.log('user is %s and has these roles: %j',
-    session.userCtx.name, session.userCtx.roles);
-});
-~~~
-
-
-
 ## Advanced Features
-
 
 ### Debugging
 
