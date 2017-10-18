@@ -131,7 +131,7 @@ You can find a further CRUD example in the [example](https://github.com/cloudant
 
 To use Cloudant, `require('cloudant')` in your code. That will return the initialization function. Run that function, passing your account name and password, and an optional callback. (And see the [security note](#security-note) about placing your password into your source code.
 
-In general, the common style is that `Cloudant` (upper-case) is the **package** you load; wheareas `cloudant` (lower-case) is your connection to your database--the result of calling `Cloudant()`:
+In general, the common style is that `Cloudant` (upper-case) is the **package** you load; whereas `cloudant` (lower-case) is your connection to your database--the result of calling `Cloudant()`:
 
 ~~~ js
 var Cloudant = require('cloudant');
@@ -156,7 +156,7 @@ Note, if you only have a single Cloudant service then specifying the `instanceNa
 
 You can optionally provide a callback to the Cloudant initialization function. This will make the library automatically "ping" Cloudant to confirm the connection and that your credentials work.
 
-Here is a simple example of initializing asychronously, using its optional callback parameter:
+Here is a simple example of initializing asynchronously, using its optional callback parameter:
 
 ~~~ js
 var Cloudant = require('cloudant');
@@ -732,7 +732,7 @@ db.geo('city', 'city_points', query, function(er, result) {
 
 ### Debugging
 
-If you wish to see further information about what the nodejs-cloudant library is doing, then its debugging output can be sent to the console by simply setting an environement variable:
+If you wish to see further information about what the nodejs-cloudant library is doing, then its debugging output can be sent to the console by simply setting an environment variable:
 
     export DEBUG=cloudant
     # then run your Node.js application
@@ -762,7 +762,7 @@ The environment variable can also be defined on the same line as the Node.js scr
 
 ### Advanced Configuration
 
-Besides the account and password options, you can add an optionsl `requestDefaults` value, which will initialize Request (the underlying HTTP library) as you need it.
+Besides the account and password options, you can add an optional `requestDefaults` value, which will initialize Request (the underlying HTTP library) as you need it.
 
 ~~~ js
 
