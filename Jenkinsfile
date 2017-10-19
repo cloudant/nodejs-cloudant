@@ -24,7 +24,6 @@ def getEnvForSuite(suiteName) {
   switch(suiteName) {
     case 'test':
       envVars.add("NOCK_OFF=true")
-      envVars.add("SKIP_IAM_TESTS=true")
       break
     default:
       error("Unknown test suite environment ${suiteName}")
