@@ -19,6 +19,7 @@
 require('dotenv').config({silent: true});
 
 var fs = require('fs');
+var request = require('request');
 var should = require('should');
 var assert = require('assert');
 var uuid = require('uuid/v4');
@@ -155,6 +156,78 @@ describe('promise plugin', function() {
       done();
     });
     assert.equal(p instanceof Promise, true);
+  });
+});
+
+describe('custom plugin', function() {
+  before(onBefore);
+  after(onAfter);
+
+  var doNothingPlugin = function(opts, callback) {
+    callback(null, { statusCode: 200 }, { ok: true });
+  };
+
+  var defaultPlugin = function(opts, callback) {
+    request(opts, callback);
+  };
+
+  it('should allow custom plugins', function(done) {
+    var cloudant = Cloudant({ plugin: doNothingPlugin, account: ME, password: PASSWORD });
+    var db = cloudant.db.use(dbName);
+    db.info(function(err, data) {
+      assert.equal(err, null);
+      assert.ok(data.ok);
+      done();
+    });
+  });
+
+  it('should allow custom plugins using asynchronous instantiation', function(done) {
+    var mocks = nock(SERVER)
+      .post('/_session', { name: ME, password: PASSWORD })
+      .reply(200, { ok: true })
+      .get('/_session')
+      .reply(200, { ok: true })
+      .get('/')
+      .reply(200, { couchdb: 'Welcome' });
+
+    Cloudant({ plugin: defaultPlugin, account: ME, password: PASSWORD }, function(err, nano, pong) {
+      assert.equal(err, null);
+      assert.notEqual(nano, null);
+      assert.equal(pong.couchdb, 'Welcome');
+      mocks.done();
+      done();
+    });
+  });
+
+  it('should allow custom plugins using asynchronous instantiation with invalid credentials', function(done) {
+    const badPass = 'bAD%%Pa$$w0rd123';
+
+    var mocks = nock(SERVER)
+        .post('/_session', { name: ME, password: badPass })
+        .reply(401, { error: 'unauthorized', reason: 'Name or password is incorrect.' });
+
+    Cloudant({ plugin: defaultPlugin, account: ME, password: badPass }, function(err, nano) {
+      assert.equal(err.error, 'unauthorized');
+      assert.equal(nano, null);
+      mocks.done();
+      done();
+    });
+  });
+
+  it('should allow custom plugins using asynchronous instantiation with no credentials', function(done) {
+    var mocks = nock(SERVER)
+        .get('/_session')
+        .reply(200, { userCtx: { roles: [], name: null }, ok: true })
+        .get('/')
+        .reply(200, { couchdb: 'Welcome' });
+
+    Cloudant({ plugin: defaultPlugin, url: SERVER }, function(err, nano, pong) {
+      assert.equal(err, null);
+      assert.notEqual(nano, null);
+      assert.equal(pong.userCtx.name, null);
+      mocks.done();
+      done();
+    });
   });
 });
 
