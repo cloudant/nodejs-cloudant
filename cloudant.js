@@ -211,7 +211,11 @@ function Cloudant(options, callback) {
   if (callback) {
     nano.cc.addPlugins('cookieauth');
     nano.ping(function(error, pong) {
-      callback(error, nano, pong);
+      if (error) {
+        callback(error);
+      } else {
+        callback(error, nano, pong);
+      }
     });
   }
 
