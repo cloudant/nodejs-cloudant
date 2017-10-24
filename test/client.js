@@ -71,14 +71,14 @@ describe('CloudantClient', function() {
     it('supports legacy option retryAttempts', function() {
       var cfg = { retryAttempts: 123 };
       var cloudantClient = new Client(cfg);
-      cloudantClient._support_legacy_keys(cfg);
+      cloudantClient._supportLegacyKeys(cfg);
       assert.equal(cfg.maxAttempt, 123);
     });
 
     it('supports legacy option retryTimeout', function() {
       var cfg = { retryTimeout: 321 };
       var cloudantClient = new Client(cfg);
-      cloudantClient._support_legacy_keys(cfg);
+      cloudantClient._supportLegacyKeys(cfg);
       assert.equal(cfg.retryInitialDelayMsecs, 321);
     });
   });

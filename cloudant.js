@@ -55,7 +55,7 @@ function Cloudant(options, callback) {
 
   var nanoOptions = { url: theurl, request: cloudantRequest, log: nanodebug };
   if (options.cookie) {
-    nanoOptions.cookie = options.cookie // legacy - sets 'X-CouchDB-WWW-Authenticate' header
+    nanoOptions.cookie = options.cookie; // legacy - sets 'X-CouchDB-WWW-Authenticate' header
   }
 
   debug('Creating Nano instance with options: %j', nanoOptions);
