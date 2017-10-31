@@ -53,6 +53,6 @@
   },
   "main": "./cloudant.js",
   "engines": {
-    "node": ">=0.8.0"
+    "node": ">=4.8.2"
   }
 }
