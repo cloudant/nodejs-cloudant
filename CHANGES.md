@@ -1,4 +1,5 @@
 # UNRELEASED
+- [UPGRADED] Upgrade package: cloudant-nano@6.7.0.
 
 # 1.9.0 (2017-10-20)
 - [NEW] Add 'error' & 'response' events to 429 retry plugin stream.
