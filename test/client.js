@@ -364,6 +364,30 @@ describe('CloudantClient', function() {
         done();
       }, 8000);
     });
+
+    it('after plugin execution phase', function(done) {
+      var mocks = nock(SERVER)
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
+
+      var cloudantClient = new Client();
+      assert.equal(cloudantClient._plugins.length, 1);
+
+      var options = {
+        url: SERVER + DBNAME,
+        auth: { username: ME, password: PASSWORD },
+        method: 'GET'
+      };
+      var r = cloudantClient.request(options)
+        .on('response', function(resp) {
+          assert.equal(resp.statusCode, 200);
+          r.abort(); // abort request
+        })
+        .on('abort', function() {
+          mocks.done();
+          done();
+        });
+    });
   });
 
   describe('using callbacks', function() {
