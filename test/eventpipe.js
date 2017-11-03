@@ -94,7 +94,7 @@ describe('EventPipe', function() {
     ep.resume(); // note EventPipe starts in 'paused' mode
   });
 
-  it('pipes data from source to target', function(done) {
+  it('relays data from source to target', function(done) {
     var source = new events.EventEmitter();
     var target = new stream.PassThrough();
     var ep = new EventPipe(source, target);
@@ -114,6 +114,7 @@ describe('EventPipe', function() {
     var data = [];
     var seenRequestEvent = false;
     var seenSocketEvent = false;
+    var seenResponseEvent = false;
 
     // add event handlers
     target
@@ -125,6 +126,10 @@ describe('EventPipe', function() {
         seenSocketEvent = true;
         assert.ok(socket.encrypted);
       })
+      .on('response', function(resp) {
+        seenResponseEvent = true;
+        assert.equal(resp.statusCode, 123);
+      })
       .on('pipe', function(src) {
         assert.fail('Unexpected "pipe" event received.');
       })
@@ -134,6 +139,7 @@ describe('EventPipe', function() {
       .on('end', function() {
         assert.ok(seenRequestEvent);
         assert.ok(seenSocketEvent);
+        assert.ok(seenResponseEvent);
         assert.deepEqual(data, sentData);
         done();
       });
@@ -141,13 +147,20 @@ describe('EventPipe', function() {
     ep.resume(); // note EventPipe starts in 'paused' mode
   });
 
-  it('pipes data from source to target (with `pipeData` enabled)', function(done) {
+  it('pipes data from source to target', function(done) {
     var source = new stream.Readable();
-
     source._read = function() {}; // noop read
-
     var target = new stream.PassThrough();
-    var ep = new EventPipe(source, target, true);
+
+    var ep = new EventPipe(source, target);
+
+    var reader = new stream.PassThrough();
+    reader.data = [];
+    reader.on('data', function(data) {
+      reader.data.push(data.toString('utf8'));
+    });
+
+    target.pipe(reader); // pipe to reader
 
     source.emit('request', {url: 'http://localhost:5986'});
     source.emit('socket', {encrypted: true});
@@ -161,9 +174,9 @@ describe('EventPipe', function() {
 
     source.push(null); // signal EOF
 
-    var data = [];
     var seenRequestEvent = false;
     var seenSocketEvent = false;
+    var seenResponseEvent = false;
     var seenPipeEvent = false;
 
     // add event handlers
@@ -176,18 +189,20 @@ describe('EventPipe', function() {
         seenSocketEvent = true;
         assert.ok(socket.encrypted);
       })
+      .on('response', function(resp) {
+        seenResponseEvent = true;
+        assert.equal(resp.statusCode, 123);
+      })
       .on('pipe', function(src) {
         seenPipeEvent = true;
         assert.equal(typeof src, 'object');
       })
-      .on('data', function(d) {
-        data.push(d.toString('utf8'));
-      })
       .on('end', function() {
         assert.ok(seenRequestEvent);
         assert.ok(seenSocketEvent);
+        assert.ok(seenResponseEvent);
         assert.ok(seenPipeEvent);
-        assert.deepEqual(data, sentData);
+        assert.deepEqual(reader.data, sentData);
         done();
       });
 
