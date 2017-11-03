@@ -19,20 +19,20 @@ const assert = require('assert');
 const events = require('events');
 const stream = require('stream');
 
-const EventPipe = require('../lib/eventpipe.js');
+const EventRelay = require('../lib/eventrelay.js');
 
-describe('EventPipe', function() {
+describe('EventRelay', function() {
   it('does not throw errors for an undefined source', function() {
     var target = new stream.PassThrough();
-    var ep = new EventPipe(undefined, target);
-    ep.clear();
-    ep.resume();
+    var er = new EventRelay(undefined, target);
+    er.clear();
+    er.resume();
   });
 
-  it('pipes all events from source to target', function(done) {
+  it('relays all events from source to target', function(done) {
     var source = new events.EventEmitter();
     var target = new stream.PassThrough();
-    var ep = new EventPipe(source, target);
+    var er = new EventRelay(source, target);
 
     // send events
     var sentEvents = ['one', 'two', 'three'];
@@ -55,20 +55,20 @@ describe('EventPipe', function() {
         done();
       });
 
-    ep.resume(); // note EventPipe starts in 'paused' mode
+    er.resume(); // note EventRelay starts in 'paused' mode
   });
 
-  it('clears events and only pipes new events from source to target', function(done) {
+  it('clears events and only relays new events from source to target', function(done) {
     var source = new events.EventEmitter();
     var target = new stream.PassThrough();
-    var ep = new EventPipe(source, target);
+    var er = new EventRelay(source, target);
 
     // send events
     ['one', 'two', 'three'].forEach(function(e) {
       source.emit(e, e);
     });
 
-    ep.clear();
+    er.clear();
 
     // send more events
     var sentEvents = ['four', 'five', 'six'];
@@ -91,13 +91,13 @@ describe('EventPipe', function() {
         done();
       });
 
-    ep.resume(); // note EventPipe starts in 'paused' mode
+    er.resume(); // note EventRelay starts in 'paused' mode
   });
 
   it('relays data from source to target', function(done) {
     var source = new events.EventEmitter();
     var target = new stream.PassThrough();
-    var ep = new EventPipe(source, target);
+    var er = new EventRelay(source, target);
 
     source.emit('request', {url: 'http://localhost:5986'});
     source.emit('socket', {encrypted: true});
@@ -144,7 +144,7 @@ describe('EventPipe', function() {
         done();
       });
 
-    ep.resume(); // note EventPipe starts in 'paused' mode
+    er.resume(); // note EventRelay starts in 'paused' mode
   });
 
   it('pipes data from source to target', function(done) {
@@ -152,7 +152,7 @@ describe('EventPipe', function() {
     source._read = function() {}; // noop read
     var target = new stream.PassThrough();
 
-    var ep = new EventPipe(source, target);
+    var er = new EventRelay(source, target);
 
     var reader = new stream.PassThrough();
     reader.data = [];
@@ -206,6 +206,6 @@ describe('EventPipe', function() {
         done();
       });
 
-    ep.resume(); // note EventPipe starts in 'paused' mode
+    er.resume(); // note EventRelay starts in 'paused' mode
   });
 });
