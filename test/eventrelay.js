@@ -58,6 +58,37 @@ describe('EventRelay', function() {
     er.resume(); // note EventRelay starts in 'paused' mode
   });
 
+  it('allows source to be defined after construction', function(done) {
+    var source = new events.EventEmitter();
+    var target = new stream.PassThrough();
+    var er = new EventRelay(target);
+
+    er.setSource(source);
+
+    // send events
+    var sentEvents = ['one', 'two', 'three'];
+    sentEvents.forEach(function(e) {
+      source.emit(e, e);
+    });
+
+    // add event handlers
+    var receivedEvents = [];
+    target
+      .on('one', function(x) {
+        receivedEvents.push(x);
+      })
+      .on('two', function(x) {
+        receivedEvents.push(x);
+      })
+      .on('three', function(x) {
+        receivedEvents.push(x);
+        assert.deepEqual(receivedEvents, sentEvents);
+        done();
+      });
+
+    er.resume(); // note EventRelay starts in 'paused' mode
+  });
+
   it('clears events and only relays new events from source to target', function(done) {
     var source = new events.EventEmitter();
     var target = new stream.PassThrough();
