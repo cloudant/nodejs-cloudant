@@ -96,6 +96,9 @@ class CookiePlugin extends BasePlugin {
     var parsed = u.parse(req.url);
     var auth = parsed.auth;
 
+    delete parsed.auth;
+    delete parsed.href;
+
     if (!auth) {
       debug('Missing credentials - skipping cookie authentication.');
       state.stash.credentials = null;
@@ -116,6 +119,7 @@ class CookiePlugin extends BasePlugin {
         if (self.baseUrl && self.cookieJar.getCookies(self.baseUrl, {expire: true}).length > 0) {
           debug('There is already a valid session cookie in the jar.');
           req.jar = self.cookieJar;
+          req.url = u.format(parsed); // remove credentials from request
           return callback(state);
         }
       }
@@ -131,6 +135,7 @@ class CookiePlugin extends BasePlugin {
       if (error) {
         debug(error.message);
       } else {
+        req.url = u.format(parsed); // remove credentials from request
         req.jar = self.cookieJar; // add jar
       }
       callback(state);

@@ -92,6 +92,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
         mocks.done();
@@ -121,6 +122,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
 
@@ -136,6 +138,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
 
@@ -167,6 +170,7 @@ describe('CookieAuth Plugin', function() {
         cloudantClient.request(req, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(typeof resp.request.headers.cookie, 'undefined');
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
           assert.ok(data.indexOf('"couchdb":"Welcome"') > -1);
           mocks.done();
@@ -195,6 +199,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
         mocks.done();
@@ -266,6 +271,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
         mocks.done();
@@ -293,6 +299,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
         mocks.done();
@@ -354,6 +361,7 @@ describe('CookieAuth Plugin', function() {
           cloudantClient.request(req2, function(err, resp, data) {
             assert.equal(err, null);
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
+            assert.equal(resp.request.uri.auth, null);
             assert.equal(resp.statusCode, 200);
             assert.ok(data.indexOf('"doc_count":0') > -1);
             mocks.done();
@@ -382,6 +390,7 @@ describe('CookieAuth Plugin', function() {
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
         assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
         mocks.done();
@@ -409,6 +418,7 @@ describe('CookieAuth Plugin', function() {
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
         assert.equal(resp.request.headers.cookie, MOCK_COOKIE_2);
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
         mocks.done();
@@ -440,6 +450,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -483,6 +494,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -508,6 +520,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -554,6 +567,7 @@ describe('CookieAuth Plugin', function() {
             if (!process.env.NOCK_OFF) {
               assert.equal(typeof resp.request.headers.cookie, 'undefined');
             }
+            assert.equal(resp.request.uri.auth, null);
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
@@ -596,6 +610,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -702,6 +717,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -743,6 +759,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -843,6 +860,7 @@ describe('CookieAuth Plugin', function() {
                 if (!process.env.NOCK_OFF) {
                   assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
                 }
+                assert.equal(resp.request.uri.auth, null);
                 assert.equal(resp.statusCode, 200);
               })
               .on('data', function(data) {
@@ -887,6 +905,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -930,6 +949,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE_2);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -964,6 +984,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
       })
@@ -975,6 +996,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -1012,6 +1034,7 @@ describe('CookieAuth Plugin', function() {
         cloudantClient.request(req, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(typeof resp.request.headers.cookie, 'undefined');
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
           assert.ok(data.indexOf('"couchdb":"Welcome"') > -1);
         })
@@ -1021,6 +1044,7 @@ describe('CookieAuth Plugin', function() {
           .on('response', function(resp) {
             responseCount++;
             assert.equal(typeof resp.request.headers.cookie, 'undefined');
+            assert.equal(resp.request.uri.auth, null);
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
@@ -1059,6 +1083,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
       })
@@ -1070,6 +1095,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -1180,6 +1206,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
       })
@@ -1191,6 +1218,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -1228,6 +1256,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
       })
@@ -1239,6 +1268,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -1341,6 +1371,7 @@ describe('CookieAuth Plugin', function() {
             cloudantClient.request(req2, function(err, resp, data) {
               assert.equal(err, null);
               assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
+              assert.equal(resp.request.uri.auth, null);
               assert.equal(resp.statusCode, 200);
               assert.ok(data.indexOf('"doc_count":0') > -1);
             })
@@ -1352,6 +1383,7 @@ describe('CookieAuth Plugin', function() {
                 if (!process.env.NOCK_OFF) {
                   assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
                 }
+                assert.equal(resp.request.uri.auth, null);
                 assert.equal(resp.statusCode, 200);
               })
               .on('data', function(data) {
@@ -1392,6 +1424,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
       })
@@ -1403,6 +1436,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {
@@ -1442,6 +1476,7 @@ describe('CookieAuth Plugin', function() {
         if (!process.env.NOCK_OFF) {
           assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
         }
+        assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
         assert.ok(data.indexOf('"doc_count":0') > -1);
       })
@@ -1453,6 +1488,7 @@ describe('CookieAuth Plugin', function() {
           if (!process.env.NOCK_OFF) {
             assert.equal(resp.request.headers.cookie, MOCK_COOKIE_2);
           }
+          assert.equal(resp.request.uri.auth, null);
           assert.equal(resp.statusCode, 200);
         })
         .on('data', function(data) {

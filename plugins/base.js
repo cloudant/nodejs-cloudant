@@ -62,5 +62,6 @@ class BasePlugin {
 }
 
 BasePlugin.id = 'base';
+BasePlugin._pluginVersion = 2;
 
 module.exports = BasePlugin;

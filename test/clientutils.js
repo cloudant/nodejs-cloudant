@@ -34,7 +34,7 @@ describe('Client Utilities', function() {
 
   describe('processState', function() {
     it('calls back without error if no response', function(done) {
-      var r = { response: undefined, state: { retry: false } };
+      var r = { clientStream: {}, response: undefined, state: { retry: false } };
       utils.processState(r, function(stop) {
         assert.equal(stop, undefined);
         done();
@@ -152,7 +152,7 @@ describe('Client Utilities', function() {
           .get('/')
           .reply(200, {couchdb: 'Welcome'});
 
-      var r = { response: request.get(SERVER) };
+      var r = { clientStream: {}, response: request.get(SERVER) };
       r.state = {
         abortWithResponse: undefined,
         attempt: 1,
@@ -171,7 +171,7 @@ describe('Client Utilities', function() {
           .get('/')
           .reply(200, {couchdb: 'Welcome'});
 
-      var r = { response: request.get(SERVER) };
+      var r = { clientStream: {}, response: request.get(SERVER) };
       r.state = {
         abortWithResponse: undefined,
         attempt: 3,
