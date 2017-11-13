@@ -2,7 +2,7 @@
 - [NEW] Added API for upcoming IBM Cloud Identity and Access Management support
   for Cloudant on IBM Cloud. Note: IAM API key support is not yet enabled in the
   service.
-- [NEW] Support multiple plugins.
+- [NEW] Support multiple plugins. See 'api-migration.md' for migration details.
 
 # 1.10.0 (2017-11-01)
 - [UPGRADED] Upgrade package: cloudant-nano@6.7.0.
