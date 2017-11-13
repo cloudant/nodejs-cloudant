@@ -1,5 +1,4 @@
 # UNRELEASED
-- [IMPROVED] Updated documentation by replacing deprecated Cloudant links with the latest bluemix.net links.
 
 # 1.10.0 (2017-11-01)
 - [UPGRADED] Upgrade package: cloudant-nano@6.7.0.
