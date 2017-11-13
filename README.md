@@ -402,7 +402,7 @@ Output:
         thandoodstrenterprourete: [ '_reader', '_writer' ],
         nodejs: [ '_reader', '_writer', '_admin', '_replicator' ] } }
 
-See the [Authorization] documentation for further details.
+See the Cloudant API for full details](https://docs.cloudant.com/api.html#authorization)
 
 ### Use an API Key
 
@@ -453,7 +453,7 @@ Output:
 
     { enable_cors: true, allow_credentials: true, origins: [ '*' ] }
 
-See [CORS] for further details.
+See <https://docs.cloudant.com/api.html#cors> for further details.
 
 
 ## Virtual Hosts
@@ -718,7 +718,7 @@ db.geo('city', 'city_points', query, function(er, result) {
 
 ## Cookie Authentication
 
-Cloudant supports making requests using Cloudant's [cookie authentication](https://console.bluemix.net/docs/services/Cloudant/api/authentication.html#cookie-authentication).
+Cloudant supports making requests using Cloudant's [cookie authentication](https://docs.cloudant.com/authentication.html#cookie-authentication).
 
 ~~~ js
 var Cloudant = require('cloudant');
@@ -1012,23 +1012,23 @@ and limitations under the License.
 
 * [Nano Library]
 * [Cloudant Documentation]
-* [Cloudant Query]
-* [Cloudant Search]
-* [Authentication]
-* [Authorization]
-* [CORS]
-* [Issues]
-* [Follow library]
+* [Cloudant Query](https://docs.cloudant.com/cloudant_query.html)
+* [Cloudant Search](https://docs.cloudant.com/search.html)
+* [Authentication](https://docs.cloudant.com/authentication.html)
+* [Authorization](https://docs.cloudant.com/authorization.html)
+* [CORS](https://docs.cloudant.com/cors.html)
+* [Issues](https://github.com/cloudant/nodejs-cloudant/issues)
+* [Follow library](https://github.com/iriscouch/follow)
 
 [Nano Library]: https://github.com/cloudant-labs/cloudant-nano
-[Cloudant Documentation]: https://console.bluemix.net/docs/services/Cloudant/cloudant.html#overview
-[Cloudant Query]: https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#query
-[Cloudant Search]: https://console.bluemix.net/docs/services/Cloudant/api/search.html
-[Cloudant Geospatial]: https://console.bluemix.net/docs/services/Cloudant/api/cloudant-geo.html#cloudant-geospatial
-[Authentication]: https://console.bluemix.net/docs/services/Cloudant/api/authentication.html
-[Authorization]: https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#authorization
+[Cloudant Documentation]: https://docs.cloudant.com/
+[Cloudant Query]: https://docs.cloudant.com/cloudant_query.html
+[Cloudant Search]: https://docs.cloudant.com/search.html
+[Cloudant Geospatial]: https://docs.cloudant.com/geo.html
+[Authentication]: https://docs.cloudant.com/authentication.html
+[Authorization]: https://docs.cloudant.com/authorization.html
 [geojson]: http://geojson.org/
-[CORS]: https://console.bluemix.net/docs/services/Cloudant/api/cors.html#cors
+[CORS]: https://docs.cloudant.com/cors.html
 [Issues]: https://github.com/cloudant/nodejs-cloudant/issues
-[Follow library]: https://github.com/cloudant-labs/cloudant-follow
+[Follow library]: https://github.com/iriscouch/follow
 [request]: https://github.com/request/request
