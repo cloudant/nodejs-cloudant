@@ -3,6 +3,8 @@
   for Cloudant on IBM Cloud. Note: IAM API key support is not yet enabled in the
   service.
 - [NEW] Support multiple plugins. See 'api-migration.md' for migration details.
+- [IMPROVED] Updated documentation by replacing deprecated Cloudant links with
+  the latest bluemix.net links.
 
 # 1.10.0 (2017-11-01)
 - [UPGRADED] Upgrade package: cloudant-nano@6.7.0.
