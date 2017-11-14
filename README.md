@@ -145,14 +145,16 @@ var Cloudant = require('cloudant')
 var cloudant = Cloudant("https://MYUSERNAME:MYPASSWORD@MYACCOUNT.cloudant.com");
 ~~~
 
-Running on Bluemix? You can initialize Cloudant directly from the `VCAP_SERVICES` environment variable:
+Running on Bluemix? You can initialize Cloudant directly from the `VCAP_SERVICES` environment variable. Just pass `vcapServices` and your `vcapInstanceName` (or alias `instanceName`) in the client configuration:
 
 ~~~ js
 var Cloudant = require('cloudant');
-var cloudant = Cloudant({instanceName: 'foo', vcapServices: JSON.parse(process.env.VCAP_SERVICES)});
+var cloudant = Cloudant({ vcapInstanceName: 'foo', vcapServices: JSON.parse(process.env.VCAP_SERVICES) });
 ~~~
 
-Note, if you only have a single Cloudant service then specifying the `instanceName` isn't required.
+You can also specify a `vcapServiceName` if your service name isn't the default, namely 'cloudantNoSQLDB'.
+
+Note, if you only have a single Cloudant service then specifying the `vcapInstanceName` isn't required.
 
 You can optionally provide a callback to the Cloudant initialization function. This will make the library automatically "ping" Cloudant to confirm the connection and that your credentials work.
 
