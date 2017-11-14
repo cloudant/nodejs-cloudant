@@ -415,7 +415,7 @@ Output:
         thandoodstrenterprourete: [ '_reader', '_writer' ],
         nodejs: [ '_reader', '_writer', '_admin', '_replicator' ] } }
 
-See the Cloudant API for full details](https://docs.cloudant.com/api.html#authorization)
+See the [Cloudant API for full details](https://docs.cloudant.com/api.html#authorization)
 
 ### Use an API Key
 
