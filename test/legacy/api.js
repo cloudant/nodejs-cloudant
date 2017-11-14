@@ -22,8 +22,8 @@ var fs = require('fs');
 var should = require('should');
 var uuid = require('uuid/v4');
 
-var nock = require('./nock.js');
-var Cloudant = require('../cloudant.js');
+var nock = require('../nock.js');
+var Cloudant = require('../../cloudant.js');
 
 // These globals may potentially be parameterized.
 var ME = process.env.cloudant_username || 'nodejs';
@@ -52,21 +52,16 @@ describe('Initialization', function() {
 
   it('supports a ping callback', function(done) {
     var mocks = nock(SERVER)
-      .get('/_session').reply(200, {ok: true, userCtx: {name: null, roles: []}})
+      .post('/_session').reply(200, {ok: true})
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2'});
 
-    Cloudant({account: ME}, function(er, cloudant, body) {
+    Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, body) {
+      console.log(body)
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
       body.should.be.an.Object;
       body.should.have.a.property('couchdb');
       body.should.have.a.property('version');
-      body.should.have.a.property('userCtx');
-      body.userCtx.should.be.an.Object;
-      body.userCtx.should.have.a.property('name');
-      body.userCtx.should.have.a.property('roles');
-      body.userCtx.roles.should.be.an.Array;
-
       mocks.done();
       done();
     });
@@ -78,9 +73,9 @@ describe('Initialization', function() {
     }
 
     var mocks = nock(SERVER)
-      .get('/_session').reply(500, {});
+      .post('/_session').reply(500, {});
 
-    Cloudant({account: ME}, function(er, cloudant, body) {
+    Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, body) {
       er.should.be.an.Object;
       mocks.done();
       done();
@@ -89,11 +84,10 @@ describe('Initialization', function() {
 
   it('uses cookie auth for ping callback', function(done) {
     var mocks = nock(SERVER)
-      .get('/_session').reply(200, {ok: true, userCtx: {name: null, roles: []}})
       .post('/_session').reply(200, {ok: true, userCtx: {name: ME, roles: []}})
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2'});
 
-    Cloudant({account: ME, account: ME, password: PASSWORD}, function(er, cloudant, welcome) {
+    Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, welcome) {
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
 
@@ -119,7 +113,7 @@ describe('Authentication', function() {
     var mocks = nock(SERVER)
       .post('/_api/v2/api_keys').reply(200, { 'password': 'Eivln4jPiLS8BoTxjXjVukDT', 'ok': true, 'key': 'thandoodstrenterprourete' });
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     c.generate_api_key(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -141,7 +135,7 @@ describe('CORS', function() {
     var mocks = nock(SERVER)
       .get('/_api/v2/user/config/cors').reply(200, { 'enable_cors': true, 'allow_credentials': true, 'origins': ['*']});
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     c.get_cors(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -161,7 +155,7 @@ describe('CORS', function() {
     var mocks = nock(SERVER)
       .put('/_api/v2/user/config/cors').reply(200, { 'ok': true });
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     c.set_cors({ 'enable_cors': true, 'allow_credentials': true, 'origins': ['*']}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -183,7 +177,7 @@ describe('Authorization', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -252,7 +246,7 @@ describe('Cloudant-Specific APIs', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -362,7 +356,7 @@ describe('Changes query', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -478,7 +472,7 @@ describe('Changes follower', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -574,22 +568,11 @@ describe('Changes follower', function() {
     var mocks = nock(SERVER)
       .get('/' + dbName)
       .reply(200, { update_seq: '2-g1AAAADbeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtUrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WIgORGpIcgGRSPVgPI5F68liAJEMDkAJq20-8XRB9ByD6QPZlAQCMOkh4', db_name: dbName, sizes: { file: 58038, external: 8, active: 2166 }, purge_seq: 0, other: { data_size: 8 }, doc_del_count: 0, doc_count: 2, disk_size: 58038, disk_format_version: 6, compact_running: false, instance_start_time: '0' })
-      .post('/' + dbName)
-      .reply(200, {ok: true, id: docId, rev: '2-a1933e6ba0b5ac9868cd6f5adc12dc5f'})
       .filteringPath(/[?&](since=.*|feed=continuous|heartbeat=.*)/g, '') // Strip out the standard parameters: ?since &feed, &heartbeat
       .get('/' + dbName + '/_changes')
       .reply(200, '{"seq":"3-g1AAAAEzeJzLYWBgYMlgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASpjSmRIsv___39WBpCVCxRgT05OSjQ0SyNSe5IDkEyqB5vAnMgENsHM1CDZPDGFkH4ibchjAZIMDUAKaMl-hDtTLZMMktOMSDLlAMQUsG8ZIaYYWpqmGCVnAQDI71_n","id":"' + docId + '","changes":[{"rev":"2-a1933e6ba0b5ac9868cd6f5adc12dc5f"}]}\n');
 
-    // Make an update that will trigger the "since=now" follower.
-    setTimeout(update_doc, 1);
     var feed = mydb.follow({since: 'now'}, on_change);
-
-    function update_doc() {
-      var newDoc = {_id: docId, _rev: firstChange.changes[0].rev, newField: 'newValue'};
-      mydb.insert(newDoc, function(er, result) {
-        should(er).equal(null);
-      });
-    }
 
     function on_change(er, change) {
       should(er).equal(null);
@@ -630,7 +613,7 @@ describe('Cloudant Query', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -773,7 +756,7 @@ describe('Cloudant Search', function() {
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
-    cc = Cloudant({account: ME, password: PASSWORD});
+    cc = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     cc.db.create(dbName, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -900,14 +883,14 @@ describe('User Agent tests', function() {
   });
 
   it('checks that the library is using a custom user-agent', function(done) {
-    var cc = Cloudant('http://localhost:8080');
+    var cc = Cloudant({url: 'http://localhost:8080', plugin: 'retryerror'});
     var db = cc.db.use('justtesting');
     db.get('justtesting2', function(er, data) {
       should(er).equal(null);
       data.should.be.an.Object;
       data.should.have.a.property('user-agent');
       data['user-agent'].should.be.a.String;
-      var pkg = require('../package.json');
+      var pkg = require('../../package.json');
       data['user-agent'].should.match(/^nodejs-cloudant/);
       data['user-agent'].should.containEql('Node.js');
       data['user-agent'].should.containEql(process.version); // node.js version number
@@ -934,7 +917,7 @@ describe('Gzip header tests', function() {
   });
 
   it('checks that the library is providing "I accept compression" headers', function(done) {
-    var cc = Cloudant('http://localhost:8080');
+    var cc = Cloudant({url: 'http://localhost:8080', plugin: 'retryerror'});
     var db = cc.db.use('justtesting');
     db.get('justtesting2', function(er, data) {
       should(er).equal(null);
@@ -964,7 +947,7 @@ function test_gzip() {
         'content-type': 'text/css'
       });
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     var mydb = c.db.use(dbName);
     mydb.attachment.get('x', 'y.css', function(er, data) {
       should(er).equal(null);
@@ -985,7 +968,7 @@ describe('Virtual Hosts', function() {
     var mocks = nock(SERVER)
       .get('/_api/v2/user/virtual_hosts').reply(200, {'virtual_hosts': []});
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     c.get_virtual_hosts(function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -1001,7 +984,7 @@ describe('Virtual Hosts', function() {
     var mocks = nock(SERVER)
       .post('/_api/v2/user/virtual_hosts').reply(200, {'ok': true});
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     c.add_virtual_host({ host: myHost, path: '/mypath'}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -1018,7 +1001,7 @@ describe('Virtual Hosts', function() {
     var mocks = nock(SERVER)
       .delete('/_api/v2/user/virtual_hosts').reply(200, { 'ok': true });
 
-    var c = Cloudant({account: ME, password: PASSWORD});
+    var c = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
     c.delete_virtual_host({ host: myHost, path: '/mypath'}, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;

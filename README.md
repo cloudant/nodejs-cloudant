@@ -106,12 +106,12 @@ cloudant.db.destroy('alice', function(err) {
     var alice = cloudant.db.use('alice')
 
     // ...and insert a document in it.
-    alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
+    alice.insert({ crazy: true }, 'panda', function(err, body, header) {
       if (err) {
         return console.log('[alice.insert] ', err.message);
       }
 
-      console.log('You have inserted the rabbit.');
+      console.log('You have inserted the panda.');
       console.log(body);
     });
   });
@@ -120,9 +120,9 @@ cloudant.db.destroy('alice', function(err) {
 
 If you run this example, you will see:
 
-    You have inserted the rabbit.
+    You have inserted the panda.
     { ok: true,
-      id: 'rabbit',
+      id: 'panda',
       rev: '1-6e4cb465d49c0368ac3946506d26335d' }
 
 You can find a further CRUD example in the [example](https://github.com/cloudant/nodejs-cloudant/tree/master/example) directory of this project.
@@ -131,7 +131,7 @@ You can find a further CRUD example in the [example](https://github.com/cloudant
 
 To use Cloudant, `require('cloudant')` in your code. That will return the initialization function. Run that function, passing your account name and password, and an optional callback. (And see the [security note](#security-note) about placing your password into your source code.
 
-In general, the common style is that `Cloudant` (upper-case) is the **package** you load; wheareas `cloudant` (lower-case) is your connection to your database--the result of calling `Cloudant()`:
+In general, the common style is that `Cloudant` (upper-case) is the **package** you load; whereas `cloudant` (lower-case) is your connection to your database--the result of calling `Cloudant()`:
 
 ~~~ js
 var Cloudant = require('cloudant');
@@ -156,7 +156,7 @@ Note, if you only have a single Cloudant service then specifying the `instanceNa
 
 You can optionally provide a callback to the Cloudant initialization function. This will make the library automatically "ping" Cloudant to confirm the connection and that your credentials work.
 
-Here is a simple example of initializing asychronously, using its optional callback parameter:
+Here is a simple example of initializing asynchronously, using its optional callback parameter:
 
 ~~~ js
 var Cloudant = require('cloudant');
@@ -220,28 +220,66 @@ Cloudant({url:"companycloudant.local", username:"somebody", password:"somebody's
 
 ### Request Plugins
 
-This library can be used with one of these `request` plugins:
+This library can be used with one (or more) of the following `request` plugins:
 
-1. `default` - the default [request](https://www.npmjs.com/package/request) library plugin. This uses Node.js's callbacks to communicate Cloudant's replies
-back to your app and can be used to stream data using the Node.js [Stream API](https://nodejs.org/api/stream.html).
-2. `promises` - if you'd prefer to write code in the Promises style then the "promises" plugin turns each request into a Promise. This plugin cannot be used to
-stream data because instead of returning the HTTP request, we are simply returning a Promise instead.
-3. `retry` - on occasion, Cloudant's multi-tenant offerring may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time.
-The "retry" plugin will automatically retry your request with exponential back-off. The 'retry' plugin can be used to stream data.
-4. `cookieauth` - this plugin will automatically swap your Cloudant credentials for a cookie transparently for you. It will handle the authentication for you
-and ensure that the cookie is refreshed. The 'cookieauth' plugin can be used to stream data.
-5. custom plugin - you may also supply your own function which will be called to make API calls.
+1. `cookieauth`
 
-#### The 'promises' Plugins
+   This plugin will automatically swap your Cloudant credentials for a cookie. It will handle the authentication for you and ensure that the cookie is refreshed when required.
+2. `promises`
 
-When initialising the Cloudant library, you can opt to use the 'promises' plugin:
+   If you'd prefer to write code in the _Promises_ style then the `promises` plugin turns each request into a _Promise_.
+3. `retry429` (or `retry`)
+
+   On occasion Cloudant's multi-tenant offering may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. The `retry429` plugin will automatically retry your request with an exponential back-off.
+4. `retry5xx`
+
+   The plugin will automatically retry 5xx responses with an exponential back-off.
+5. `retryerror`
+
+   The plugin will automatically retry request errors (e.g. connection reset errors) with an exponential back-off.
+
+_Want to use multiple plugins?_ Not a problem. Simply pass the plugins as an array instead:
 
 ```js
-var cloudant = Cloudant({url: myurl, plugin:'promises'});
+var cloudant = new Cloudant({ url: myurl, plugins: [ 'cookieauth', 'promises', 'retry5xx' ] });
+var mydb = cloudant.db.use('mydb');
+mydb.get('mydoc', function(err, data) {
+  console.log(`Document contents: ${data.toString('utf8')}`);
+});
+```
+
+The plugins are _always_ executed in the order they are specified. Remember that all plugins are respected. If one requests a retry then it cannot be overruled by another. If two plugins request different delay times before the next retry attempt then the largest delay time is honoured.
+
+Be aware that if you don't specify any plugins then the `cookieauth` plugin will automatically be added. To disable all plugins you can pass an empty array as the plugin list, i.e. `Cloudant({ url: myurl, plugins: [] })`.
+
+#### The `cookieauth` plugin
+
+For example:
+
+```js
+var cloudant = new Cloudant({ url: 'http://user:pass@localhost:5984', plugin: 'cookieauth' });
+var mydb = cloudant.db.use('mydb');
+mydb.get('mydoc', function(err, data) {
+  console.log(`Document contents: ${data.toString('utf8')}`);
+});
+```
+
+The plugin will transparently call `POST /_session` to exchange your credentials for a cookie before proceeding with the document fetch.
+
+Note that all subsequent requests made using this client will also use cookie authentication. The library will automatically refresh the cookie on any `401` or `403` response.
+
+If you don't specify a username and password during the client construction then cookie authentication is disabled.
+
+#### The `promises` plugin
+
+For example:
+
+```js
+var cloudant = new Cloudant({ url: myurl, plugin: 'promises' });
 var mydb = cloudant.db.use('mydb');
 ```
 
-Then the library will return a Promise for every asynchronous call:
+Then the library will return a _Promise_ for every asynchronous call:
 
 ```js
 mydb.list().then(function(data) {
@@ -251,55 +289,31 @@ mydb.list().then(function(data) {
 });
 ```
 
-#### The 'retry' plugin
+#### The retry plugins
 
-When initialising the Cloudant library, you can opt to use the 'retry' plugin:
+1. `retry429`
+2. `retry5xx`
+3. `retryerror`
+
+For example, when initialising the Cloudant library you can opt to use the `retry429` plugin:
 
 ```js
-var cloudant = Cloudant({url: myurl, plugin:'retry'});
+var cloudant = new Cloudant({ url: myurl, plugin: 'retry429' });
 var mydb = cloudant.db.use('mydb');
 ```
 
 Then use the Cloudant library normally. You may also opt to configure the retry parameters:
 
-- retryAttempts - the maximum number of times the request will be attempted (default 3)
-- retryTimeout - the number of milliseconds after the first attempt that the second request will be tried; the timeout doubling with each subsequent attempt  (default 500)
+- `maxAttempt` (or `retryAttempts`) - the maximum number of times the request will be attempted _(default: 3)_.
+- `retryInitialDelayMsecs` (or `retryTimeout`) - the initial retry delay in milliseconds _(default: 500)_.
+- `retryDelayMultiplier` - the multiplication factor used for increasing the timeout after each subsequent attempt _(default: 2)_.
+
+For example:
 
 ```js
-var cloudant = Cloudant({url: myurl, plugin:'retry', retryAttempts:5, retryTimeout:1000 });
+var cloudant = new Cloudant({ url: myurl, plugin: 'retry429', maxAttempt: 5, retryInitialDelayMsecs: 1000 });
 var mydb = cloudant.db.use('mydb');
 ```
-
-#### The 'cookieauth' plugin
-
-When initialising the Cloudant library, you can opt to use the 'cookieauth' plugin:
-
-```js
-var cloudant = Cloudant({url: myurl, plugin:'cookieauth'});
-var mydb = cloudant.db.use('mydb');
-mydb.get('mydoc', function(err, data) {
-
-});
-```
-
-The above code will transparently call `POST /_session` to exchange your credentials for a cookie and then call `GET /mydoc` to fetch the document.
-
-Subsequent calls to the same `cloudant` instance will simply use cookie authentication from that point. The library will automatically ensure that the cookie remains
-up-to-date by calling Cloudant on an hourly basis to refresh the cookie.
-
-#### Custom plugin
-
-When initialising the Cloudant library, you can supply your own plugin function:
-
-```js  
-  var doNothingPlugin = function(opts, callback) {
-    // don't do anything, just pretend that everything's ok.
-    callback(null, { statusCode:200 }, { ok: true});
-  };
-  var cloudant = Cloudant({url: myurl, plugin: doNothingPlugin});
-```
-
-Whenever the Cloudant library wishes to make an outgoing HTTP request, it will call your function instead of `request`.
 
 ## API Reference
 
@@ -320,7 +334,6 @@ This library adds documentation for the following:
 - [Cloudant Query](#cloudant-query)
 - [Cloudant Search](#cloudant-search)
 - [Cloudant Geospatial](#cloudant-geospatial)
-- [Cookie Authentication](#cookie-authentication)
 - [Advanced Features](#advanced-features)
   - [Advanced Configuration](#advanced-configuration)
   - [Pool size and open sockets](#pool-size-and-open-sockets)
@@ -715,85 +728,11 @@ db.geo('city', 'city_points', query, function(er, result) {
 });
 ~~~
 
-
-## Cookie Authentication
-
-Cloudant supports making requests using Cloudant's [cookie authentication](https://docs.cloudant.com/authentication.html#cookie-authentication).
-
-~~~ js
-var Cloudant = require('cloudant');
-var username = 'nodejs'; // Set this to your own account
-var password = process.env.cloudant_password;
-var cloudant = Cloudant({account:username, password:password});
-
-// A global variable to store the cookies. Of course, you can store cookies any way you wish.
-var cookies = {}
-
-
-// In this example, we authenticate using the same username/userpass as above.
-// However, you can use a different combination to authenticate as other users
-// in your database. This can be useful for using a less-privileged account.
-cloudant.auth(username, password, function(er, body, headers) {
-  if (er) {
-    return console.log('Error authenticating: ' + er.message);
-  }
-
-  console.log('Got cookie for %s: %s', username, headers['set-cookie']);
-
-  // Store the authentication cookie for later.
-  cookies[username] = headers['set-cookie'];
-});
-~~~
-
-To reuse a cookie:
-
-~~~ js
-// (Presuming the "cookies" global from the above example is still in scope.)
-
-var Cloudant = require('cloudant');
-var username = 'nodejs'; // Set this to your own account
-var other_cloudant = Cloudant({account:username, cookie:cookies[username]});
-
-var alice = other_cloudant.db.use('alice')
-alice.insert({_id:"my_doc"}, function (er, body, headers) {
-  if (er) {
-    return console.log('Failed to insert into alice database: ' + er.message);
-  }
-
-  // Change the cookie if Cloudant tells us to.
-  if (headers && headers['set-cookie']) {
-    cookies[username] = headers['set-cookie'];
-  }
-});
-~~~
-
-Getting current session:
-
-~~~ js
-// (Presuming the "cookie" global from the above example is still in scope.)
-
-var Cloudant = require('cloudant');
-var username = 'nodejs'; // Set this to your own account
-var cloudant = Cloudant({account:username, cookie:cookies[username]});
-
-cloudant.session(function(er, session) {
-  if (er) {
-    return console.log('oh noes!');
-  }
-
-  console.log('user is %s and has these roles: %j',
-    session.userCtx.name, session.userCtx.roles);
-});
-~~~
-
-
-
 ## Advanced Features
-
 
 ### Debugging
 
-If you wish to see further information about what the nodejs-cloudant library is doing, then its debugging output can be sent to the console by simply setting an environement variable:
+If you wish to see further information about what the nodejs-cloudant library is doing, then its debugging output can be sent to the console by simply setting an environment variable:
 
     export DEBUG=cloudant
     # then run your Node.js application
@@ -823,7 +762,7 @@ The environment variable can also be defined on the same line as the Node.js scr
 
 ### Advanced Configuration
 
-Besides the account and password options, you can add an optionsl `requestDefaults` value, which will initialize Request (the underlying HTTP library) as you need it.
+Besides the account and password options, you can add an optional `requestDefaults` value, which will initialize Request (the underlying HTTP library) as you need it.
 
 ~~~ js
 
@@ -868,18 +807,18 @@ var cloudant = require('cloudant')({account:"me", password:"secret", requestDefa
 
 Cloudant is minimalistic but you can add your own features with `cloudant.request(opts, callback)`
 
-For example, to create a function to retrieve a specific revision of the `rabbit` document:
+For example, to create a function to retrieve a specific revision of the `panda` document:
 
 ~~~ js
-function getrabbitrev(rev, callback) {
+function getpandarev(rev, callback) {
   cloudant.request({ db: 'alice',
-                     doc: 'rabbit',
+                     doc: 'panda',
                      method: 'get',
                      params: { rev: rev }
                    }, callback)
 }
 
-getrabbitrev('4-2e6cdc4c7e26b745c2881a24e0eeece2', function(err, body) {
+getpandarev('4-2e6cdc4c7e26b745c2881a24e0eeece2', function(err, body) {
   if (!err)
     console.log(body)
 })
@@ -887,7 +826,7 @@ getrabbitrev('4-2e6cdc4c7e26b745c2881a24e0eeece2', function(err, body) {
 
 ### Pipes
 
-You can pipe in Cloudant like in any other stream.  for example if our `rabbit` document has an attachment with name `picture.png` (with a picture of our white rabbit, of course!) you can pipe it to a `writable
+You can pipe in Cloudant like in any other stream.  for example if our `panda` document has an attachment with name `picture.png` (with a picture of our white panda, of course!) you can pipe it to a `writable
 stream`
 
 See the [Attachment Functions](#attachment-functions) section for examples of piping to and from attachments.
@@ -974,11 +913,11 @@ Cloudant({account:me, password:password}, function(er, cloudant) {
       // specify the database we are going to use
       var alice = cloudant.db.use('alice')
       // and insert a document in it
-      alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
+      alice.insert({ crazy: true }, 'panda', function(err, body, header) {
         if (err)
           return console.log('[alice.insert] ', err.message)
 
-        console.log('you have inserted the rabbit.')
+        console.log('you have inserted the panda.')
         console.log(body)
       })
     })
@@ -988,9 +927,9 @@ Cloudant({account:me, password:password}, function(er, cloudant) {
 
 If you run this example, you will see:
 
-    you have inserted the rabbit.
+    you have inserted the panda.
     { ok: true,
-      id: 'rabbit',
+      id: 'panda',
       rev: '1-6e4cb465d49c0368ac3946506d26335d' }
 
 ## License

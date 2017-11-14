@@ -13,167 +13,207 @@
 // limitations under the License.
 'use strict';
 
-// this the the 'cookieauth' request handler.
-// Instead of passing the authentication credentials using HTTP Basic Auth with every request
-// we exchange the credentials for a cookie which we remember and pass back with each
-// subsequent request.
-var async = require('async');
-var debug = require('debug')('cloudant');
-var stream = require('stream');
-var u = require('url');
-var nullcallback = function() {};
+const debug = require('debug')('cloudant:plugins:cookieauth');
+const request = require('request');
+const u = require('url');
 
-module.exports = function(options) {
-  var requestDefaults = options.requestDefaults || {};
-  var request = require('request').defaults(requestDefaults);
-  var jar = request.jar();
-  var cookieRefresh = null;
+const BasePlugin = require('./base.js');
 
-  // make a request using cookie authentication
-  // 1) if we have a cookie or have no credentials, just try the request
-  // 2) otherwise, get session cookie
-  // 3) then try the request
-  var cookieRequest = function(req, callback) {
-    // deal with absence of callback
-    if (typeof callback !== 'function') {
-      callback = nullcallback;
+/**
+ * Cookie Authentication plugin.
+ */
+class CookiePlugin extends BasePlugin {
+  constructor(client, cfg) {
+    super(client);
+
+    var self = this;
+    self.baseUrl = null;
+    self.cookieJar = request.jar();
+    self.credentials = {};
+    self.useCookieAuth = true;
+
+    if (typeof cfg.baseUrl !== 'undefined' &&
+        typeof cfg.username !== 'undefined' &&
+        typeof cfg.password !== 'undefined') {
+      debug('Attempting cookie session request from plugin init.');
+
+      self.baseUrl = cfg.baseUrl;
+      self.credentials = { username: cfg.username, password: cfg.password };
+
+      var state = {
+        cfg: cfg,
+        stash: { credentials: self.credentials, forceRenewCookie: false }
+      };
+      self.refreshCookie(state, function(error) {
+        if (error) {
+          debug(error.message);
+        }
+      });
+    }
+  }
+
+  // Compare `newCredentials` to credentials currently being stored by the
+  // client.
+  isNewCredentials(newCredentials) {
+    return newCredentials.username !== this.credentials.username ||
+           newCredentials.password !== this.credentials.password;
+  }
+
+  onRequest(state, req, callback) {
+    var self = this;
+
+    // set stash defaults
+    if (typeof state.stash.useCookieAuth === 'undefined') {
+      state.stash.useCookieAuth = true;
+    }
+    if (typeof state.stash.forceRenewCookie === 'undefined') {
+      state.stash.forceRenewCookie = false;
     }
 
-    // parse the url to extract credentials and calculate
-    // stuburl - the cloudant url without credentials or auth
-    // auth - whether there are credentials or not
-    // credentials - object containing username & password
-    var url = req.uri || req.url;
-    var parsed = u.parse(url);
+    // Cookie renewal flags:
+    //
+    // - `useCookieAuth`
+    //     `true`  => Allow cookie session authentication attempts.
+    //     `false` => Implies a cookie session authentication attempt has failed
+    //                with a non-200 response. No further attempts can be made
+    //                unless different credentials are used.
+    //
+    // - `forceRenewCookie`
+    //     `true`  => Renew the session cookie.
+    //     `false` => Only renew the session cookie if there isn't a valid
+    //                cookie already in the cookie jar.
+
+    if (!state.stash.useCookieAuth) {
+      // another plugin has requested a retry. a previous session cookie request
+      // attempt failed for these credentials. we don't try again.
+      debug('Skipping session cookie authentication.');
+      return callback(state);
+    }
+
+    req.url = req.uri || req.url;
+    delete req.uri;
+
+    var parsed = u.parse(req.url);
     var auth = parsed.auth;
-    var credentials = null;
+
     delete parsed.auth;
     delete parsed.href;
-    url = u.format(parsed);
-    if (auth) {
-      var bits = auth.split(':');
-      credentials = {
-        username: bits[0],
-        password: bits[1]
-      };
+
+    if (!auth) {
+      debug('Missing credentials - skipping cookie authentication.');
+      state.stash.credentials = null;
+      return callback(state);
     }
-    req.url = url;
-    delete req.uri;
-    delete parsed.path;
-    delete parsed.pathname;
-    var stuburl = u.format(parsed).replace(/\/$/, '');
 
-    // to maintain streaming compatiblity, always return a PassThrough stream
-    var s = new stream.PassThrough();
+    var bits = auth.split(':');
+    var urlCredentials = {username: bits[0], password: bits[1]};
+    state.stash.credentials = urlCredentials;
 
-    // run these three things in series
-    async.series([
-
-      // call the request being asked for
-      function(done) {
-        // do we have cookie for this domain name?
-        var cookies = jar.getCookies(stuburl);
-        var statusCode = 500;
-
-        // if we have a cookie for this domain, then we can try the required API call straight away
-        if (!auth || cookies.length > 0) {
-          debug('we have cookies (or no credentials) so attempting API call straight away');
-          req.jar = jar;
-          request(req, function(e, h, b) {
-            // if we have no credentials or we suceeded
-            if (!auth || (statusCode >= 200 && statusCode < 400)) {
-              // returning an err of true stops the async sequence
-              // we're good because we didn't get a 4** or 5**
-              done(true, [e, h, b]);
-            } else {
-              // continue with the async chain
-              done(null, [e, h, b]);
-            }
-          }).on('response', function(r) {
-            statusCode = (r && r.statusCode) || 500;
-          }).on('data', function(chunk) {
-            // only write to the output stream on success
-            if (statusCode < 400) {
-              s.write(chunk);
-            }
-          });
-        } else {
-          debug('we have no cookies - need to authenticate first');
-          // we have no cookies so we need to authenticate first
-          // i.e. do nothing here
-          done(null, null);
+    if (!self.isNewCredentials(state.stash.credentials)) {
+      if (!self.useCookieAuth) {
+        // don't acquire session cookie as previous attempt failed
+        debug('Skipping session cookie authentication.');
+        return callback(state);
+      }
+      if (!state.stash.forceRenewCookie) {
+        if (self.baseUrl && self.cookieJar.getCookies(self.baseUrl, {expire: true}).length > 0) {
+          debug('There is already a valid session cookie in the jar.');
+          req.jar = self.cookieJar;
+          req.url = u.format(parsed); // remove credentials from request
+          return callback(state);
         }
-      },
-
-      // call POST /_session to get a cookie
-      function(done) {
-        debug('need to authenticate - calling POST /_session');
-        var r = {
-          url: stuburl + '/_session',
-          method: 'post',
-          form: {
-            name: credentials.username,
-            password: credentials.password
-          },
-          jar: jar
-        };
-        request(r, function(e, h, b) {
-          var statusCode = (h && h.statusCode) || 500;
-          // if we sucessfully authenticate
-          if (statusCode >= 200 && statusCode < 400) {
-            // continue to the next stage of the async chain
-            debug('authentication successful');
-
-            // if we don't already have a timer set to refresh the cookie every hour,
-            // set one up
-            if (!cookieRefresh) {
-              debug('setting up recurring cookie refresh request');
-              cookieRefresh = setInterval(function() {
-                debug('refreshing cookie');
-                request({method: 'get', url: stuburl + '/_session', jar: jar});
-              }, 1000 * 60 * 60);
-              // prevent setInterval from requiring the event loop to be active
-              cookieRefresh.unref();
-            }
-
-            done(null, [e, h, b]);
-          } else {
-            // failed to authenticate - no point proceeding any further
-            debug('authentication failed');
-            done(true, [e, h, b]);
-          }
-        });
-      },
-
-      // call the request being asked for with cookie authentication
-      function(done) {
-        debug('attempting API call with cookie');
-        var statusCode = 500;
-        req.jar = jar;
-        request(req, function(e, h, b) {
-          done(null, [e, h, b]);
-        }).on('response', function(r) {
-          statusCode = (r && r.statusCode) || 500;
-        }).on('data', function(chunk) {
-          if (statusCode < 400) {
-            s.write(chunk);
-          }
-        });
       }
-    ], function(err, data) {
-        // callback with the last call we made
-      if (data && data.length > 0) {
-        var reply = data[data.length - 1];
-          // error, headers, body
-        callback(reply[0], reply[1], reply[2]);
-      } else {
-        callback(err, { statusCode: 500 }, null);
-      }
+    }
+
+    self.baseUrl = u.format({
+      protocol: parsed.protocol,
+      host: parsed.host,
+      port: parsed.port
     });
 
-    // return the pass-through stream
-    return s;
-  };
+    self.refreshCookie(state, function(error) {
+      if (error) {
+        debug(error.message);
+      } else {
+        req.url = u.format(parsed); // remove credentials from request
+        req.jar = self.cookieJar; // add jar
+      }
+      callback(state);
+    });
+  }
 
-  return cookieRequest;
-};
+  onResponse(state, response, callback) {
+    if (state.stash.useCookieAuth && state.stash.credentials && response.statusCode === 401) {
+      var newCredentials = this.isNewCredentials(state.stash.credentials);
+
+      // Note: Using `this.useCookieAuth` is only applicable when we have
+      //       matching credentials. If not, the client has changed the
+      //       credentials and a new session cookie request should be made.
+
+      if (newCredentials || (!newCredentials && this.useCookieAuth)) {
+        state.stash.forceRenewCookie = true;
+        state.retry = true;
+      } else {
+        debug(`Not renewing session cookie for unauthorized response code.`);
+      }
+    }
+    callback(state);
+  }
+
+  // Perform cookie session request.
+  refreshCookie(state, callback) {
+    var self = this;
+
+    self.withLock({
+      stale: state.cfg.cookieLockStaleMsecs || 1500, // 1.5 secs
+      wait: state.cfg.cookieLockWaitMsecs || 1000 // 1 sec
+    }, function(error, done) {
+      if (error) {
+        debug(`Failed to acquire lock: ${error}`); // refresh cookie without lock
+      }
+      if (self.isNewCredentials(state.stash.credentials)) {
+        debug('New credentials identified. Renewing session cookie...');
+      } else {
+        if (!self.useCookieAuth) {
+          return callback(new Error('Skipping session cookie authentication'));
+        }
+        if (!state.stash.forceRenewCookie) {
+          if (self.baseUrl && self.cookieJar.getCookies(self.baseUrl, {expire: true}).length > 0) {
+            debug('There is already a valid session cookie in the jar.');
+            return callback();
+          }
+        }
+      }
+      debug('Making cookie session request.');
+      self._client({
+        url: self.baseUrl + '/_session',
+        method: 'POST',
+        jar: self.cookieJar,
+        form: {
+          name: state.stash.credentials.username,
+          password: state.stash.credentials.password
+        }
+      }, function(error, response, body) {
+        if (error || response.statusCode >= 500) {
+          state.retry = true;
+          callback(new Error('Failed to acquire session cookie. Attempting retry...'));
+        } else if (response.statusCode !== 200) {
+          // setting `state.stash.useCookieAuth = false` will ensure the
+          // `onResponse` hook doesn't retry the request
+          self.useCookieAuth = state.stash.useCookieAuth = false;
+          callback(new Error(`Failed to acquire session cookie. Status code: ${response.statusCode}`));
+        } else {
+          debug('Successfully acquired session cookie.');
+          self.credentials = state.stash.credentials;  // store client credentials
+          self.useCookieAuth = true;
+          callback();
+        }
+        done();
+      });
+    });
+  }
+}
+
+CookiePlugin.id = 'cookieauth';
+
+module.exports = CookiePlugin;

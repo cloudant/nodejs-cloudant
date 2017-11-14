@@ -1,4 +1,4 @@
-// Copyright © 2015, 2017 IBM Corp. All rights reserved.
+// Copyright © 2017 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,25 @@
 // limitations under the License.
 'use strict';
 
-const Retry429Plugin = require('./retry429.js');
+const BasePlugin = require('./base.js');
 
-// support legacy plugin 'retry'
+/**
+ * Retry 429 response plugin.
+ */
+class Retry429Plugin extends BasePlugin {
+  onResponse(state, response, callback) {
+    if (response.statusCode === 429) {
+      state.retry = true;
+      if (state.attempt === 1) {
+        state.retryDelayMsecs = state.cfg.retryInitialDelayMsecs;
+      } else {
+        state.retryDelayMsecs *= state.cfg.retryDelayMultiplier;
+      }
+    }
+    callback(state);
+  }
+}
 
-module.exports = Retry429Plugin; // alias for plugin 'retry429'
+Retry429Plugin.id = 'retry429';
+
+module.exports = Retry429Plugin;
