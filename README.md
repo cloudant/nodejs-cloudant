@@ -732,33 +732,29 @@ db.geo('city', 'city_points', query, function(er, result) {
 
 ### Debugging
 
-If you wish to see further information about what the nodejs-cloudant library is doing, then its debugging output can be sent to the console by simply setting an environment variable:
+Enable debugging output by setting the following environment variable:
 
-    export DEBUG=cloudant
+    export DEBUG=cloudant*
     # then run your Node.js application
 
-Debug messages will be displayed to indicate each of the Cloudant-specific function calls.
+There are several debuggers used within the library. You can capture output from a specific debugger. Here are some examples:
 
-If you want to see all debug messages, including calls made by the underlying `nano` library and HTTP requests/responses sent, then simply change the environment variable to
+- `DEBUG="cloudant:client"`
+  Only show events from the underlying request client.
+- `DEBUG="cloudant:plugins*"`
+  Only show events from plugins.
+- `DEBUG="cloudant:plugins:cookieauth"`
+  Only show events from the cookie authentication plugin (if enabled).
+- `DEBUG="cloudant:plugins:iamauth"`
+  Only show events from the IAM authentication plugin (if enabled).
 
-    export DEBUG=cloudant,nano
+You can also get debugging output from nodejs-cloudant dependencies too:
+
+    export DEBUG=cloudant*,nano
+    export NODE_DEBUG=request
     # then run your Node.js application
 
-This will log every request and response as in the following example:
-
-    nano { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, uri: 'https://xxxx:yyyyy@xxxx.cloudant.com/woof', body: '{"a":1,"b":2}' } +3ms
-    nano { err: null, body: { ok: true, id: '98f178cb8f4fe089f70fa4c92a0c84b1', rev: '1-25f9b97d75a648d1fcd23f0a73d2776e' }, headers: { 'x-couch-request-id': '8220322dee', location: 'http://reader.cloudant.com/woof/98f178cb8f4fe089f70fa4c92a0c84b1', date: 'Mon, 07 Sep 2015 13:06:01 GMT', 'content-type': 'application/json', 'cache-control': 'must-revalidate', 'strict-transport-security': 'max-age=31536000', 'x-content-type-options': 'nosniff;', connection: 'close', statusCode: 201, uri: 'https://xxxx:yyyy@xxxx.cloudant.com/woof' } }
-
-Note that credentials used in the requests are also written to the log.
-
-Similarly, if you only want `nano`-level debugging:
-
-    export DEBUG=nano
-    # then run your Node.js application
-
-The environment variable can also be defined on the same line as the Node.js script you are running e.g.:
-
-    DEBUG="*" node myscript.js
+This will show all HTTP requests and responses made by the library. Be aware that credentials are also logged.
 
 ### Advanced Configuration
 
