@@ -31,25 +31,6 @@ class CookiePlugin extends BasePlugin {
     self.cookieJar = request.jar();
     self.credentials = {};
     self.useCookieAuth = true;
-
-    if (typeof cfg.baseUrl !== 'undefined' &&
-        typeof cfg.username !== 'undefined' &&
-        typeof cfg.password !== 'undefined') {
-      debug('Attempting cookie session request from plugin init.');
-
-      self.baseUrl = cfg.baseUrl;
-      self.credentials = { username: cfg.username, password: cfg.password };
-
-      var state = {
-        cfg: cfg,
-        stash: { credentials: self.credentials, forceRenewCookie: false }
-      };
-      self.refreshCookie(state, function(error) {
-        if (error) {
-          debug(error.message);
-        }
-      });
-    }
   }
 
   // Compare `newCredentials` to credentials currently being stored by the
