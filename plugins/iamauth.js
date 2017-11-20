@@ -42,13 +42,6 @@ class IAMPlugin extends BasePlugin {
       debug('Missing IAM API key. Skipping IAM authentication.');
       self.shouldApplyIAMAuth = false;
     }
-
-    debug('Attempting IAM session request from plugin init.');
-    self.refreshCookie(cfg, function(error) {
-      if (error) {
-        debug(error.message);
-      }
-    });
   }
 
   onRequest(state, req, callback) {
