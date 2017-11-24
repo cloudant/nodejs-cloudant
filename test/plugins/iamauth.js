@@ -231,47 +231,6 @@ describe('IAMAuth Plugin', function() {
     });
   });
 
-  it('performs authenticated request and returns 200 response when specifying credentials via client', function(done) {
-    // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
-    var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
-        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
-        'response_type': 'cloud_iam',
-        'apikey': IAM_API_KEY
-      })
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
-
-    var cloudantSessionMocks = nock(SERVER)
-      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
-      .reply(200, {ok: true}, MOCK_SET_IAM_SESSION_HEADER);
-
-    var cloudantMocks = nock(SERVER)
-      .get(DBNAME)
-      .reply(200, {doc_count: 0});
-
-    var cloudantClient = new Client({
-      baseUrl: SERVER, // required for client to authenticate
-      iamApiKey: IAM_API_KEY,
-      plugin: 'iamauth'
-    });
-
-    setTimeout(function() {
-      iamMocks.done();
-      cloudantSessionMocks.done();
-      var req = { url: SERVER + DBNAME, method: 'GET' };
-      cloudantClient.request(req, function(err, resp, data) {
-        assert.equal(err, null);
-        if (!process.env.NOCK_OFF) {
-          assert.equal(resp.request.headers.cookie, MOCK_IAM_SESSION);
-        }
-        assert.equal(resp.statusCode, 200);
-        assert.ok(data.indexOf('"doc_count":0') > -1);
-        cloudantMocks.done();
-        done();
-      });
-    }, 1000);
-  });
-
   it('performs request and returns 500 response', function(done) {
     if (process.env.NOCK_OFF) {
       this.skip();

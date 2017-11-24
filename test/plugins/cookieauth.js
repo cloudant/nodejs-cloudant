@@ -22,9 +22,10 @@ const uuidv4 = require('uuid/v4'); // random
 
 const ME = process.env.cloudant_username || 'nodejs';
 const PASSWORD = process.env.cloudant_password || 'sjedon';
-const BAD_PASSWORD = 'bAD%%Pa$$w0rd123';
+const BAD_PASSWORD = 'bAD-Pa$$w0rd123';
 const SERVER = `https://${ME}.cloudant.com`;
 const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${ME}.cloudant.com`;
+const SERVER_WITH_BAD_CREDS = `https://${ME}:${BAD_PASSWORD}@${ME}.cloudant.com`;
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 
 // mock cookies
@@ -147,63 +148,6 @@ describe('CookieAuth Plugin', function() {
           mocks.done();
           done();
         }
-      });
-    });
-
-    it('performs request and returns 200 response when specifying credentials via client', function(done) {
-      // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
-      var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get('/')
-          .reply(200, {couchdb: 'Welcome'});
-
-      var cloudantClient = new Client({
-        username: ME,
-        password: PASSWORD,
-        baseUrl: SERVER,
-        plugin: 'cookieauth'
-      });
-
-      setTimeout(function() {
-        var req = { url: SERVER, method: 'GET' }; // no creds in URL
-        cloudantClient.request(req, function(err, resp, data) {
-          assert.equal(err, null);
-          assert.equal(typeof resp.request.headers.cookie, 'undefined');
-          assert.equal(resp.request.uri.auth, null);
-          assert.equal(resp.statusCode, 200);
-          assert.ok(data.indexOf('"couchdb":"Welcome"') > -1);
-          mocks.done();
-          done();
-        });
-      }, 1000);
-    });
-
-    it('performs authenticated request and returns 200 response when specifying credentials via client', function(done) {
-      // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
-      var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get(DBNAME)
-          .reply(200, {doc_count: 0});
-
-      var cloudantClient = new Client({
-        username: ME,
-        password: PASSWORD,
-        baseUrl: SERVER,
-        plugin: 'cookieauth'
-      });
-      var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
-      cloudantClient.request(req, function(err, resp, data) {
-        assert.equal(err, null);
-        if (!process.env.NOCK_OFF) {
-          assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
-        }
-        assert.equal(resp.request.uri.auth, null);
-        assert.equal(resp.statusCode, 200);
-        assert.ok(data.indexOf('"doc_count":0') > -1);
-        mocks.done();
-        done();
       });
     });
 
@@ -347,28 +291,26 @@ describe('CookieAuth Plugin', function() {
       var cloudantClient = new Client({
         username: ME,
         password: BAD_PASSWORD,
-        baseUrl: SERVER,
         plugin: 'cookieauth'
       });
 
-      setTimeout(function() {
-        var req1 = { url: SERVER + DBNAME, method: 'GET' };
-        cloudantClient.request(req1, function(err, resp, data) {
-          assert.equal(err, null);
-          assert.equal(resp.statusCode, 401);
+      var req1 = { url: SERVER_WITH_BAD_CREDS + DBNAME, method: 'GET' };
+      cloudantClient.request(req1, function(err, resp, data) {
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 401);
+        assert.ok(data.toString('utf8').indexOf('"error":"unauthorized"') > -1);
 
-          var req2 = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
-          cloudantClient.request(req2, function(err, resp, data) {
-            assert.equal(err, null);
-            assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
-            assert.equal(resp.request.uri.auth, null);
-            assert.equal(resp.statusCode, 200);
-            assert.ok(data.indexOf('"doc_count":0') > -1);
-            mocks.done();
-            done();
-          });
+        var req2 = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
+        cloudantClient.request(req2, function(err, resp, data) {
+          assert.equal(err, null);
+          assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
+          assert.equal(resp.request.uri.auth, null);
+          assert.equal(resp.statusCode, 200);
+          assert.ok(data.indexOf('"doc_count":0') > -1);
+          mocks.done();
+          done();
         });
-      }, 1000);
+      });
     });
 
     it('returns 200 response on authentication retry success', function(done) {
@@ -538,93 +480,6 @@ describe('CookieAuth Plugin', function() {
         });
     });
 
-    it('performs request and returns 200 response when specifying credentials via client', function(done) {
-      // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
-      var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get('/')
-          .reply(200, {couchdb: 'Welcome'});
-
-      var dataCount = 0;
-      var responseCount = 0;
-
-      var cloudantClient = new Client({
-        username: ME,
-        password: PASSWORD,
-        baseUrl: SERVER,
-        plugin: 'cookieauth'
-      });
-
-      setTimeout(function() {
-        var req = { url: SERVER, method: 'GET' }; // no creds in URL
-        cloudantClient.request(req)
-          .on('error', function(err) {
-            assert.fail(`Unexpected error: ${err}`);
-          })
-          .on('response', function(resp) {
-            responseCount++;
-            if (!process.env.NOCK_OFF) {
-              assert.equal(typeof resp.request.headers.cookie, 'undefined');
-            }
-            assert.equal(resp.request.uri.auth, null);
-            assert.equal(resp.statusCode, 200);
-          })
-          .on('data', function(data) {
-            dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"couchdb":"Welcome"') > -1);
-          })
-          .on('end', function() {
-            assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
-            mocks.done();
-            done();
-          });
-      }, 1000);
-    });
-
-    it('performs authenticated request and returns 200 response when specifying credentials via client', function(done) {
-      // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
-      var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get(DBNAME)
-          .reply(200, {doc_count: 0});
-
-      var dataCount = 0;
-      var responseCount = 0;
-
-      var cloudantClient = new Client({
-        username: ME,
-        password: PASSWORD,
-        baseUrl: SERVER,
-        plugin: 'cookieauth'
-      });
-      var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
-      cloudantClient.request(req)
-        .on('error', function(err) {
-          assert.fail(`Unexpected error: ${err}`);
-        })
-        .on('response', function(resp) {
-          responseCount++;
-          if (!process.env.NOCK_OFF) {
-            assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
-          }
-          assert.equal(resp.request.uri.auth, null);
-          assert.equal(resp.statusCode, 200);
-        })
-        .on('data', function(data) {
-          dataCount++;
-          assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
-        })
-        .on('end', function() {
-          assert.equal(responseCount, 1);
-          assert.equal(dataCount, 1);
-          mocks.done();
-          done();
-        });
-    });
-
     it('performs request and returns 500 response', function(done) {
       if (process.env.NOCK_OFF) {
         this.skip();
@@ -828,53 +683,50 @@ describe('CookieAuth Plugin', function() {
       var cloudantClient = new Client({
         username: ME,
         password: BAD_PASSWORD,
-        baseUrl: SERVER,
         plugin: 'cookieauth'
       });
 
       var dataCount = 0;
       var responseCount = 0;
 
-      setTimeout(function() {
-        var req1 = { url: SERVER + DBNAME, method: 'GET' };
-        cloudantClient.request(req1)
-          .on('error', function(err) {
-            assert.fail(`Unexpected error: ${err}`);
-          })
-          .on('response', function(resp) {
-            responseCount++;
-            assert.equal(resp.statusCode, 401);
-          })
-          .on('data', function(data) {
-            dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"error":"unauthorized"') > -1);
-          })
-          .on('end', function() {
-            var req2 = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
-            cloudantClient.request(req2)
-              .on('error', function(err) {
-                assert.fail(`Unexpected error: ${err}`);
-              })
-              .on('response', function(resp) {
-                responseCount++;
-                if (!process.env.NOCK_OFF) {
-                  assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
-                }
-                assert.equal(resp.request.uri.auth, null);
-                assert.equal(resp.statusCode, 200);
-              })
-              .on('data', function(data) {
-                dataCount++;
-                assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
-              })
-              .on('end', function() {
-                assert.equal(responseCount, 2);
-                assert.equal(dataCount, 2);
-                mocks.done();
-                done();
-              });
-          });
-      }, 1000);
+      var req1 = { url: SERVER_WITH_BAD_CREDS + DBNAME, method: 'GET' };
+      cloudantClient.request(req1)
+        .on('error', function(err) {
+          assert.fail(`Unexpected error: ${err}`);
+        })
+        .on('response', function(resp) {
+          responseCount++;
+          assert.equal(resp.statusCode, 401);
+        })
+        .on('data', function(data) {
+          dataCount++;
+          assert.ok(data.toString('utf8').indexOf('"error":"unauthorized"') > -1);
+        })
+        .on('end', function() {
+          var req2 = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
+          cloudantClient.request(req2)
+            .on('error', function(err) {
+              assert.fail(`Unexpected error: ${err}`);
+            })
+            .on('response', function(resp) {
+              responseCount++;
+              if (!process.env.NOCK_OFF) {
+                assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
+              }
+              assert.equal(resp.request.uri.auth, null);
+              assert.equal(resp.statusCode, 200);
+            })
+            .on('data', function(data) {
+              dataCount++;
+              assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            })
+            .on('end', function() {
+              assert.equal(responseCount, 2);
+              assert.equal(dataCount, 2);
+              mocks.done();
+              done();
+            });
+        });
     });
 
     it('returns 200 response on authentication retry success', function(done) {
@@ -978,105 +830,6 @@ describe('CookieAuth Plugin', function() {
       var responseCount = 0;
 
       var cloudantClient = new Client({ plugin: 'cookieauth' });
-      var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
-      cloudantClient.request(req, function(err, resp, data) {
-        assert.equal(err, null);
-        if (!process.env.NOCK_OFF) {
-          assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
-        }
-        assert.equal(resp.request.uri.auth, null);
-        assert.equal(resp.statusCode, 200);
-        assert.ok(data.indexOf('"doc_count":0') > -1);
-      })
-        .on('error', function(err) {
-          assert.fail(`Unexpected error: ${err}`);
-        })
-        .on('response', function(resp) {
-          responseCount++;
-          if (!process.env.NOCK_OFF) {
-            assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
-          }
-          assert.equal(resp.request.uri.auth, null);
-          assert.equal(resp.statusCode, 200);
-        })
-        .on('data', function(data) {
-          dataCount++;
-          assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
-        })
-        .on('end', function() {
-          assert.equal(responseCount, 1);
-          assert.equal(dataCount, 1);
-          mocks.done();
-          done();
-        });
-    });
-
-    it('performs request and returns 200 response when specifying credentials via client', function(done) {
-      // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
-      var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get('/')
-          .reply(200, {couchdb: 'Welcome'});
-
-      var dataCount = 0;
-      var responseCount = 0;
-
-      var cloudantClient = new Client({
-        username: ME,
-        password: PASSWORD,
-        baseUrl: SERVER,
-        plugin: 'cookieauth'
-      });
-
-      setTimeout(function() {
-        var req = { url: SERVER, method: 'GET' }; // no creds in URL
-        cloudantClient.request(req, function(err, resp, data) {
-          assert.equal(err, null);
-          assert.equal(typeof resp.request.headers.cookie, 'undefined');
-          assert.equal(resp.request.uri.auth, null);
-          assert.equal(resp.statusCode, 200);
-          assert.ok(data.indexOf('"couchdb":"Welcome"') > -1);
-        })
-          .on('error', function(err) {
-            assert.fail(`Unexpected error: ${err}`);
-          })
-          .on('response', function(resp) {
-            responseCount++;
-            assert.equal(typeof resp.request.headers.cookie, 'undefined');
-            assert.equal(resp.request.uri.auth, null);
-            assert.equal(resp.statusCode, 200);
-          })
-          .on('data', function(data) {
-            dataCount++;
-            assert.ok(data.indexOf('"couchdb":"Welcome"') > -1);
-          })
-          .on('end', function() {
-            assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
-            mocks.done();
-            done();
-          });
-      }, 1000);
-    });
-
-    it('performs authenticated request and returns 200 response when specifying credentials via client', function(done) {
-      // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
-      var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get(DBNAME)
-          .reply(200, {doc_count: 0});
-
-      var dataCount = 0;
-      var responseCount = 0;
-
-      var cloudantClient = new Client({
-        username: ME,
-        password: PASSWORD,
-        baseUrl: SERVER,
-        plugin: 'cookieauth'
-      });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -1341,63 +1094,60 @@ describe('CookieAuth Plugin', function() {
       var cloudantClient = new Client({
         username: ME,
         password: BAD_PASSWORD,
-        baseUrl: SERVER,
         plugin: 'cookieauth'
       });
 
       var dataCount = 0;
       var responseCount = 0;
 
-      setTimeout(function() {
-        var req1 = { url: SERVER + DBNAME, method: 'GET' };
-        cloudantClient.request(req1, function(err, resp, data) {
-          assert.equal(err, null);
+      var req1 = { url: SERVER_WITH_BAD_CREDS + DBNAME, method: 'GET' };
+      cloudantClient.request(req1, function(err, resp, data) {
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 401);
+        assert.ok(data.toString('utf8').indexOf('"error":"unauthorized"') > -1);
+      })
+        .on('error', function(err) {
+          assert.fail(`Unexpected error: ${err}`);
+        })
+        .on('response', function(resp) {
+          responseCount++;
           assert.equal(resp.statusCode, 401);
+        })
+        .on('data', function(data) {
+          dataCount++;
           assert.ok(data.toString('utf8').indexOf('"error":"unauthorized"') > -1);
         })
-          .on('error', function(err) {
-            assert.fail(`Unexpected error: ${err}`);
+        .on('end', function() {
+          var req2 = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
+          cloudantClient.request(req2, function(err, resp, data) {
+            assert.equal(err, null);
+            assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
+            assert.equal(resp.request.uri.auth, null);
+            assert.equal(resp.statusCode, 200);
+            assert.ok(data.indexOf('"doc_count":0') > -1);
           })
-          .on('response', function(resp) {
-            responseCount++;
-            assert.equal(resp.statusCode, 401);
-          })
-          .on('data', function(data) {
-            dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"error":"unauthorized"') > -1);
-          })
-          .on('end', function() {
-            var req2 = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
-            cloudantClient.request(req2, function(err, resp, data) {
-              assert.equal(err, null);
-              assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
+            .on('error', function(err) {
+              assert.fail(`Unexpected error: ${err}`);
+            })
+            .on('response', function(resp) {
+              responseCount++;
+              if (!process.env.NOCK_OFF) {
+                assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
+              }
               assert.equal(resp.request.uri.auth, null);
               assert.equal(resp.statusCode, 200);
-              assert.ok(data.indexOf('"doc_count":0') > -1);
             })
-              .on('error', function(err) {
-                assert.fail(`Unexpected error: ${err}`);
-              })
-              .on('response', function(resp) {
-                responseCount++;
-                if (!process.env.NOCK_OFF) {
-                  assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
-                }
-                assert.equal(resp.request.uri.auth, null);
-                assert.equal(resp.statusCode, 200);
-              })
-              .on('data', function(data) {
-                dataCount++;
-                assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
-              })
-              .on('end', function() {
-                assert.equal(responseCount, 2);
-                assert.equal(dataCount, 2);
-                mocks.done();
-                done();
-              });
-          });
-      }, 1000);
+            .on('data', function(data) {
+              dataCount++;
+              assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            })
+            .on('end', function() {
+              assert.equal(responseCount, 2);
+              assert.equal(dataCount, 2);
+              mocks.done();
+              done();
+            });
+        });
     });
 
     it('returns 200 response on authentication retry success', function(done) {
