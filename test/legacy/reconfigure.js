@@ -141,6 +141,31 @@ describe('Reconfigure', function() {
     done();
   });
 
+  it('gets URL by instance name alias from vcap containing single service', function(done) {
+    var config = { vcapInstanceName: 'serviceA', // alias of 'instanceName'
+      vcapServices: { cloudantNoSQLDB: [
+        { name: 'serviceA', credentials: { url: 'http://mykey:mypassword@mydomain.cloudant.com' } }
+      ]}
+    };
+    var url = reconfigure(config);
+    url.should.be.a.String;
+    url.should.equal('http://mykey:mypassword@mydomain.cloudant.com');
+    done();
+  });
+
+  it('gets URL by service name and instance name from vcap containing single service', function(done) {
+    var config = {
+      vcapServiceName: 'myNoSQLDB', vcapInstanceName: 'instanceA',
+      vcapServices: { myNoSQLDB: [
+        { name: 'instanceA', credentials: { url: 'http://mykey:mypassword@mydomain.cloudant.com' } }
+      ]}
+    };
+    var url = reconfigure(config);
+    url.should.be.a.String;
+    url.should.equal('http://mykey:mypassword@mydomain.cloudant.com');
+    done();
+  });
+
   it('gets first URL from vcap containing multiple services', function(done) {
     var config = {vcapServices: {cloudantNoSQLDB: [
       {credentials: {url: 'http://mykey:mypassword@mydomain.cloudant.com'}},
