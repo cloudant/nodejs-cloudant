@@ -172,12 +172,6 @@ function Cloudant(options, callback) {
       body: configuration }, callback);
   };
 
-  // WARNING: 'set_permissions' API is deprecated. Use 'set_security'.
-  var set_permissions = function(opts, callback) { // eslint-disable-line camelcase
-    console.error('set_permissions is deprecated. use set_security instead');
-    callback(null, null);
-  };
-
   // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#listing-virtual-hosts
   var get_virtual_hosts = function(callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/virtual_hosts',
@@ -202,7 +196,6 @@ function Cloudant(options, callback) {
   nano.ping = ping;
   nano.get_cors = get_cors; // eslint-disable-line camelcase
   nano.set_cors = set_cors; // eslint-disable-line camelcase
-  nano.set_permissions = set_permissions; // eslint-disable-line camelcase
   nano.generate_api_key = generate_api_key; // eslint-disable-line camelcase
   nano.get_virtual_hosts = get_virtual_hosts; // eslint-disable-line camelcase
   nano.add_virtual_host = add_virtual_host; // eslint-disable-line camelcase
