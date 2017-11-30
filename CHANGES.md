@@ -5,6 +5,7 @@
 - [NEW] Support multiple plugins. See 'api-migration.md' for migration details.
 - [NEW] Allow custom service name in CloudFoundry VCAP_SERVICES environment
   variable.
+- [FIXED] Fix `get_security`/`set_security` asymmetry.
 - [IMPROVED] Updated documentation by replacing deprecated Cloudant links with
   the latest bluemix.net links.
 - [REMOVED] Remove previously deprecated method `set_permissions`.

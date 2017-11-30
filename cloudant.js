@@ -91,10 +91,21 @@ function Cloudant(options, callback) {
 
    // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#modifying-permissions
     var set_security = function(permissions, callback) { // eslint-disable-line camelcase
-      var path = '_api/v2/db/' + encodeURIComponent(db) + '/_security';
-      return nano.request({ path: path,
+      var body = permissions;
+      var prefix = '_api/v2/db/'; // use `/_api/v2/<db>/_security` endpoint
+
+      if (permissions['couchdb_auth_only']) {
+        // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#using-the-_users-database-with-cloudant-nosql-db
+        prefix = ''; // use `/<db>/_security` endpoint
+      } else if (!permissions.cloudant) {
+        body = { cloudant: permissions };
+      }
+
+      return nano.request({
+        path: prefix + encodeURIComponent(db) + '/_security',
         method: 'put',
-        body: {cloudant: permissions} }, callback);
+        body: body
+      }, callback);
     };
 
     // https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#query
