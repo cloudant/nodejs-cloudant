@@ -129,23 +129,63 @@ You can find a further CRUD example in the [example](https://github.com/cloudant
 
 ### Initialization
 
-To use Cloudant, `require('cloudant')` in your code. That will return the initialization function. Run that function, passing your account name and password, and an optional callback. (And see the [security note](#security-note) about placing your password into your source code.
+To use Cloudant, add `require('cloudant')` in your code. In general, the common style is that `Cloudant` (upper-case) is the **package** you load; whereas `cloudant` (lower-case) is your connection to your database (i.e. the result of calling `Cloudant()`).
 
-In general, the common style is that `Cloudant` (upper-case) is the **package** you load; whereas `cloudant` (lower-case) is your connection to your database--the result of calling `Cloudant()`:
+You can initialize your client in _one_ of the following ways:
+
+#### 1. Using a URL:
+
+You can initialize Cloudant with a URL:
+
+~~~ js
+var Cloudant = require('cloudant')
+var cloudant = Cloudant("http://MYUSERNAME:MYPASSWORD@localhost:5984");
+~~~
+
+#### 2. Using account credentials:
+
+##### 2.1. Connecting to Cloudant
+
+You can just pass your account name and password (see the [security note](#security-note) about placing your password into your source code).
 
 ~~~ js
 var Cloudant = require('cloudant');
 var cloudant = Cloudant({account:me, password:password});
 ~~~
 
-If you would prefer, you can also initialize Cloudant with a URL:
+By default, when you connect to your cloudant account (i.e. "me.cloudant.com"), you authenticate as the account owner (i.e. "me"). However, you can use Cloudant with any username and password. Just provide an additional "username" option when you initialize Cloudant. This will connect to your account, but using the username as the authenticated user. (And of course, use the appropriate password.)
 
 ~~~ js
-var Cloudant = require('cloudant')
-var cloudant = Cloudant("https://MYUSERNAME:MYPASSWORD@MYACCOUNT.cloudant.com");
+var Cloudant = require('cloudant');
+var me = "nodejs";         // Substitute with your Cloudant user account.
+var otherUsername = "jhs"; // Substitute with some other Cloudant user account.
+var otherPassword = process.env.other_cloudant_password;
+
+Cloudant({account:me, username:otherUsername, password:otherPassword}, function(er, cloudant, reply) {
+  if (er) {
+    throw er;
+  }
+
+  console.log('Connected with username: %s', reply.userCtx.name);
+});
 ~~~
 
-Running on Bluemix? You can initialize Cloudant directly from the `VCAP_SERVICES` environment variable. Just pass `vcapServices` and your `vcapInstanceName` (or alias `instanceName`) in the client configuration:
+##### 2.2. Connecting to Cloudant Local
+
+If you use Cloudant Local, everything works exactly the same, except you provide a *url* parameter to indicate which server to use:
+
+~~~ js
+Cloudant({url:"companycloudant.local", username:"somebody", password:"somebody's secret"}, function(er, cloudant, reply) {
+  if (er)
+    throw er
+
+  console.log('Connected with username: %s', reply.userCtx.name)
+})
+~~~
+
+#### 3. Using a `VCAP_SERVICES` environment variable:
+
+You can initialize Cloudant directly from the `VCAP_SERVICES` environment variable. Just pass `vcapServices` and your `vcapInstanceName` (or alias `instanceName`) in the client configuration:
 
 ~~~ js
 var Cloudant = require('cloudant');
@@ -155,6 +195,8 @@ var cloudant = Cloudant({ vcapInstanceName: 'foo', vcapServices: JSON.parse(proc
 You can also specify a `vcapServiceName` if your service name isn't the default, namely 'cloudantNoSQLDB'.
 
 Note, if you only have a single Cloudant service then specifying the `vcapInstanceName` isn't required.
+
+### Initialization Callback
 
 You can optionally provide a callback to the Cloudant initialization function. This will make the library automatically "ping" Cloudant to confirm the connection and that your credentials work.
 
@@ -178,8 +220,6 @@ Cloudant({account:me, password:password}, function(err, cloudant) {
 });
 ~~~
 
-### Callback Signature
-
 After initialization, in general, callback functions receive three arguments:
 
 * `err` - the error, if any
@@ -187,38 +227,6 @@ After initialization, in general, callback functions receive three arguments:
 * `header` - the http _response header_ from Cloudant, if no error
 
 The `ping()` function is the only exception to this rule. It does not return headers since a "ping" is made from multiple requests to gather various bits of information.
-
-### Password Authentication
-
-By default, when you connect to your cloudant account (i.e. "me.cloudant.com"), you authenticate as the account owner (i.e. "me"). However, you can use Cloudant with any username and password. Just provide an additional "username" option when you initialize Cloudant. This will connect to your account, but using the username as the authenticated user. (And of course, use the appropriate password.)
-
-~~~ js
-var Cloudant = require('cloudant');
-var me = "nodejs";         // Substitute with your Cloudant user account.
-var otherUsername = "jhs"; // Substitute with some other Cloudant user account.
-var otherPassword = process.env.other_cloudant_password;
-
-Cloudant({account:me, username:otherUsername, password:otherPassword}, function(er, cloudant, reply) {
-  if (er) {
-    throw er;
-  }
-
-  console.log('Connected with username: %s', reply.userCtx.name);
-});
-~~~
-
-### Cloudant Local
-
-If you use Cloudant Local, everything works exactly the same, except you provide a *url* parameter to indicate which server to use:
-
-~~~ js
-Cloudant({url:"companycloudant.local", username:"somebody", password:"somebody's secret"}, function(er, cloudant, reply) {
-  if (er)
-    throw er
-
-  console.log('Connected with username: %s', reply.userCtx.name)
-})
-~~~
 
 ### Request Plugins
 
