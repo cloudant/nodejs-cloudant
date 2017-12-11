@@ -91,10 +91,21 @@ function Cloudant(options, callback) {
 
    // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#modifying-permissions
     var set_security = function(permissions, callback) { // eslint-disable-line camelcase
-      var path = '_api/v2/db/' + encodeURIComponent(db) + '/_security';
-      return nano.request({ path: path,
+      var body = permissions;
+      var prefix = '_api/v2/db/'; // use `/_api/v2/<db>/_security` endpoint
+
+      if (permissions['couchdb_auth_only']) {
+        // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#using-the-_users-database-with-cloudant-nosql-db
+        prefix = ''; // use `/<db>/_security` endpoint
+      } else if (!permissions.cloudant) {
+        body = { cloudant: permissions };
+      }
+
+      return nano.request({
+        path: prefix + encodeURIComponent(db) + '/_security',
         method: 'put',
-        body: {cloudant: permissions} }, callback);
+        body: body
+      }, callback);
     };
 
     // https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#query
@@ -172,12 +183,6 @@ function Cloudant(options, callback) {
       body: configuration }, callback);
   };
 
-  // WARNING: 'set_permissions' API is deprecated. Use 'set_security'.
-  var set_permissions = function(opts, callback) { // eslint-disable-line camelcase
-    console.error('set_permissions is deprecated. use set_security instead');
-    callback(null, null);
-  };
-
   // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#listing-virtual-hosts
   var get_virtual_hosts = function(callback) { // eslint-disable-line camelcase
     return nano.request({path: '_api/v2/user/virtual_hosts',
@@ -202,7 +207,6 @@ function Cloudant(options, callback) {
   nano.ping = ping;
   nano.get_cors = get_cors; // eslint-disable-line camelcase
   nano.set_cors = set_cors; // eslint-disable-line camelcase
-  nano.set_permissions = set_permissions; // eslint-disable-line camelcase
   nano.generate_api_key = generate_api_key; // eslint-disable-line camelcase
   nano.get_virtual_hosts = get_virtual_hosts; // eslint-disable-line camelcase
   nano.add_virtual_host = add_virtual_host; // eslint-disable-line camelcase
