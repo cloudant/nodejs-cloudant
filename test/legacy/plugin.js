@@ -1,4 +1,4 @@
-// Copyright © 2015, 2017 IBM Corp. All rights reserved.
+// Copyright © 2015, 2018 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ var uuid = require('uuid/v4');
 var nock = require('../nock.js');
 var Cloudant = require('../../cloudant.js');
 var request = require('request');
-var stream = require('stream');
+var PassThroughDuplex = require('../../lib/passthroughduplex.js');
 
 // These globals may potentially be parameterized.
 var ME = process.env.cloudant_username || 'nodejs';
@@ -121,7 +121,7 @@ describe('retry-on-429 plugin', function() {
     var p = db.info(function() {
       done();
     });
-    assert.equal(p instanceof stream.PassThrough, true);
+    assert.equal(p instanceof PassThroughDuplex, true);
   });
 });
 
@@ -176,7 +176,7 @@ describe('cookieauth plugin', function() {
       mocks.done();
       done();
     });
-    assert.equal(p instanceof require('stream').PassThrough, true);
+    assert.equal(p instanceof PassThroughDuplex, true);
   });
 
   it('should authenticate before attempting API call', function(done) {
@@ -298,7 +298,7 @@ describe('custom plugin', function() {
   };
 
   var defaultPlugin = function(opts, callback) {
-    request(opts, callback);
+    return request(opts, callback);
   };
 
   it('should allow custom plugins', function(done) {

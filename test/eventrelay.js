@@ -1,4 +1,4 @@
-// Copyright © 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2018 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ const EventRelay = require('../lib/eventrelay.js');
 describe('EventRelay', function() {
   it('does not throw errors for an undefined source', function() {
     var target = new stream.PassThrough();
-    var er = new EventRelay(undefined, target);
+    var er = new EventRelay(target);
     er.clear();
     er.resume();
   });
@@ -125,7 +125,7 @@ describe('EventRelay', function() {
     er.resume(); // note EventRelay starts in 'paused' mode
   });
 
-  it('relays data from source to target', function(done) {
+  it('relays request events from source to target', function(done) {
     var source = new events.EventEmitter();
     var target = new stream.PassThrough();
     var er = new EventRelay(source, target);
@@ -172,68 +172,6 @@ describe('EventRelay', function() {
         assert.ok(seenSocketEvent);
         assert.ok(seenResponseEvent);
         assert.deepEqual(data, sentData);
-        done();
-      });
-
-    er.resume(); // note EventRelay starts in 'paused' mode
-  });
-
-  it('pipes data from source to target', function(done) {
-    var source = new stream.Readable();
-    source._read = function() {}; // noop read
-    var target = new stream.PassThrough();
-
-    var er = new EventRelay(source, target);
-
-    var reader = new stream.PassThrough();
-    reader.data = [];
-    reader.on('data', function(data) {
-      reader.data.push(data.toString('utf8'));
-    });
-
-    target.pipe(reader); // pipe to reader
-
-    source.emit('request', {url: 'http://localhost:5986'});
-    source.emit('socket', {encrypted: true});
-    source.emit('response', {statusCode: 123});
-
-    // data
-    var sentData = ['foo', 'bar', 'baz'];
-    sentData.forEach(function(d) {
-      source.push(d);
-    });
-
-    source.push(null); // signal EOF
-
-    var seenRequestEvent = false;
-    var seenSocketEvent = false;
-    var seenResponseEvent = false;
-    var seenPipeEvent = false;
-
-    // add event handlers
-    target
-      .on('request', function(req) {
-        seenRequestEvent = true;
-        assert.equal(req.url, 'http://localhost:5986');
-      })
-      .on('socket', function(socket) {
-        seenSocketEvent = true;
-        assert.ok(socket.encrypted);
-      })
-      .on('response', function(resp) {
-        seenResponseEvent = true;
-        assert.equal(resp.statusCode, 123);
-      })
-      .on('pipe', function(src) {
-        seenPipeEvent = true;
-        assert.equal(typeof src, 'object');
-      })
-      .on('end', function() {
-        assert.ok(seenRequestEvent);
-        assert.ok(seenSocketEvent);
-        assert.ok(seenResponseEvent);
-        assert.ok(seenPipeEvent);
-        assert.deepEqual(reader.data, sentData);
         done();
       });
 
