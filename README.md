@@ -234,17 +234,24 @@ This library can be used with one (or more) of the following `request` plugins:
 
 1. `cookieauth`
 
-   This plugin will automatically swap your Cloudant credentials for a cookie. It will handle the authentication for you and ensure that the cookie is refreshed when required.
-2. `promises`
+   This plugin will automatically exchange your Cloudant credentials for a cookie. It will handle the authentication and ensure that the cookie is refreshed as required.
+
+2. `iamauth`
+
+   IBM Cloud Identity & Access Management enables you to securely authenticate users and control access to all cloud resources consistently in the IBM Bluemix Cloud Platform.
+   This plugin will automatically exchange your IAM API key for a token. It will handle the authentication and ensure that the token is refreshed as required.
+   The production IAM token service at https://iam.bluemix.net/oidc/token is used by default. You can set `iamTokenUrl` in your client configuration to override this.
+   See [IBM Cloud Identity and Access Management](https://console.bluemix.net/docs/services/Cloudant/guides/iam.html#ibm-cloud-identity-and-access-management) for more information.
+3. `promises`
 
    If you'd prefer to write code in the _Promises_ style then the `promises` plugin turns each request into a _Promise_.
-3. `retry429` (or `retry`)
+4. `retry429` (or `retry`)
 
    On occasion Cloudant's multi-tenant offering may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. The `retry429` plugin will automatically retry your request with an exponential back-off.
-4. `retry5xx`
+5. `retry5xx`
 
    The plugin will automatically retry 5xx responses with an exponential back-off.
-5. `retryerror`
+6. `retryerror`
 
    The plugin will automatically retry request errors (e.g. connection reset errors) with an exponential back-off.
 
