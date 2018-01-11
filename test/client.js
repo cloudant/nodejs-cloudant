@@ -1,4 +1,4 @@
-// Copyright © 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2018 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 const assert = require('assert');
 const Client = require('../lib/client.js');
 const nock = require('./nock.js');
+const stream = require('stream');
 const testPlugin = require('./fixtures/testplugins.js');
 const uuidv4 = require('uuid/v4'); // random
 
@@ -25,12 +26,15 @@ const ME = process.env.cloudant_username || 'nodejs';
 const PASSWORD = process.env.cloudant_password || 'sjedon';
 const SERVER = `https://${ME}.cloudant.com`;
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
+const DOCID = 'doc1';
 
 describe('CloudantClient', function() {
   before(function(done) {
     var mocks = nock(SERVER)
-        .put(DBNAME)
-        .reply(201, {ok: true});
+        .put(DBNAME) // create database
+        .reply(201, {ok: true})
+        .post(DBNAME) // create document
+        .reply(201, {ok: true, id: DOCID, rev: '1-xxxxxxxx'});
 
     var cloudantClient = new Client({ plugin: 'retryerror' });
 
@@ -42,8 +46,22 @@ describe('CloudantClient', function() {
     cloudantClient.request(options, function(err, resp) {
       assert.equal(err, null);
       assert.equal(resp.statusCode, 201);
-      mocks.done();
-      done();
+
+      // create a document
+      var options = {
+        url: SERVER + DBNAME,
+        auth: { username: ME, password: PASSWORD },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: `{"_id":"${DOCID}","foo":"bar"}`
+      };
+      cloudantClient.request(options, function(err, resp) {
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 201);
+
+        mocks.done();
+        done();
+      });
     });
   });
 
@@ -216,7 +234,7 @@ describe('CloudantClient', function() {
       var mocks = nock(SERVER)
           .get(DBNAME)
           .times(2)
-          .reply(200, {doc_count: 0});
+          .reply(200, {doc_count: 1});
 
       var cloudantClient = new Client({ plugins: [] });
       cloudantClient.addPlugins(testPlugin.AlwaysRetry);
@@ -231,7 +249,7 @@ describe('CloudantClient', function() {
         assert.equal(cloudantClient._plugins[0].onResponseCallCount, 2);
         assert.equal(err, null);
         assert.equal(resp.statusCode, 200);
-        assert.ok(data.indexOf('"doc_count":0') > -1);
+        assert.ok(data.indexOf('"doc_count":1') > -1);
         mocks.done();
         done();
       });
@@ -245,7 +263,7 @@ describe('CloudantClient', function() {
       var mocks = nock(SERVER)
           .get(DBNAME)
           .times(3)
-          .reply(200, {doc_count: 0});
+          .reply(200, {doc_count: 1});
 
       var cloudantClient = new Client({ plugins: [] });
       cloudantClient.addPlugins(testPlugin.AlwaysRetry);
@@ -260,7 +278,7 @@ describe('CloudantClient', function() {
       cloudantClient.request(options, { retryDelayMultiplier: 3 }, function(err, resp, data) {
         assert.equal(err, null);
         assert.equal(resp.statusCode, 200);
-        assert.ok(data.indexOf('"doc_count":0') > -1);
+        assert.ok(data.indexOf('"doc_count":1') > -1);
 
         // validate retry delay
         var now = (new Date()).getTime();
@@ -279,7 +297,7 @@ describe('CloudantClient', function() {
       var mocks = nock(SERVER)
           .get(DBNAME)
           .times(3)
-          .reply(200, {doc_count: 0});
+          .reply(200, {doc_count: 1});
 
       var cloudantClient = new Client({ plugins: [] });
       cloudantClient.addPlugins(testPlugin.AlwaysRetry);
@@ -294,7 +312,7 @@ describe('CloudantClient', function() {
       cloudantClient.request(options, { retryInitialDelayMsecs: 750 }, function(err, resp, data) {
         assert.equal(err, null);
         assert.equal(resp.statusCode, 200);
-        assert.ok(data.indexOf('"doc_count":0') > -1);
+        assert.ok(data.indexOf('"doc_count":1') > -1);
 
         // validate retry delay
         var now = (new Date()).getTime();
@@ -308,7 +326,7 @@ describe('CloudantClient', function() {
     it('successfully overrides usePromises', function(done) {
       var mocks = nock(SERVER)
           .get(DBNAME)
-          .reply(200, {doc_count: 0});
+          .reply(200, {doc_count: 1});
 
       var cloudantClient = new Client({ plugins: [] });
       assert.equal(cloudantClient._plugins.length, 0);
@@ -320,7 +338,7 @@ describe('CloudantClient', function() {
         method: 'GET'
       };
       var p = cloudantClient.request(options, { usePromises: true }).then(function(data) {
-        assert.equal(data.doc_count, 0);
+        assert.equal(data.doc_count, 1);
         mocks.done();
         done();
       }).catch(function(err) {
@@ -339,7 +357,7 @@ describe('CloudantClient', function() {
       var mocks = nock(SERVER)
           .get(DBNAME)
           .times(4)
-          .reply(200, {doc_count: 0});
+          .reply(200, {doc_count: 1});
 
       var cloudantClient = new Client({
         maxAttempt: 5,
@@ -368,7 +386,7 @@ describe('CloudantClient', function() {
     it('after plugin execution phase', function(done) {
       var mocks = nock(SERVER)
           .get(DBNAME)
-          .reply(200, {doc_count: 0});
+          .reply(200, {doc_count: 1});
 
       var cloudantClient = new Client();
       assert.equal(cloudantClient._plugins.length, 1);
@@ -395,7 +413,7 @@ describe('CloudantClient', function() {
       it('performs request and returns response', function(done) {
         var mocks = nock(SERVER)
             .get(DBNAME)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         assert.equal(cloudantClient._plugins.length, 0);
@@ -408,7 +426,7 @@ describe('CloudantClient', function() {
         cloudantClient.request(options, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(resp.statusCode, 200);
-          assert.ok(data.indexOf('"doc_count":0') > -1);
+          assert.ok(data.indexOf('"doc_count":1') > -1);
           mocks.done();
           done();
         });
@@ -438,13 +456,43 @@ describe('CloudantClient', function() {
           done();
         });
       });
+
+      it('performs request with piped payload and returns response', function(done) {
+        var mocks = nock(SERVER)
+            .post(DBNAME + '/_all_docs', function(body) {
+              assert.deepEqual(body, { keys: [ 'doc1' ] });
+              return true;
+            })
+            .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+
+        var cloudantClient = new Client({ plugins: [] });
+        assert.equal(cloudantClient._plugins.length, 0);
+
+        var readable = new stream.PassThrough();
+        readable.end('{"keys":["doc1"]}'); // request payload
+
+        var options = {
+          url: SERVER + DBNAME + '/_all_docs',
+          auth: { username: ME, password: PASSWORD },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        };
+
+        readable.pipe(cloudantClient.request(options, function(err, resp, data) {
+          assert.equal(err, null);
+          assert.equal(resp.statusCode, 200);
+          assert.ok(data.indexOf('"key":"doc1","value":{"rev":"1') > -1);
+          mocks.done();
+          done();
+        }));
+      });
     });
 
     describe('with single Noop plugin', function() {
       it('performs request and calls request and response hooks only', function(done) {
         var mocks = nock(SERVER)
             .get(DBNAME)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient.addPlugins(testPlugin.NoopPlugin);
@@ -458,7 +506,7 @@ describe('CloudantClient', function() {
         cloudantClient.request(options, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(resp.statusCode, 200);
-          assert.ok(data.indexOf('"doc_count":0') > -1);
+          assert.ok(data.indexOf('"doc_count":1') > -1);
 
           assert.equal(cloudantClient._plugins[0].onRequestCallCount, 1);
           assert.equal(cloudantClient._plugins[0].onErrorCallCount, 0);
@@ -467,6 +515,37 @@ describe('CloudantClient', function() {
           mocks.done();
           done();
         });
+      });
+
+      it('performs request with piped payload and returns response', function(done) {
+        var mocks = nock(SERVER)
+            .post(DBNAME + '/_all_docs', function(body) {
+              assert.deepEqual(body, { keys: [ 'doc1' ] });
+              return true;
+            })
+            .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+
+        var cloudantClient = new Client({ plugins: [] });
+        cloudantClient.addPlugins(testPlugin.NoopPlugin);
+        assert.equal(cloudantClient._plugins.length, 1);
+
+        var readable = new stream.PassThrough();
+        readable.end('{"keys":["doc1"]}'); // request payload
+
+        var options = {
+          url: SERVER + DBNAME + '/_all_docs',
+          auth: { username: ME, password: PASSWORD },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        };
+
+        readable.pipe(cloudantClient.request(options, function(err, resp, data) {
+          assert.equal(err, null);
+          assert.equal(resp.statusCode, 200);
+          assert.ok(data.indexOf('"key":"doc1","value":{"rev":"1') > -1);
+          mocks.done();
+          done();
+        }));
       });
 
       it('performs request and calls request and error hooks only', function(done) {
@@ -504,7 +583,7 @@ describe('CloudantClient', function() {
       it('performs request and calls request and response hooks only', function(done) {
         var mocks = nock(SERVER)
             .get(DBNAME)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
@@ -520,7 +599,7 @@ describe('CloudantClient', function() {
         cloudantClient.request(options, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(resp.statusCode, 200);
-          assert.ok(data.indexOf('"doc_count":0') > -1);
+          assert.ok(data.indexOf('"doc_count":1') > -1);
 
           cloudantClient._plugins.forEach(function(plugin) {
             assert.equal(plugin.onRequestCallCount, 1);
@@ -531,6 +610,39 @@ describe('CloudantClient', function() {
           mocks.done();
           done();
         });
+      });
+
+      it('performs request with piped payload and returns response', function(done) {
+        var mocks = nock(SERVER)
+            .post(DBNAME + '/_all_docs', function(body) {
+              assert.deepEqual(body, { keys: [ 'doc1' ] });
+              return true;
+            })
+            .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+
+        var cloudantClient = new Client({ plugins: [] });
+        cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
+        cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
+        cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
+        assert.equal(cloudantClient._plugins.length, 3);
+
+        var readable = new stream.PassThrough();
+        readable.end('{"keys":["doc1"]}'); // request payload
+
+        var options = {
+          url: SERVER + DBNAME + '/_all_docs',
+          auth: { username: ME, password: PASSWORD },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        };
+
+        readable.pipe(cloudantClient.request(options, function(err, resp, data) {
+          assert.equal(err, null);
+          assert.equal(resp.statusCode, 200);
+          assert.ok(data.indexOf('"key":"doc1","value":{"rev":"1') > -1);
+          mocks.done();
+          done();
+        }));
       });
 
       it('performs request and calls request and error hooks only', function(done) {
@@ -789,7 +901,7 @@ describe('CloudantClient', function() {
         if (!process.env.NOCK_OFF) {
           mocks
             .get(DBNAME).times(3)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
         }
 
         var cloudantClient = new Client({ maxAttempt: 3, plugins: [] });
@@ -808,7 +920,7 @@ describe('CloudantClient', function() {
         cloudantClient.request(options, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(resp.statusCode, 200);
-          assert.ok(data.indexOf('"doc_count":0') > -1);
+          assert.ok(data.indexOf('"doc_count":1') > -1);
 
           mocks.done();
           done();
@@ -853,7 +965,7 @@ describe('CloudantClient', function() {
       it('performs request and returns response', function(done) {
         var mocks = nock(SERVER)
             .get(DBNAME)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         assert.equal(cloudantClient._plugins.length, 0);
@@ -871,7 +983,7 @@ describe('CloudantClient', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            assert.ok(data.toString('utf8').indexOf('"doc_count":1') > -1);
           })
           .on('end', function() {
             mocks.done();
@@ -910,7 +1022,7 @@ describe('CloudantClient', function() {
       it('performs request and calls request and response hooks only', function(done) {
         var mocks = nock(SERVER)
             .get(DBNAME)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient.addPlugins(testPlugin.NoopPlugin);
@@ -929,7 +1041,7 @@ describe('CloudantClient', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            assert.ok(data.toString('utf8').indexOf('"doc_count":1') > -1);
           })
           .on('end', function() {
             assert.equal(cloudantClient._plugins[0].onRequestCallCount, 1);
@@ -976,7 +1088,7 @@ describe('CloudantClient', function() {
       it('performs request and calls request and response hooks only', function(done) {
         var mocks = nock(SERVER)
             .get(DBNAME)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
@@ -997,7 +1109,7 @@ describe('CloudantClient', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            assert.ok(data.toString('utf8').indexOf('"doc_count":1') > -1);
           })
           .on('end', function() {
             assert.equal(cloudantClient._plugins[0].onRequestCallCount, 1);
@@ -1289,7 +1401,7 @@ describe('CloudantClient', function() {
         if (!process.env.NOCK_OFF) {
           mocks
             .get(DBNAME).times(3)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
         }
 
         var cloudantClient = new Client({ maxAttempt: 3, plugins: [] });
@@ -1313,7 +1425,7 @@ describe('CloudantClient', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            assert.ok(data.toString('utf8').indexOf('"doc_count":1') > -1);
           })
           .on('end', function() {
             mocks.done();
@@ -1360,7 +1472,7 @@ describe('CloudantClient', function() {
       it('performs request and returns response with promise client', function(done) {
         var mocks = nock(SERVER)
             .get(DBNAME)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugin: 'promises' });
         assert.equal(cloudantClient._plugins.length, 0);
@@ -1372,7 +1484,7 @@ describe('CloudantClient', function() {
           method: 'GET'
         };
         var p = cloudantClient.request(options).then(function(data) {
-          assert.equal(data.doc_count, 0);
+          assert.equal(data.doc_count, 1);
           mocks.done();
           done();
         }).catch(function(err) {
@@ -1415,7 +1527,7 @@ describe('CloudantClient', function() {
       it('performs request and calls request and response hooks only', function(done) {
         var mocks = nock(SERVER)
             .get(DBNAME)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: ['promises', testPlugin.NoopPlugin] });
         assert.equal(cloudantClient._plugins.length, 1);
@@ -1427,7 +1539,7 @@ describe('CloudantClient', function() {
           method: 'GET'
         };
         var p = cloudantClient.request(options).then(function(data) {
-          assert.equal(data.doc_count, 0);
+          assert.equal(data.doc_count, 1);
 
           assert.equal(cloudantClient._plugins[0].onRequestCallCount, 1);
           assert.equal(cloudantClient._plugins[0].onErrorCallCount, 0);
@@ -1480,7 +1592,7 @@ describe('CloudantClient', function() {
       it('performs request and calls request and response hooks only', function(done) {
         var mocks = nock(SERVER)
             .get(DBNAME)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [
           'promises',
@@ -1497,7 +1609,7 @@ describe('CloudantClient', function() {
           method: 'GET'
         };
         var p = cloudantClient.request(options).then(function(data) {
-          assert.equal(data.doc_count, 0);
+          assert.equal(data.doc_count, 1);
 
           cloudantClient._plugins.forEach(function(plugin) {
             assert.equal(plugin.onRequestCallCount, 1);
@@ -1805,7 +1917,7 @@ describe('CloudantClient', function() {
         if (!process.env.NOCK_OFF) {
           mocks
             .get(DBNAME).times(3)
-            .reply(200, {doc_count: 0});
+            .reply(200, {doc_count: 1});
         }
 
         var cloudantClient = new Client({
@@ -1825,7 +1937,7 @@ describe('CloudantClient', function() {
           method: 'GET'
         };
         var p = cloudantClient.request(options).then(function(data) {
-          assert.equal(data.doc_count, 0);
+          assert.equal(data.doc_count, 1);
           mocks.done();
           done();
         }).catch(function(err) {

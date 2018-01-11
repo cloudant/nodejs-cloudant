@@ -1,4 +1,4 @@
-// Copyright © 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2018 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -231,7 +231,7 @@ describe('Client Utilities', function() {
       assert.equal(utils.wrapCallback(r), undefined);
     });
 
-    it('runs all plugin hooks and executes client callback', function(done) {
+    it('skips error hooks and executes client callback', function(done) {
       nock(SERVER)
           .get('/')
           .reply(200, {couchdb: 'Welcome'});
@@ -244,7 +244,9 @@ describe('Client Utilities', function() {
 
         assert.equal(plugin.onRequestCallCount, 0);
         assert.equal(plugin.onErrorCallCount, 0);
-        assert.equal(plugin.onResponseCallCount, 1);
+        assert.equal(plugin.onResponseCallCount, 0);
+
+        done();
       };
       var r = {
         abort: false,
@@ -260,16 +262,17 @@ describe('Client Utilities', function() {
         retry: false,
         sending: true
       };
-      r.response = request.get(SERVER, utils.wrapCallback(r, function(stop) {
-        assert.equal(stop.message, 'No retry requested');
-        done();
-      }));
+      r.response = request.get(SERVER, utils.wrapCallback(r));
     });
 
-    it('runs all plugin hooks and skips client callback on retry', function(done) {
+    it('runs plugin error hooks and skips client callback on retry', function(done) {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
       nock(SERVER)
           .get('/')
-          .reply(200, {couchdb: 'Welcome'});
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
       var plugin = new testPlugin.NoopPlugin(null, {});
       var cb = function(e, r, d) {
@@ -292,10 +295,14 @@ describe('Client Utilities', function() {
       }));
     });
 
-    it('runs all plugin hooks and executes client callback on abort', function(done) {
+    it('runs plugin error hooks and executes client callback on abort', function(done) {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
       nock(SERVER)
           .get('/')
-          .reply(200, {couchdb: 'Welcome'});
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
       var plugin = new testPlugin.NoopPlugin(null, {});
       var cb = function(e, r, d) {
@@ -304,8 +311,8 @@ describe('Client Utilities', function() {
         assert.equal(d, 'data');
 
         assert.equal(plugin.onRequestCallCount, 0);
-        assert.equal(plugin.onErrorCallCount, 0);
-        assert.equal(plugin.onResponseCallCount, 1);
+        assert.equal(plugin.onErrorCallCount, 1);
+        assert.equal(plugin.onResponseCallCount, 0);
       };
       var r = {
         clientCallback: cb,
