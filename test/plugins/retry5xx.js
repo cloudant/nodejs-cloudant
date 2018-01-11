@@ -1,4 +1,4 @@
-// Copyright © 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2018 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ const assert = require('assert');
 const Client = require('../../lib/client.js');
 const fs = require('fs');
 const nock = require('../nock.js');
+const stream = require('stream');
 const uuidv4 = require('uuid/v4'); // random
 
 const ME = process.env.cloudant_username || 'nodejs';
@@ -207,6 +208,51 @@ describe('Retry5xx Plugin', function() {
         mocks.done();
         done();
       });
+    });
+
+    it('successfully retries request with piped payload on 500 response and returns 200 response', function(done) {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
+      var mocks = nock(SERVER)
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          }).times(4)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          })
+          .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+
+      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+
+      var readable = new stream.Readable();
+      readable.push('{"keys":["doc1"]}'); // request payload
+      readable.push(null);
+
+      var req = {
+        url: SERVER + DBNAME + '/_all_docs',
+        auth: { username: ME, password: PASSWORD },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      };
+
+      var startTs = (new Date()).getTime();
+      readable.pipe(cloudantClient.request(req, function(err, resp, data) {
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 200);
+        assert.ok(data.indexOf('"key":"doc1","value":{"rev":"1') > -1);
+
+        // validate retry delay
+        var now = (new Date()).getTime();
+        assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
+
+        mocks.done();
+        done();
+      }));
     });
   });
 
@@ -422,6 +468,74 @@ describe('Retry5xx Plugin', function() {
           // validate retry delay
           var now = (new Date()).getTime();
           assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
+
+          mocks.done();
+          done();
+        });
+    });
+
+    it('successfully retries request with piped payload on 500 response and returns 200 response', function(done) {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
+      var mocks = nock(SERVER)
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          }).times(4)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          })
+          .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+
+      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var req = {
+        url: SERVER + DBNAME + '/_all_docs',
+        auth: { username: ME, password: PASSWORD },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      };
+
+      var dataCount = 0;
+      var responseCount = 0;
+
+      var dataFile = fs.createWriteStream('data.json');
+
+      var readable = new stream.Readable();
+      readable.push('{"keys":["doc1"]}'); // request payload
+      readable.push(null);
+
+      var startTs = (new Date()).getTime();
+      readable.pipe(cloudantClient.request(req))
+        .on('error', function(err) {
+          assert.fail(`Unexpected error: ${err}`);
+        })
+        .on('response', function(resp) {
+          responseCount++;
+          assert.equal(resp.statusCode, 200);
+        })
+        .on('data', function(data) {
+          dataCount++;
+          assert.ok(data.indexOf('"key":"doc1","value":{"rev":"1') > -1);
+        })
+        .on('end', function() {
+          assert.equal(responseCount, 1);
+          assert.equal(dataCount, 1);
+
+          // validate retry delay
+          var now = (new Date()).getTime();
+          assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
+        })
+        .pipe(dataFile)
+        .on('finish', function() {
+          // validate file contents
+          var obj = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+          assert.equal(obj.rows.length, 1);
+          assert.equal(obj.rows[0].key, 'doc1');
+          fs.unlinkSync('data.json');
 
           mocks.done();
           done();
@@ -659,6 +773,78 @@ describe('Retry5xx Plugin', function() {
           // validate retry delay
           var now = (new Date()).getTime();
           assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
+
+          mocks.done();
+          done();
+        });
+    });
+
+    it('successfully retries request with piped payload on 500 response and returns 200 response', function(done) {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
+      var mocks = nock(SERVER)
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          }).times(4)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          })
+          .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+
+      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var req = {
+        url: SERVER + DBNAME + '/_all_docs',
+        auth: { username: ME, password: PASSWORD },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      };
+
+      var dataCount = 0;
+      var responseCount = 0;
+
+      var dataFile = fs.createWriteStream('data.json');
+
+      var readable = new stream.Readable();
+      readable.push('{"keys":["doc1"]}'); // request payload
+      readable.push(null);
+
+      var startTs = (new Date()).getTime();
+      readable.pipe(cloudantClient.request(req, function(err, resp, data) {
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 200);
+        assert.ok(data.indexOf('"key":"doc1","value":{"rev":"1') > -1);
+      }))
+        .on('error', function(err) {
+          assert.fail(`Unexpected error: ${err}`);
+        })
+        .on('response', function(resp) {
+          responseCount++;
+          assert.equal(resp.statusCode, 200);
+        })
+        .on('data', function(data) {
+          dataCount++;
+          assert.ok(data.indexOf('"key":"doc1","value":{"rev":"1') > -1);
+        })
+        .on('end', function() {
+          assert.equal(responseCount, 1);
+          assert.equal(dataCount, 1);
+
+          // validate retry delay
+          var now = (new Date()).getTime();
+          assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
+        })
+        .pipe(dataFile)
+        .on('finish', function() {
+          // validate file contents
+          var obj = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+          assert.equal(obj.rows.length, 1);
+          assert.equal(obj.rows[0].key, 'doc1');
+          fs.unlinkSync('data.json');
 
           mocks.done();
           done();
