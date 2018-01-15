@@ -200,7 +200,10 @@ describe('cookieauth plugin', function() {
 
   it('should fail with incorrect authentication', function(done) {
     var mocks = nock(SERVER)
-        .post('/_session', {name: ME, password: 'wrongpassword'}).reply(401, {error: 'unauthorized', reason: 'Name or password is incorrect.'});
+        .post('/_session', {name: ME, password: 'wrongpassword'})
+        .reply(401, {error: 'unauthorized', reason: 'Name or password is incorrect.'})
+        .get('/' + dbName + '/mydoc')
+        .reply(401, {error: 'unauthorized', reason: 'Name or password is incorrect.'});
     var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: 'wrongpassword'});
     var db = cloudant.db.use(dbName);
     var p = db.get('mydoc', function(err, data) {
@@ -265,9 +268,13 @@ describe('cookieauth plugin', function() {
       this.skip();
     }
     var mocks = nock(SERVER)
-        .post('/_session').reply(403, { ok: false });
-    var cloudant = Cloudant({ plugin: 'cookieauth', account: ME, password: PASSWORD }, function(err, data) {
-      err.should.be.an.Object;
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(401, {error: 'unauthorized', reason: 'Name or password is incorrect.'})
+        .get('/')
+        .reply(200, {couchdb: 'Welcome', version: '1.0.2', cloudant_build: '2488'});
+    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: PASSWORD}, function(err, cloudant, data) {
+      cloudant.should.be.an.Object;
+      data.should.be.an.Object.have.a.property('couchdb');
       mocks.done();
       done();
     });
