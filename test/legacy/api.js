@@ -56,7 +56,6 @@ describe('Initialization', function() {
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2'});
 
     Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, body) {
-      console.log(body)
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
       body.should.be.an.Object;
@@ -73,7 +72,10 @@ describe('Initialization', function() {
     }
 
     var mocks = nock(SERVER)
-      .post('/_session').reply(500, {});
+      .post('/_session')
+      .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
+      .get('/')
+      .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
     Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, body) {
       er.should.be.an.Object;
