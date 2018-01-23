@@ -24,7 +24,7 @@ const BasePlugin = require('./base.js');
  */
 class CookiePlugin extends BasePlugin {
   constructor(client, cfg) {
-    super(client);
+    super(client, cfg);
 
     var self = this;
     self.baseUrl = null;
@@ -146,8 +146,8 @@ class CookiePlugin extends BasePlugin {
     var self = this;
 
     self.withLock({
-      stale: state.cfg.cookieLockStaleMsecs || 1500, // 1.5 secs
-      wait: state.cfg.cookieLockWaitMsecs || 1000 // 1 sec
+      stale: self._cfg.cookieLockStaleMsecs || 1500, // 1.5 secs
+      wait: self._cfg.cookieLockWaitMsecs || 1000 // 1 sec
     }, function(error, done) {
       if (error) {
         debug(`Failed to acquire lock: ${error}`); // refresh cookie without lock

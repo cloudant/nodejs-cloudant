@@ -23,9 +23,9 @@ class Retry429Plugin extends BasePlugin {
     if (response.statusCode === 429) {
       state.retry = true;
       if (state.attempt === 1) {
-        state.retryDelayMsecs = state.cfg.retryInitialDelayMsecs;
+        state.retryDelayMsecs = this._cfg.retryInitialDelayMsecs;
       } else {
-        state.retryDelayMsecs *= state.cfg.retryDelayMultiplier;
+        state.retryDelayMsecs *= this._cfg.retryDelayMultiplier;
       }
     }
     callback(state);

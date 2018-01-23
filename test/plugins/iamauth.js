@@ -126,7 +126,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ iamApiKey: IAM_API_KEY, plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -164,7 +164,7 @@ describe('IAMAuth Plugin', function() {
     var end1 = false;
     var end2 = false;
 
-    var cloudantClient = new Client({ iamApiKey: IAM_API_KEY, plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -199,38 +199,6 @@ describe('IAMAuth Plugin', function() {
     });
   });
 
-  it('performs request and returns 200 response when specifying credentials on request', function(done) {
-    // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
-    var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
-        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
-        'response_type': 'cloud_iam',
-        'apikey': IAM_API_KEY
-      })
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
-
-    var cloudantMocks = nock(SERVER)
-      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
-      .reply(200, {ok: true}, MOCK_SET_IAM_SESSION_HEADER)
-      .get(DBNAME)
-      .reply(200, {doc_count: 0});
-
-    var cloudantClient = new Client({ plugin: 'iamauth' });
-    var req = { url: SERVER + DBNAME, method: 'GET' };
-
-    cloudantClient.request(req, { iamApiKey: IAM_API_KEY }, function(err, resp, data) {
-      assert.equal(err, null);
-      if (!process.env.NOCK_OFF) {
-        assert.equal(resp.request.headers.cookie, MOCK_IAM_SESSION);
-      }
-      assert.equal(resp.statusCode, 200);
-      assert.ok(data.indexOf('"doc_count":0') > -1);
-      iamMocks.done();
-      cloudantMocks.done();
-      done();
-    });
-  });
-
   it('performs request and returns 500 response', function(done) {
     if (process.env.NOCK_OFF) {
       this.skip();
@@ -250,7 +218,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
-    var cloudantClient = new Client({ iamApiKey: IAM_API_KEY, plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -282,7 +250,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-    var cloudantClient = new Client({ iamApiKey: IAM_API_KEY, plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err.code, 'ECONNRESET');
@@ -318,7 +286,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ iamApiKey: IAM_API_KEY, plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -348,7 +316,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
 
-    var cloudantClient = new Client({ iamApiKey: IAM_API_KEY, plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -383,7 +351,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ iamApiKey: IAM_API_KEY, plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -415,7 +383,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
 
-    var cloudantClient = new Client({ iamApiKey: IAM_API_KEY, plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -425,59 +393,6 @@ describe('IAMAuth Plugin', function() {
       iamMocks.done();
       cloudantMocks.done();
       done();
-    });
-  });
-
-  it('retries session post with new credentials and returns 200 response', function(done) {
-    if (process.env.NOCK_OFF) {
-      this.skip();
-    }
-
-    const badApiKey = 'bAD%%Ap1@_KEy*123';
-
-    var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
-        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
-        'response_type': 'cloud_iam',
-        'apikey': badApiKey
-      })
-      .reply(400, {
-        errorCode: 'BXNIM0415E',
-        errorMessage: 'Provided API key could not be found'
-      })
-      .post('/oidc/token', {
-        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
-        'response_type': 'cloud_iam',
-        'apikey': IAM_API_KEY
-      })
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
-
-    var cloudantMocks = nock(SERVER)
-      .get(DBNAME)
-      .reply(401, {error: 'unauthorized', reason: 'Unauthorized'})
-      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
-      .reply(200, {ok: true}, MOCK_SET_IAM_SESSION_HEADER)
-      .get(DBNAME)
-      .reply(200, {doc_count: 0});
-
-    var cloudantClient = new Client({ iamApiKey: badApiKey, plugin: 'iamauth' });
-    var req = { url: SERVER + DBNAME, method: 'GET' };
-    cloudantClient.request(req, function(err, resp, data) {
-      assert.equal(err, null);
-      assert.equal(resp.request.headers.cookie, null);
-      assert.equal(resp.statusCode, 401);
-      assert.ok(data.indexOf('"error":"unauthorized"') > -1);
-
-      // specify a valid IAM API key on request
-      cloudantClient.request(req, { iamApiKey: IAM_API_KEY }, function(err, resp, data) {
-        assert.equal(err, null);
-        assert.equal(resp.request.headers.cookie, MOCK_IAM_SESSION);
-        assert.equal(resp.statusCode, 200);
-        assert.ok(data.indexOf('"doc_count":0') > -1);
-        iamMocks.done();
-        cloudantMocks.done();
-        done();
-      });
     });
   });
 
@@ -505,7 +420,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ iamApiKey: IAM_API_KEY, plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -538,7 +453,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
 
-    var cloudantClient = new Client({ iamApiKey: IAM_API_KEY, plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);

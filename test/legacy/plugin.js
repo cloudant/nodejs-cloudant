@@ -94,7 +94,7 @@ describe('retry-on-429 plugin', function() {
       mocks.persist().get('/' + dbName).reply(200, {});
     }
     var cloudant = Cloudant({plugin: 'retry', account: ME, password: PASSWORD});
-    cloudant.cc.addPlugins('retryerror'); // retry socket hang up errors
+    cloudant.cc._addPlugins('retryerror'); // retry socket hang up errors
     var db = cloudant.db.use(dbName);
     this.timeout(10000);
     db.info(function(err, data) {

@@ -22,9 +22,9 @@ class RetryErrorPlugin extends BasePlugin {
   onError(state, error, callback) {
     state.retry = true;
     if (state.attempt === 1) {
-      state.retryDelayMsecs = state.cfg.retryInitialDelayMsecs;
+      state.retryDelayMsecs = this._cfg.retryInitialDelayMsecs;
     } else {
-      state.retryDelayMsecs *= state.cfg.retryDelayMultiplier;
+      state.retryDelayMsecs *= this._cfg.retryDelayMultiplier;
     }
     callback(state);
   }

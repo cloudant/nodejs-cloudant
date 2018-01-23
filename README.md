@@ -230,107 +230,137 @@ The `ping()` function is the only exception to this rule. It does not return hea
 
 ### Request Plugins
 
-This library can be used with one (or more) of the following `request` plugins:
+The library is easily extendable via the use of plugins. They provide the ability to intercept a request:
+1. Before the request is submitted to the server.
+2. After the response headers are received.
+3. If the underlying HTTP client emits an `error` event.
+
+Plugins can be used to modify an outgoing request, edit an incoming response or even retry a request entirely.
+
+#### Plugin Configuration
+
+The following global configurations can be defined to affect the behavior of all plugins:
+-	`maxAttempt` (or `retryAttempts`) - The maximum number of times the request will be attempted _(default: 3)_.
+-	`retryInitialDelayMsecs` (or `retryTimeout`) - The initial retry delay in milliseconds _(default: 500)_.
+-	`retryDelayMultiplier` - The multiplication factor used for increasing the timeout after each subsequent attempt _(default: 2)_.
+
+Note that `retryInitialDelayMsecs` and `retryDelayMultiplier` can be overriden by plugin specific configuration. This is achieved by passing the plugin (and its associated configuration) as an object.
+
+For example:
+```js
+var cloudant = new Cloudant({ url: myurl, retryDelayMultiplier: 3, plugins: [ 'retryerror', { retry5xx: { retryDelayMultiplier: 4 } } ]);
+var mydb = cloudant.db.use('mydb');
+```
+
+`maxAttempt` can _not_ be overridden by plugin specific configuration.
+
+#### The Plugins
 
 1. `cookieauth`
 
    This plugin will automatically exchange your Cloudant credentials for a cookie. It will handle the authentication and ensure that the cookie is refreshed as required.
 
+   For example:
+   ```js
+   var cloudant = new Cloudant({ url: 'http://user:pass@localhost:5984', plugin: 'cookieauth' });
+   var mydb = cloudant.db.use('mydb');
+   mydb.get('mydoc', function(err, data) {
+     console.log(`Document contents: ${data.toString('utf8')}`);
+   });
+   ```
+
+   The plugin will transparently call `POST /_session` to exchange your credentials for a cookie before proceeding with the document fetch.
+
+   Note that all subsequent requests made using this client will also use cookie authentication. The library will automatically refresh the cookie on any `401` or `403` response.
+
+   If you don't specify a username and password during the client construction then cookie authentication is disabled.
+
 2. `iamauth`
 
    IBM Cloud Identity & Access Management enables you to securely authenticate users and control access to all cloud resources consistently in the IBM Bluemix Cloud Platform.
+
    This plugin will automatically exchange your IAM API key for a token. It will handle the authentication and ensure that the token is refreshed as required.
-   The production IAM token service at https://iam.bluemix.net/oidc/token is used by default. You can set `iamTokenUrl` in your client configuration to override this.
+
+   The production IAM token service at https://iam.bluemix.net/oidc/token is used by default. You can set `iamTokenUrl` in your plugin configuration to override this.
+
+   For example:
+   ```js
+   var cloudant = new Cloudant({ url: 'http://user:pass@localhost:5984', plugin: { iamauth: { iamApiKey: 'xxxxxxxxxx', iamTokenUrl: 'https://my.iam.token.url.com/token' } } });
+   var mydb = cloudant.db.use('mydb');
+   mydb.get('mydoc', function(err, data) {
+     console.log(`Document contents: ${data.toString('utf8')}`);
+   });
+   ```
+
    See [IBM Cloud Identity and Access Management](https://console.bluemix.net/docs/services/Cloudant/guides/iam.html#ibm-cloud-identity-and-access-management) for more information.
+
 3. `promises`
 
    If you'd prefer to write code in the _Promises_ style then the `promises` plugin turns each request into a _Promise_.
-4. `retry429` (or `retry`)
 
-   On occasion Cloudant's multi-tenant offering may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. The `retry429` plugin will automatically retry your request with an exponential back-off.
-5. `retry5xx`
+   For example:
+   ```js
+   var cloudant = new Cloudant({ url: myurl, plugin: 'promises' });
+   var mydb = cloudant.db.use('mydb');
+   ```
 
-   The plugin will automatically retry 5xx responses with an exponential back-off.
-6. `retryerror`
+   Then the library will return a _Promise_ for every asynchronous call:
+   ```js
+   mydb.list().then(function(data) {
+     console.log(data);
+   }).catch(function(err) {
+     console.log('something went wrong', err);
+   });
+   ```
 
-   The plugin will automatically retry request errors (e.g. connection reset errors) with an exponential back-off.
+4. The retry plugins
 
-_Want to use multiple plugins?_ Not a problem. Simply pass the plugins as an array instead:
+    - `retry429` (or `retry`)
 
+      On occasion Cloudant's multi-tenant offering may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. The `retry429` plugin will automatically retry your request with an exponential back-off.
+
+      _For example:_
+      ```js
+      var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, retryInitialDelayMsecs: 1000, plugin: 'retry429' });
+      var mydb = cloudant.db.use('mydb');
+      ```
+
+    - `retry5xx`
+
+      The plugin will automatically retry 5xx responses with an exponential back-off.
+
+      _For example:_
+      ```js
+      var cloudant = new Cloudant({ url: myurl, retryDelayMultiplier: 3, plugin: 'retry5xx' });
+      var mydb = cloudant.db.use('mydb');
+      ```
+
+    - `retryerror`
+
+      The plugin will automatically retry request errors (e.g. connection reset errors) with an exponential back-off.
+
+      _For example:_
+      ```js
+      var cloudant = new Cloudant({ url: myurl, maxAttempt: 10, plugin: 'retry' });
+      var mydb = cloudant.db.use('mydb');
+      ```
+
+#### Using Multiple Plugins
+
+You can pass the plugins as an array, for example:
 ```js
-var cloudant = new Cloudant({ url: myurl, plugins: [ 'cookieauth', 'promises', 'retry5xx' ] });
+var cloudant = new Cloudant({ url: myurl, plugins: [ 'cookieauth', 'promises', { retry5xx: { retryDelayMultiplier: 4 } } ] });
 var mydb = cloudant.db.use('mydb');
 mydb.get('mydoc', function(err, data) {
   console.log(`Document contents: ${data.toString('utf8')}`);
 });
 ```
+
+Note that `plugins` is an alias for `plugin`. Both will accept single or multiple plugin configurations. They are interchangeable.
 
 The plugins are _always_ executed in the order they are specified. Remember that all plugins are respected. If one requests a retry then it cannot be overruled by another. If two plugins request different delay times before the next retry attempt then the largest delay time is honoured.
 
 Be aware that if you don't specify any plugins then the `cookieauth` plugin will automatically be added. To disable all plugins you can pass an empty array as the plugin list, i.e. `Cloudant({ url: myurl, plugins: [] })`.
-
-#### The `cookieauth` plugin
-
-For example:
-
-```js
-var cloudant = new Cloudant({ url: 'http://user:pass@localhost:5984', plugin: 'cookieauth' });
-var mydb = cloudant.db.use('mydb');
-mydb.get('mydoc', function(err, data) {
-  console.log(`Document contents: ${data.toString('utf8')}`);
-});
-```
-
-The plugin will transparently call `POST /_session` to exchange your credentials for a cookie before proceeding with the document fetch.
-
-Note that all subsequent requests made using this client will also use cookie authentication. The library will automatically refresh the cookie on any `401` or `403` response.
-
-If you don't specify a username and password during the client construction then cookie authentication is disabled.
-
-#### The `promises` plugin
-
-For example:
-
-```js
-var cloudant = new Cloudant({ url: myurl, plugin: 'promises' });
-var mydb = cloudant.db.use('mydb');
-```
-
-Then the library will return a _Promise_ for every asynchronous call:
-
-```js
-mydb.list().then(function(data) {
-  console.log(data);
-}).catch(function(err) {
-  console.log('something went wrong', err);
-});
-```
-
-#### The retry plugins
-
-1. `retry429`
-2. `retry5xx`
-3. `retryerror`
-
-For example, when initialising the Cloudant library you can opt to use the `retry429` plugin:
-
-```js
-var cloudant = new Cloudant({ url: myurl, plugin: 'retry429' });
-var mydb = cloudant.db.use('mydb');
-```
-
-Then use the Cloudant library normally. You may also opt to configure the retry parameters:
-
-- `maxAttempt` (or `retryAttempts`) - the maximum number of times the request will be attempted _(default: 3)_.
-- `retryInitialDelayMsecs` (or `retryTimeout`) - the initial retry delay in milliseconds _(default: 500)_.
-- `retryDelayMultiplier` - the multiplication factor used for increasing the timeout after each subsequent attempt _(default: 2)_.
-
-For example:
-
-```js
-var cloudant = new Cloudant({ url: myurl, plugin: 'retry429', maxAttempt: 5, retryInitialDelayMsecs: 1000 });
-var mydb = cloudant.db.use('mydb');
-```
 
 ## API Reference
 

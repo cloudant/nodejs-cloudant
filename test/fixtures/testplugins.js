@@ -22,8 +22,8 @@ const SERVER = `https://${ME}.cloudant.com`;
 // NoopPlugin for testing
 
 class NoopPlugin extends BasePlugin {
-  constructor(client) {
-    super(client);
+  constructor(client, cfg) {
+    super(client, cfg);
     this.onRequestCallCount = 0;
     this.onErrorCallCount = 0;
     this.onResponseCallCount = 0;
@@ -62,8 +62,8 @@ NoopPlugin3.id = 'noop3';
 //   - onResponse: always retries (with retry delay)
 
 class AlwaysRetry extends BasePlugin {
-  constructor(client) {
-    super(client);
+  constructor(client, cfg) {
+    super(client, cfg);
     this.onRequestCallCount = 0;
     this.onErrorCallCount = 0;
     this.onResponseCallCount = 0;
@@ -73,9 +73,9 @@ class AlwaysRetry extends BasePlugin {
     this.onErrorCallCount++;
     state.retry = true;
     if (state.attempt === 1) {
-      state.retryDelayMsecs = state.cfg.retryInitialDelayMsecs;
+      state.retryDelayMsecs = this._cfg.retryInitialDelayMsecs;
     } else {
-      state.retryDelayMsecs *= state.cfg.retryDelayMultiplier;
+      state.retryDelayMsecs *= this._cfg.retryDelayMultiplier;
     }
     callback(state);
   }
@@ -84,9 +84,9 @@ class AlwaysRetry extends BasePlugin {
     this.onResponseCallCount++;
     state.retry = true;
     if (state.attempt === 1) {
-      state.retryDelayMsecs = state.cfg.retryInitialDelayMsecs;
+      state.retryDelayMsecs = this._cfg.retryInitialDelayMsecs;
     } else {
-      state.retryDelayMsecs *= state.cfg.retryDelayMultiplier;
+      state.retryDelayMsecs *= this._cfg.retryDelayMultiplier;
     }
     callback(state);
   }
@@ -101,8 +101,8 @@ AlwaysRetry.id = 'alwaysretry';
 //   - onResponse: always retries with retry delay
 
 class ComplexPlugin1 extends BasePlugin {
-  constructor(client) {
-    super(client);
+  constructor(client, cfg) {
+    super(client, cfg);
     this.onRequestCallCount = 0;
     this.onErrorCallCount = 0;
     this.onResponseCallCount = 0;
@@ -142,8 +142,8 @@ ComplexPlugin1.id = 'complexplugin1';
 //   - onResponse: retries 401 responses once
 
 class ComplexPlugin2 extends BasePlugin {
-  constructor(client) {
-    super(client);
+  constructor(client, cfg) {
+    super(client, cfg);
     this.onRequestCallCount = 0;
     this.onErrorCallCount = 0;
     this.onResponseCallCount = 0;
@@ -166,7 +166,7 @@ class ComplexPlugin2 extends BasePlugin {
 
   onResponse(state, response, callback) {
     this.onResponseCallCount++;
-    if (state.attempt < state.cfg.maxAttempt) {
+    if (state.attempt < state.maxAttempt) {
       if (state.attempt === 1 && response.statusCode === 401) {
         state.retry = true;
       }
@@ -181,8 +181,8 @@ ComplexPlugin2.id = 'complexplugin2';
 //   - onResponse: retries 5xx responses once, submitting a DELETE /bar on failure
 
 class ComplexPlugin3 extends BasePlugin {
-  constructor(client) {
-    super(client);
+  constructor(client, cfg) {
+    super(client, cfg);
     this.onResponseCallCount = 0;
   }
 

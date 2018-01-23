@@ -50,7 +50,7 @@ describe('Client Utilities', function() {
       r.state = {
         abortWithResponse: undefined,
         attempt: 1,
-        cfg: { maxAttempt: 3, retryDelay: 0 },
+        maxAttempt: 3,
         retry: true,
         sending: true
       };
@@ -137,7 +137,7 @@ describe('Client Utilities', function() {
       r.state = {
         abortWithResponse: undefined,
         attempt: 1,
-        cfg: { maxAttempt: 3, retryDelay: 0 },
+        maxAttempt: 3,
         retry: true,
         sending: false
       };
@@ -286,7 +286,7 @@ describe('Client Utilities', function() {
       r.state = {
         abortWithResponse: undefined,
         attempt: 1,
-        cfg: { maxAttempt: 3, retryDelay: 0 },
+        maxAttempt: 3,
         retry: true,
         sending: true
       };

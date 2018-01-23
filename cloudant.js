@@ -213,7 +213,7 @@ function Cloudant(options, callback) {
   nano.delete_virtual_host = delete_virtual_host; // eslint-disable-line camelcase
 
   if (callback) {
-    nano.cc.addPlugins('cookieauth');
+    nano.cc._addPlugins('cookieauth');
     nano.ping(function(error, pong) {
       if (error) {
         callback(error);
