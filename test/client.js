@@ -85,22 +85,6 @@ describe('CloudantClient', function() {
     });
   });
 
-  describe('supports legacy configuration', function() {
-    it('supports legacy option retryAttempts', function() {
-      var cfg = { retryAttempts: 123 };
-      var cloudantClient = new Client(cfg);
-      cloudantClient._supportLegacyKeys(cfg);
-      assert.equal(cfg.maxAttempt, 123);
-    });
-
-    it('supports legacy option retryTimeout', function() {
-      var cfg = { retryTimeout: 321 };
-      var cloudantClient = new Client(cfg);
-      cloudantClient._supportLegacyKeys(cfg);
-      assert.equal(cfg.retryInitialDelayMsecs, 321);
-    });
-  });
-
   describe('plugin support', function() {
     it('adds cookie authentication plugin if no other plugins are specified', function() {
       var cloudantClient = new Client();

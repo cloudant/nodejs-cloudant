@@ -240,8 +240,8 @@ Plugins can be used to modify an outgoing request, edit an incoming response or 
 #### Plugin Configuration
 
 The following global configurations can be defined to affect the behavior of all plugins:
--	`maxAttempt` (or `retryAttempts`) - The maximum number of times the request will be attempted _(default: 3)_.
--	`retryInitialDelayMsecs` (or `retryTimeout`) - The initial retry delay in milliseconds _(default: 500)_.
+-	`maxAttempt` - The maximum number of times the request will be attempted _(default: 3)_.
+-	`retryInitialDelayMsecs` - The initial retry delay in milliseconds _(default: 500)_.
 -	`retryDelayMultiplier` - The multiplication factor used for increasing the timeout after each subsequent attempt _(default: 2)_.
 
 Note that `retryInitialDelayMsecs` and `retryDelayMultiplier` can be overriden by plugin specific configuration. This is achieved by passing the plugin (and its associated configuration) as an object.

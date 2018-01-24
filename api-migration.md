@@ -15,7 +15,7 @@ The library continues to support legacy plugins. They can be used in conjunction
 with new plugins. Your plugins list may contain any number of new plugins but
 only ever one legacy plugin.
 
-The `cloudant.request` object is a pass through stream and cannot be used inside
+The `cloudant.request` object is a duplex stream and cannot be used inside
 an event hook function. For example:
 
 ```js
@@ -42,3 +42,9 @@ Note that if you wish to use cookie authentication alongside other plugins you
 will need to include `cookieauth` in your plugins list. If you wish to disable
 all plugins then pass an empty array to the `plugins` parameter during
 construction.
+
+Finally, the following plugin configuration flags have been renamed:
+- `retryAttempts` -> `maxAttempt`
+- `retryTimeout` -> `retryInitialDelayMsecs`
+If you don't change these in your client code the default settings will be
+applied.
