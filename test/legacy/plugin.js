@@ -323,7 +323,7 @@ describe('custom plugin', function() {
       () => {
         Cloudant({ plugin: [ doNothingPlugin, defaultPlugin ], account: ME, password: PASSWORD });
       },
-      /Using multiple legacy plugins in not supported/,
+      /Using multiple legacy plugins is not permitted/,
       'did not throw with expected message'
     );
   });

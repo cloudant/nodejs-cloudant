@@ -161,6 +161,67 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._plugins.length, 2);
       assert.ok(cloudantClient._cfg.usePromises);
     });
+
+    it('allows plugin configuration to be specified', function() {
+      var cloudantClient = new Client({ plugins: [ { retry: { retryInitialDelayMsecs: 12345 } } ] });
+      assert.equal(cloudantClient._plugins.length, 1);
+      assert.equal(cloudantClient._plugins[0]._cfg.retryInitialDelayMsecs, 12345);
+    });
+
+    it('errors when passed an invalid plugin configuration object - too many keys', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ plugins: [ { cookieauth: {}, retry: { retryInitialDelayMsecs: 12345 } } ] });
+        },
+        /Invalid plugin configuration/,
+        'did not throw with expected message'
+      );
+    });
+
+    it('errors when passed an invalid plugin configuration object - invalid boolean key type', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ plugins: [ { true: { retryInitialDelayMsecs: 12345 } } ] });
+        },
+        /Failed to load plugin/,
+        'did not throw with expected message'
+      );
+    });
+
+    it('errors when passed an invalid plugin configuration object - invalid number key type', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ plugins: [ { 1: { retryInitialDelayMsecs: 12345 } } ] });
+        },
+        /Failed to load plugin/,
+        'did not throw with expected message'
+      );
+    });
+
+    it('errors when passed an invalid plugin configuration object - invalid array value type', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ plugins: [ { retry: [ { retryInitialDelayMsecs: 12345 } ] } ] });
+        },
+        /Invalid plugin configuration/,
+        'did not throw with expected message'
+      );
+    });
+
+    it('errors when passed an invalid plugin configuration object - invalid number value type', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ plugins: [ { retry: 12345 } ] });
+        },
+        /Invalid plugin configuration/,
+        'did not throw with expected message'
+      );
+    });
   });
 
   describe('aborts request', function() {

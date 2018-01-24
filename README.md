@@ -262,7 +262,7 @@ var mydb = cloudant.db.use('mydb');
 
    For example:
    ```js
-   var cloudant = new Cloudant({ url: 'http://user:pass@localhost:5984', plugin: 'cookieauth' });
+   var cloudant = new Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugin: 'cookieauth' });
    var mydb = cloudant.db.use('mydb');
    mydb.get('mydoc', function(err, data) {
      console.log(`Document contents: ${data.toString('utf8')}`);
@@ -285,7 +285,7 @@ var mydb = cloudant.db.use('mydb');
 
    For example:
    ```js
-   var cloudant = new Cloudant({ url: 'http://user:pass@localhost:5984', plugin: { iamauth: { iamApiKey: 'xxxxxxxxxx', iamTokenUrl: 'https://my.iam.token.url.com/token' } } });
+   var cloudant = new Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugin: { iamauth: { iamApiKey: 'xxxxxxxxxx' } } });
    var mydb = cloudant.db.use('mydb');
    mydb.get('mydoc', function(err, data) {
      console.log(`Document contents: ${data.toString('utf8')}`);
