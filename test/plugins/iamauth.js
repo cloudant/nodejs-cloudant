@@ -126,7 +126,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -164,7 +164,7 @@ describe('IAMAuth Plugin', function() {
     var end1 = false;
     var end2 = false;
 
-    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -218,7 +218,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
-    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -250,7 +250,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err.code, 'ECONNRESET');
@@ -286,7 +286,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -316,7 +316,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
 
-    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -351,7 +351,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -383,7 +383,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
 
-    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -420,7 +420,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -453,7 +453,7 @@ describe('IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
 
-    var cloudantClient = new Client({ plugin: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -467,7 +467,7 @@ describe('IAMAuth Plugin', function() {
   });
 
   it('throws error for unspecified IAM API key', function() {
-    var cloudantClient = new Client({ plugin: 'iamauth' });
+    var cloudantClient = new Client({ plugins: 'iamauth' });
     assert.throws(
       () => {
         cloudantClient.request({ url: SERVER + DBNAME });

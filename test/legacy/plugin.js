@@ -47,7 +47,7 @@ var onBefore = function(done) {
       .put('/' + dbName).reply(200, { 'ok': true })
       .put('/' + dbName + '/mydoc').reply(200, { id: 'mydoc', rev: '1-1' });
 
-  cc = Cloudant({account: ME, password: PASSWORD, plugin: 'retryerror'});
+  cc = Cloudant({account: ME, password: PASSWORD, plugins: 'retryerror'});
   cc.db.create(dbName, function(er, d) {
     should(er).equal(null);
     d.should.be.an.Object;
@@ -93,7 +93,7 @@ describe('retry-on-429 plugin', function() {
     if (typeof(process.env.NOCK_OFF) === 'undefined') {
       mocks.persist().get('/' + dbName).reply(200, {});
     }
-    var cloudant = Cloudant({plugin: 'retry', account: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: 'retry', account: ME, password: PASSWORD});
     cloudant.cc._addPlugins('retryerror'); // retry socket hang up errors
     var db = cloudant.db.use(dbName);
     this.timeout(10000);
@@ -106,7 +106,7 @@ describe('retry-on-429 plugin', function() {
 
   it('allow no callback', function(done) {
     var mocks = nock(SERVER).get('/' + dbName).reply(200, {});
-    var cloudant = Cloudant({plugin: 'retry', account: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: 'retry', account: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
     this.timeout(10000);
     db.info();
@@ -116,7 +116,7 @@ describe('retry-on-429 plugin', function() {
   it('should return a stream', function(done) {
     var mocks = nock(SERVER)
         .get('/' + dbName).reply(200, { ok: true });
-    var cloudant = Cloudant({plugin: 'retry', account: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: 'retry', account: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
     var p = db.info(function() {
       done();
@@ -132,7 +132,7 @@ describe('promise plugin', function() {
   it('should return a promise', function(done) {
     var mocks = nock(SERVER)
         .get('/' + dbName).reply(200, { ok: true });
-    var cloudant = Cloudant({plugin: 'promises', account: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: 'promises', account: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
     var p = db.info().then(function(data) {
       data.should.be.an.Object;
@@ -144,7 +144,7 @@ describe('promise plugin', function() {
   it('should return an error status code', function(done) {
     var mocks = nock(SERVER)
         .get('/somedbthatdoesntexist').reply(404, { ok: false });
-    var cloudant = Cloudant({plugin: 'promises', account: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: 'promises', account: ME, password: PASSWORD});
     var db = cloudant.db.use('somedbthatdoesntexist');
     var p = db.info().then(function(data) {
       assert(false);
@@ -167,7 +167,7 @@ describe('cookieauth plugin', function() {
     var mocks = nock(SERVER)
         .post('/_session').reply(200, { ok: true })
         .get('/' + dbName).reply(200, { ok: true });
-    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: 'cookieauth', account: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
     var p = db.info(function(err, data) {
       assert.equal(err, null);
@@ -183,7 +183,7 @@ describe('cookieauth plugin', function() {
     var mocks = nock(SERVER)
         .post('/_session', {name: ME, password: PASSWORD}).reply(200, { ok: true, info: {}, userCtx: { name: ME, roles: ['_admin'] } })
         .get('/' + dbName + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true });
-    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: 'cookieauth', account: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
     var p = db.get('mydoc', function(err, data) {
       assert.equal(err, null);
@@ -204,7 +204,7 @@ describe('cookieauth plugin', function() {
         .reply(401, {error: 'unauthorized', reason: 'Name or password is incorrect.'})
         .get('/' + dbName + '/mydoc')
         .reply(401, {error: 'unauthorized', reason: 'Name or password is incorrect.'});
-    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: 'wrongpassword'});
+    var cloudant = Cloudant({plugins: 'cookieauth', account: ME, password: 'wrongpassword'});
     var db = cloudant.db.use(dbName);
     var p = db.get('mydoc', function(err, data) {
       assert.equal(data, null);
@@ -223,7 +223,7 @@ describe('cookieauth plugin', function() {
         .post('/_session', {name: ME, password: PASSWORD}).reply(200, { ok: true, info: {}, userCtx: { name: ME, roles: ['_admin'] } }, { 'Set-Cookie': 'AuthSession=xyz; Version=1; Path=/; HttpOnly' })
         .get('/' + dbName + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true })
         .get('/' + dbName + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true });
-    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: 'cookieauth', account: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
     var p = db.get('mydoc', function(err, data) {
       assert.equal(err, null);
@@ -249,7 +249,7 @@ describe('cookieauth plugin', function() {
   it('should not authenticate without credentials', function(done) {
     var mocks = nock(SERVER)
         .get('/' + dbName + '/mydoc').reply(401, { error: 'unauthorized', reason: '_reader access is required for this request' });
-    var cloudant = Cloudant({plugin: 'cookieauth', url: SERVER});
+    var cloudant = Cloudant({plugins: 'cookieauth', url: SERVER});
     var db = cloudant.db.use(dbName);
     var p = db.get('mydoc', function(err, data) {
       assert.equal(data, null);
@@ -272,7 +272,7 @@ describe('cookieauth plugin', function() {
         .reply(401, {error: 'unauthorized', reason: 'Name or password is incorrect.'})
         .get('/')
         .reply(200, {couchdb: 'Welcome', version: '1.0.2', cloudant_build: '2488'});
-    var cloudant = Cloudant({plugin: 'cookieauth', account: ME, password: PASSWORD}, function(err, cloudant, data) {
+    var cloudant = Cloudant({plugins: 'cookieauth', account: ME, password: PASSWORD}, function(err, cloudant, data) {
       cloudant.should.be.an.Object;
       data.should.be.an.Object.have.a.property('couchdb');
       mocks.done();
@@ -287,7 +287,7 @@ describe('cookieauth plugin', function() {
     var mocks = nock(SERVER)
       .get('/')
       .reply(200, { couchdb: 'Welcome', version: '1.0.2', cloudant_build: '2488' });
-    var cloudant = Cloudant({plugin: 'cookieauth', url: SERVER}, function(err, cloudant, data) {
+    var cloudant = Cloudant({plugins: 'cookieauth', url: SERVER}, function(err, cloudant, data) {
       cloudant.should.be.an.Object;
       data.should.be.an.Object.have.a.property('couchdb');
       mocks.done();
@@ -309,7 +309,7 @@ describe('custom plugin', function() {
   };
 
   it('should allow custom plugins', function(done) {
-    var cloudant = Cloudant({ plugin: doNothingPlugin, account: ME, password: PASSWORD });
+    var cloudant = Cloudant({ plugins: doNothingPlugin, account: ME, password: PASSWORD });
     var db = cloudant.db.use(dbName);
     db.info(function(err, data) {
       assert.equal(err, null);
@@ -321,7 +321,7 @@ describe('custom plugin', function() {
   it('errors if multiple custom plugins are specified', function() {
     assert.throws(
       () => {
-        Cloudant({ plugin: [ doNothingPlugin, defaultPlugin ], account: ME, password: PASSWORD });
+        Cloudant({ plugins: [ doNothingPlugin, defaultPlugin ], account: ME, password: PASSWORD });
       },
       /Using multiple legacy plugins is not permitted/,
       'did not throw with expected message'
@@ -335,7 +335,7 @@ describe('custom plugin', function() {
       .get('/')
       .reply(200, { couchdb: 'Welcome' });
 
-    Cloudant({ plugin: defaultPlugin, account: ME, password: PASSWORD }, function(err, nano, pong) {
+    Cloudant({ plugins: defaultPlugin, account: ME, password: PASSWORD }, function(err, nano, pong) {
       assert.equal(err, null);
       assert.notEqual(nano, null);
       assert.equal(pong.couchdb, 'Welcome');
@@ -353,7 +353,7 @@ describe('custom plugin', function() {
         .get('/')
         .reply(401, { error: 'unauthorized', reason: 'Name or password is incorrect.' });
 
-    Cloudant({ plugin: defaultPlugin, account: ME, password: badPass }, function(err, nano) {
+    Cloudant({ plugins: defaultPlugin, account: ME, password: badPass }, function(err, nano) {
       assert.equal(err.error, 'unauthorized');
       assert.equal(nano, null);
       mocks.done();
@@ -366,7 +366,7 @@ describe('custom plugin', function() {
         .get('/')
         .reply(200, { couchdb: 'Welcome' });
 
-    Cloudant({ plugin: defaultPlugin, url: SERVER }, function(err, nano, pong) {
+    Cloudant({ plugins: defaultPlugin, url: SERVER }, function(err, nano, pong) {
       assert.equal(err, null);
       assert.notEqual(nano, null);
       assert.equal(pong.couchdb, 'Welcome');

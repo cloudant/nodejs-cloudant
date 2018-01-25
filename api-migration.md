@@ -11,6 +11,9 @@ This change introduces multiple plugin support by using a request interceptor
 pattern. All existing plugins included with this library have been rewritten
 to support the new implementation.
 
+Plugins must be passed via the `plugins` parameter in the Cloudant client
+constructor.
+
 The library continues to support legacy plugins. They can be used in conjunction
 with new plugins. Your plugins list may contain any number of new plugins but
 only ever one legacy plugin.

@@ -86,7 +86,7 @@ describe('CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -116,7 +116,7 @@ describe('CookieAuth Plugin', function() {
       var end1 = false;
       var end2 = false;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -162,7 +162,7 @@ describe('CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -185,7 +185,7 @@ describe('CookieAuth Plugin', function() {
           .get(DBNAME)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err.code, 'ECONNRESET');
@@ -208,7 +208,7 @@ describe('CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -236,7 +236,7 @@ describe('CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -262,7 +262,7 @@ describe('CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -291,7 +291,7 @@ describe('CookieAuth Plugin', function() {
       var cloudantClient = new Client({
         username: ME,
         password: BAD_PASSWORD,
-        plugin: 'cookieauth'
+        plugins: 'cookieauth'
       });
 
       var req1 = { url: SERVER_WITH_BAD_CREDS + DBNAME, method: 'GET' };
@@ -327,7 +327,7 @@ describe('CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -355,7 +355,7 @@ describe('CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -381,7 +381,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req)
         .on('error', function(err) {
@@ -425,7 +425,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req)
         .on('error', function(err) {
@@ -494,7 +494,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req)
         .on('error', function(err) {
@@ -528,7 +528,7 @@ describe('CookieAuth Plugin', function() {
           .get(DBNAME)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req)
         .on('error', function(err) {
@@ -561,7 +561,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req)
         .on('error', function(err) {
@@ -603,7 +603,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req)
         .on('error', function(err) {
@@ -643,7 +643,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req)
         .on('error', function(err) {
@@ -683,7 +683,7 @@ describe('CookieAuth Plugin', function() {
       var cloudantClient = new Client({
         username: ME,
         password: BAD_PASSWORD,
-        plugin: 'cookieauth'
+        plugins: 'cookieauth'
       });
 
       var dataCount = 0;
@@ -746,7 +746,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req)
         .on('error', function(err) {
@@ -790,7 +790,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req)
         .on('error', function(err) {
@@ -829,7 +829,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -877,7 +877,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -916,7 +916,7 @@ describe('CookieAuth Plugin', function() {
           .get(DBNAME)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err.code, 'ECONNRESET');
@@ -952,7 +952,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -1002,7 +1002,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -1050,7 +1050,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -1094,7 +1094,7 @@ describe('CookieAuth Plugin', function() {
       var cloudantClient = new Client({
         username: ME,
         password: BAD_PASSWORD,
-        plugin: 'cookieauth'
+        plugins: 'cookieauth'
       });
 
       var dataCount = 0;
@@ -1167,7 +1167,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -1219,7 +1219,7 @@ describe('CookieAuth Plugin', function() {
       var dataCount = 0;
       var responseCount = 0;
 
-      var cloudantClient = new Client({ plugin: 'cookieauth' });
+      var cloudantClient = new Client({ plugins: 'cookieauth' });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);

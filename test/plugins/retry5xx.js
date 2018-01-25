@@ -75,7 +75,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retry5xx' });
+      var cloudantClient = new Client({ plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -124,7 +124,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
 
       var req = {
         url: SERVER + DBNAME,
@@ -158,7 +158,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -188,7 +188,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME).times(5)
           .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -227,7 +227,7 @@ describe('Retry5xx Plugin', function() {
           })
           .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
 
       var readable = new stream.Readable();
       readable.push('{"keys":["doc1"]}'); // request payload
@@ -263,7 +263,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retry5xx' });
+      var cloudantClient = new Client({ plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -345,7 +345,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -401,7 +401,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -438,7 +438,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME).times(5)
           .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -491,7 +491,7 @@ describe('Retry5xx Plugin', function() {
           })
           .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME + '/_all_docs',
         auth: { username: ME, password: PASSWORD },
@@ -550,7 +550,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retry5xx' });
+      var cloudantClient = new Client({ plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -639,7 +639,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -699,7 +699,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -739,7 +739,7 @@ describe('Retry5xx Plugin', function() {
           .get(DBNAME).times(5)
           .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -796,7 +796,7 @@ describe('Retry5xx Plugin', function() {
           })
           .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry5xx' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry5xx' });
       var req = {
         url: SERVER + DBNAME + '/_all_docs',
         auth: { username: ME, password: PASSWORD },

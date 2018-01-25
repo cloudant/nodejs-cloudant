@@ -36,7 +36,7 @@ describe('CloudantClient', function() {
         .post(DBNAME) // create document
         .reply(201, {ok: true, id: DOCID, rev: '1-xxxxxxxx'});
 
-    var cloudantClient = new Client({ plugin: 'retryerror' });
+    var cloudantClient = new Client({ plugins: 'retryerror' });
 
     var options = {
       url: SERVER + DBNAME,
@@ -70,7 +70,7 @@ describe('CloudantClient', function() {
         .delete(DBNAME)
         .reply(200, {ok: true});
 
-    var cloudantClient = new Client({ plugin: 'retryerror' });
+    var cloudantClient = new Client({ plugins: 'retryerror' });
 
     var options = {
       url: SERVER + DBNAME,
@@ -122,30 +122,10 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._plugins.length, 1);
     });
 
-    it('allows a single plugin to be added via "plugin" options', function() {
-      var cloudantClient = new Client({ plugin: ['cookieauth'] });
-      assert.equal(cloudantClient._plugins.length, 1);
-      assert.equal(cloudantClient._cfg.usePromises, false);
-    });
-
     it('allows a single plugin to be added via "plugins" options', function() {
       var cloudantClient = new Client({ plugins: ['cookieauth'] });
       assert.equal(cloudantClient._plugins.length, 1);
       assert.equal(cloudantClient._cfg.usePromises, false);
-    });
-
-    it('allows an array of plugins to be added via "plugin" options', function() {
-      var cloudantClient = new Client({
-        plugin: [
-          'promises', // sets cloudantClient._cfg.usePromises -> true
-          'retry', // plugin 1
-          'cookieauth', // plugin 2
-          'default', // ignored
-          'base' // ignored
-        ]
-      });
-      assert.equal(cloudantClient._plugins.length, 2);
-      assert.ok(cloudantClient._cfg.usePromises);
     });
 
     it('allows an array of plugins to be added via "plugins" options', function() {
@@ -237,7 +217,7 @@ describe('CloudantClient', function() {
 
       var cloudantClient = new Client({
         maxAttempt: 5,
-        plugin: testPlugin.AlwaysRetry
+        plugins: testPlugin.AlwaysRetry
       });
       assert.equal(cloudantClient._plugins.length, 1);
 
@@ -1350,7 +1330,7 @@ describe('CloudantClient', function() {
             .get(DBNAME)
             .reply(200, {doc_count: 1});
 
-        var cloudantClient = new Client({ plugin: 'promises' });
+        var cloudantClient = new Client({ plugins: 'promises' });
         assert.equal(cloudantClient._plugins.length, 0);
         assert.ok(cloudantClient._cfg.usePromises);
 
@@ -1378,7 +1358,7 @@ describe('CloudantClient', function() {
             .get(DBNAME)
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-        var cloudantClient = new Client({ plugin: 'promises' });
+        var cloudantClient = new Client({ plugins: 'promises' });
         assert.equal(cloudantClient._plugins.length, 0);
         assert.ok(cloudantClient._cfg.usePromises);
 

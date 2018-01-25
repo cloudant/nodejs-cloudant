@@ -262,7 +262,7 @@ var mydb = cloudant.db.use('mydb');
 
    For example:
    ```js
-   var cloudant = new Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugin: 'cookieauth' });
+   var cloudant = new Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugins: 'cookieauth' });
    var mydb = cloudant.db.use('mydb');
    mydb.get('mydoc', function(err, data) {
      console.log(`Document contents: ${data.toString('utf8')}`);
@@ -285,7 +285,7 @@ var mydb = cloudant.db.use('mydb');
 
    For example:
    ```js
-   var cloudant = new Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugin: { iamauth: { iamApiKey: 'xxxxxxxxxx' } } });
+   var cloudant = new Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx' } } });
    var mydb = cloudant.db.use('mydb');
    mydb.get('mydoc', function(err, data) {
      console.log(`Document contents: ${data.toString('utf8')}`);
@@ -300,7 +300,7 @@ var mydb = cloudant.db.use('mydb');
 
    For example:
    ```js
-   var cloudant = new Cloudant({ url: myurl, plugin: 'promises' });
+   var cloudant = new Cloudant({ url: myurl, plugins: 'promises' });
    var mydb = cloudant.db.use('mydb');
    ```
 
@@ -321,7 +321,7 @@ var mydb = cloudant.db.use('mydb');
 
       _For example:_
       ```js
-      var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, retryInitialDelayMsecs: 1000, plugin: 'retry429' });
+      var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, retryInitialDelayMsecs: 1000, plugins: 'retry429' });
       var mydb = cloudant.db.use('mydb');
       ```
 
@@ -331,7 +331,7 @@ var mydb = cloudant.db.use('mydb');
 
       _For example:_
       ```js
-      var cloudant = new Cloudant({ url: myurl, retryDelayMultiplier: 3, plugin: 'retry5xx' });
+      var cloudant = new Cloudant({ url: myurl, retryDelayMultiplier: 3, plugins: 'retry5xx' });
       var mydb = cloudant.db.use('mydb');
       ```
 
@@ -341,7 +341,7 @@ var mydb = cloudant.db.use('mydb');
 
       _For example:_
       ```js
-      var cloudant = new Cloudant({ url: myurl, maxAttempt: 10, plugin: 'retry' });
+      var cloudant = new Cloudant({ url: myurl, maxAttempt: 10, plugins: 'retry' });
       var mydb = cloudant.db.use('mydb');
       ```
 
@@ -355,8 +355,6 @@ mydb.get('mydoc', function(err, data) {
   console.log(`Document contents: ${data.toString('utf8')}`);
 });
 ```
-
-Note that `plugins` is an alias for `plugin`. Both will accept single or multiple plugin configurations. They are interchangeable.
 
 The plugins are _always_ executed in the order they are specified. Remember that all plugins are respected. If one requests a retry then it cannot be overruled by another. If two plugins request different delay times before the next retry attempt then the largest delay time is honoured.
 

@@ -74,7 +74,7 @@ describe('RetryError Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retryerror' });
+      var cloudantClient = new Client({ plugins: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -100,7 +100,7 @@ describe('RetryError Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retryerror' });
 
       var req = {
         url: SERVER + DBNAME,
@@ -132,7 +132,7 @@ describe('RetryError Plugin', function() {
           .get(DBNAME).times(5)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -161,7 +161,7 @@ describe('RetryError Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retryerror' });
+      var cloudantClient = new Client({ plugins: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -212,7 +212,7 @@ describe('RetryError Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -266,7 +266,7 @@ describe('RetryError Plugin', function() {
           .get(DBNAME).times(5)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -302,7 +302,7 @@ describe('RetryError Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retryerror' });
+      var cloudantClient = new Client({ plugins: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -357,7 +357,7 @@ describe('RetryError Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -415,7 +415,7 @@ describe('RetryError Plugin', function() {
           .get(DBNAME).times(5)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retryerror' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retryerror' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },

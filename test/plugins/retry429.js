@@ -74,7 +74,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retry' });
+      var cloudantClient = new Client({ plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -123,7 +123,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry' });
 
       var req = {
         url: SERVER + DBNAME,
@@ -157,7 +157,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -187,7 +187,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME).times(5)
           .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -217,7 +217,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retry' });
+      var cloudantClient = new Client({ plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -299,7 +299,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -355,7 +355,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -392,7 +392,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME).times(5)
           .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -436,7 +436,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugin: 'retry' });
+      var cloudantClient = new Client({ plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -525,7 +525,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -585,7 +585,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
@@ -625,7 +625,7 @@ describe('Retry429 Plugin', function() {
           .get(DBNAME).times(5)
           .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'});
 
-      var cloudantClient = new Client({ maxAttempt: 5, plugin: 'retry' });
+      var cloudantClient = new Client({ maxAttempt: 5, plugins: 'retry' });
       var req = {
         url: SERVER + DBNAME,
         auth: { username: ME, password: PASSWORD },
