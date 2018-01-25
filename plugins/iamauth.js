@@ -25,7 +25,7 @@ const BasePlugin = require('./base.js');
  */
 class IAMPlugin extends BasePlugin {
   constructor(client, cfg) {
-    super(client);
+    super(client, cfg);
 
     var self = this;
     self.iamApiKey = null;
@@ -33,8 +33,7 @@ class IAMPlugin extends BasePlugin {
     self.cookieJar = request.jar();
     self.tokenUrl = cfg.iamTokenUrl || 'https://iam.bluemix.net/oidc/token';
 
-    // Specifies whether IAM authentication should be applied to the request
-    // being intercepted.
+    // Specifies whether IAM authentication should be applied to the request being intercepted.
     self.shouldApplyIAMAuth = true;
     self.refreshRequired = true;
 
@@ -47,11 +46,11 @@ class IAMPlugin extends BasePlugin {
   onRequest(state, req, callback) {
     var self = this;
 
-    if (typeof state.cfg.iamApiKey === 'undefined') {
+    if (typeof self._cfg.iamApiKey === 'undefined') {
       throw new Error('Missing IAM API key from configuration');
     }
 
-    if (state.cfg.iamApiKey !== self.iamApiKey) {
+    if (self._cfg.iamApiKey !== self.iamApiKey) {
       debug('New credentials identified. Renewing session cookie...');
       self.shouldApplyIAMAuth = self.refreshRequired = true;
     }
@@ -81,7 +80,7 @@ class IAMPlugin extends BasePlugin {
       });
     }
 
-    self.refreshCookie(state.cfg, function(error) {
+    self.refreshCookie(self._cfg, function(error) {
       if (error) {
         debug(error.message);
         if (self.shouldApplyIAMAuth) {

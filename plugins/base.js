@@ -28,6 +28,7 @@ function noop() {}
 class BasePlugin {
   constructor(client, cfg) {
     this._client = client;
+    this._cfg = cfg;
     this._lockFile = tmp.tmpNameSync({ postfix: '.lock' });
   }
 
@@ -62,6 +63,6 @@ class BasePlugin {
 }
 
 BasePlugin.id = 'base';
-BasePlugin._pluginVersion = 2;
+BasePlugin.pluginVersion = 2;
 
 module.exports = BasePlugin;

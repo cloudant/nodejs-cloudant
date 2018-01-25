@@ -36,7 +36,7 @@ describe('CloudantClient', function() {
         .post(DBNAME) // create document
         .reply(201, {ok: true, id: DOCID, rev: '1-xxxxxxxx'});
 
-    var cloudantClient = new Client({ plugin: 'retryerror' });
+    var cloudantClient = new Client({ plugins: 'retryerror' });
 
     var options = {
       url: SERVER + DBNAME,
@@ -70,7 +70,7 @@ describe('CloudantClient', function() {
         .delete(DBNAME)
         .reply(200, {ok: true});
 
-    var cloudantClient = new Client({ plugin: 'retryerror' });
+    var cloudantClient = new Client({ plugins: 'retryerror' });
 
     var options = {
       url: SERVER + DBNAME,
@@ -85,22 +85,6 @@ describe('CloudantClient', function() {
     });
   });
 
-  describe('supports legacy configuration', function() {
-    it('supports legacy option retryAttempts', function() {
-      var cfg = { retryAttempts: 123 };
-      var cloudantClient = new Client(cfg);
-      cloudantClient._supportLegacyKeys(cfg);
-      assert.equal(cfg.maxAttempt, 123);
-    });
-
-    it('supports legacy option retryTimeout', function() {
-      var cfg = { retryTimeout: 321 };
-      var cloudantClient = new Client(cfg);
-      cloudantClient._supportLegacyKeys(cfg);
-      assert.equal(cfg.retryInitialDelayMsecs, 321);
-    });
-  });
-
   describe('plugin support', function() {
     it('adds cookie authentication plugin if no other plugins are specified', function() {
       var cloudantClient = new Client();
@@ -110,58 +94,38 @@ describe('CloudantClient', function() {
 
     it('allows plugins to be added separately', function() {
       var cloudantClient = new Client({ plugins: [] });
-      cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
-      cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
-      cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
+      cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
+      cloudantClient._addPlugins(testPlugin.NoopPlugin2); // plugin 2
+      cloudantClient._addPlugins(testPlugin.NoopPlugin3); // plugin 3
       assert.equal(cloudantClient._plugins.length, 3);
     });
 
     it('allows an array of plugins to be added', function() {
       var cloudantClient = new Client({ plugins: [] });
       var plugins = [testPlugin.NoopPlugin1, testPlugin.NoopPlugin2, testPlugin.NoopPlugin3];
-      cloudantClient.addPlugins(plugins);
+      cloudantClient._addPlugins(plugins);
       assert.equal(cloudantClient._plugins.length, 3);
     });
 
     it('deduplicates plugins when added separately', function() {
       var cloudantClient = new Client({ plugins: [] });
-      cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 1
-      cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 2
-      cloudantClient.addPlugins(testPlugin.NoopPlugin); // plugin 3
+      cloudantClient._addPlugins(testPlugin.NoopPlugin); // plugin 1
+      cloudantClient._addPlugins(testPlugin.NoopPlugin); // plugin 2
+      cloudantClient._addPlugins(testPlugin.NoopPlugin); // plugin 3
       assert.equal(cloudantClient._plugins.length, 1);
     });
 
     it('deduplicates plugins when added as array', function() {
       var cloudantClient = new Client({ plugins: [] });
       var plugins = [testPlugin.NoopPlugin, testPlugin.NoopPlugin, testPlugin.NoopPlugin];
-      cloudantClient.addPlugins(plugins);
+      cloudantClient._addPlugins(plugins);
       assert.equal(cloudantClient._plugins.length, 1);
-    });
-
-    it('allows a single plugin to be added via "plugin" options', function() {
-      var cloudantClient = new Client({ plugin: ['cookieauth'] });
-      assert.equal(cloudantClient._plugins.length, 1);
-      assert.equal(cloudantClient._cfg.usePromises, false);
     });
 
     it('allows a single plugin to be added via "plugins" options', function() {
       var cloudantClient = new Client({ plugins: ['cookieauth'] });
       assert.equal(cloudantClient._plugins.length, 1);
       assert.equal(cloudantClient._cfg.usePromises, false);
-    });
-
-    it('allows an array of plugins to be added via "plugin" options', function() {
-      var cloudantClient = new Client({
-        plugin: [
-          'promises', // sets cloudantClient._cfg.usePromises -> true
-          'retry', // plugin 1
-          'cookieauth', // plugin 2
-          'default', // ignored
-          'base' // ignored
-        ]
-      });
-      assert.equal(cloudantClient._plugins.length, 2);
-      assert.ok(cloudantClient._cfg.usePromises);
     });
 
     it('allows an array of plugins to be added via "plugins" options', function() {
@@ -177,174 +141,66 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._plugins.length, 2);
       assert.ok(cloudantClient._cfg.usePromises);
     });
-  });
 
-  describe('specifying client configuration at request time', function() {
-    it('errors when attempting to override https', function() {
-      var cloudantClient = new Client({ plugins: [] });
-      assert.throws(
-        () => {
-          cloudantClient.request('http://localhost:5984', { https: false });
-        },
-        /Cannot specify 'https' at request time/,
-        'did not throw with expected message'
-      );
-    });
-
-    it('errors when attempting to override plugin', function() {
-      var cloudantClient = new Client({ plugins: [] });
-      assert.throws(
-        () => {
-          cloudantClient.request('http://localhost:5984', { plugin: [ 'retry429' ] });
-        },
-        /Cannot specify 'plugin' at request time/,
-        'did not throw with expected message'
-      );
-    });
-
-    it('errors when attempting to override plugins', function() {
-      var cloudantClient = new Client({ plugins: [] });
-      assert.throws(
-        () => {
-          cloudantClient.request('http://localhost:5984', { plugins: [ 'retry429' ] });
-        },
-        /Cannot specify 'plugins' at request time/,
-        'did not throw with expected message'
-      );
-    });
-
-    it('errors when attempting to override requestDefaults', function() {
-      var cloudantClient = new Client({ plugins: [] });
-      assert.throws(
-        () => {
-          cloudantClient.request(
-            'http://localhost:5984', { requestDefaults: { gzip: false } }
-          );
-        },
-        /Cannot specify 'requestDefaults' at request time/,
-        'did not throw with expected message'
-      );
-    });
-
-    it('successfully overrides maxAttempt', function(done) {
-      if (process.env.NOCK_OFF) {
-        this.skip();
-      }
-
-      var mocks = nock(SERVER)
-          .get(DBNAME)
-          .times(2)
-          .reply(200, {doc_count: 1});
-
-      var cloudantClient = new Client({ plugins: [] });
-      cloudantClient.addPlugins(testPlugin.AlwaysRetry);
+    it('allows plugin configuration to be specified', function() {
+      var cloudantClient = new Client({ plugins: [ { retry: { retryInitialDelayMsecs: 12345 } } ] });
       assert.equal(cloudantClient._plugins.length, 1);
-
-      var options = {
-        url: SERVER + DBNAME,
-        auth: { username: ME, password: PASSWORD },
-        method: 'GET'
-      };
-      cloudantClient.request(options, { maxAttempt: 2 }, function(err, resp, data) {
-        assert.equal(cloudantClient._plugins[0].onResponseCallCount, 2);
-        assert.equal(err, null);
-        assert.equal(resp.statusCode, 200);
-        assert.ok(data.indexOf('"doc_count":1') > -1);
-        mocks.done();
-        done();
-      });
+      assert.equal(cloudantClient._plugins[0]._cfg.retryInitialDelayMsecs, 12345);
     });
 
-    it('successfully overrides retryDelayMultiplier', function(done) {
-      if (process.env.NOCK_OFF) {
-        this.skip();
-      }
-
-      var mocks = nock(SERVER)
-          .get(DBNAME)
-          .times(3)
-          .reply(200, {doc_count: 1});
-
-      var cloudantClient = new Client({ plugins: [] });
-      cloudantClient.addPlugins(testPlugin.AlwaysRetry);
-      assert.equal(cloudantClient._plugins.length, 1);
-
-      var startTs = (new Date()).getTime();
-      var options = {
-        url: SERVER + DBNAME,
-        auth: { username: ME, password: PASSWORD },
-        method: 'GET'
-      };
-      cloudantClient.request(options, { retryDelayMultiplier: 3 }, function(err, resp, data) {
-        assert.equal(err, null);
-        assert.equal(resp.statusCode, 200);
-        assert.ok(data.indexOf('"doc_count":1') > -1);
-
-        // validate retry delay
-        var now = (new Date()).getTime();
-        assert.ok(now - startTs > (500 + 1500));
-
-        mocks.done();
-        done();
-      });
+    it('errors when passed an invalid plugin configuration object - too many keys', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ plugins: [ { cookieauth: {}, retry: { retryInitialDelayMsecs: 12345 } } ] });
+        },
+        /Invalid plugin configuration/,
+        'did not throw with expected message'
+      );
     });
 
-    it('successfully overrides retryInitialDelayMsecs', function(done) {
-      if (process.env.NOCK_OFF) {
-        this.skip();
-      }
-
-      var mocks = nock(SERVER)
-          .get(DBNAME)
-          .times(3)
-          .reply(200, {doc_count: 1});
-
-      var cloudantClient = new Client({ plugins: [] });
-      cloudantClient.addPlugins(testPlugin.AlwaysRetry);
-      assert.equal(cloudantClient._plugins.length, 1);
-
-      var startTs = (new Date()).getTime();
-      var options = {
-        url: SERVER + DBNAME,
-        auth: { username: ME, password: PASSWORD },
-        method: 'GET'
-      };
-      cloudantClient.request(options, { retryInitialDelayMsecs: 750 }, function(err, resp, data) {
-        assert.equal(err, null);
-        assert.equal(resp.statusCode, 200);
-        assert.ok(data.indexOf('"doc_count":1') > -1);
-
-        // validate retry delay
-        var now = (new Date()).getTime();
-        assert.ok(now - startTs > (750 + 1500));
-
-        mocks.done();
-        done();
-      });
+    it('errors when passed an invalid plugin configuration object - invalid boolean key type', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ plugins: [ { true: { retryInitialDelayMsecs: 12345 } } ] });
+        },
+        /Failed to load plugin/,
+        'did not throw with expected message'
+      );
     });
 
-    it('successfully overrides usePromises', function(done) {
-      var mocks = nock(SERVER)
-          .get(DBNAME)
-          .reply(200, {doc_count: 1});
+    it('errors when passed an invalid plugin configuration object - invalid number key type', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ plugins: [ { 1: { retryInitialDelayMsecs: 12345 } } ] });
+        },
+        /Failed to load plugin/,
+        'did not throw with expected message'
+      );
+    });
 
-      var cloudantClient = new Client({ plugins: [] });
-      assert.equal(cloudantClient._plugins.length, 0);
-      assert.equal(cloudantClient._cfg.usePromises, false);
+    it('errors when passed an invalid plugin configuration object - invalid array value type', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ plugins: [ { retry: [ { retryInitialDelayMsecs: 12345 } ] } ] });
+        },
+        /Invalid plugin configuration/,
+        'did not throw with expected message'
+      );
+    });
 
-      var options = {
-        url: SERVER + DBNAME,
-        auth: { username: ME, password: PASSWORD },
-        method: 'GET'
-      };
-      var p = cloudantClient.request(options, { usePromises: true }).then(function(data) {
-        assert.equal(data.doc_count, 1);
-        mocks.done();
-        done();
-      }).catch(function(err) {
-        assert.fail(`Unexpected reject: ${err}`);
-      });
-      assert.ok(p instanceof Promise);
+    it('errors when passed an invalid plugin configuration object - invalid number value type', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ plugins: [ { retry: 12345 } ] });
+        },
+        /Invalid plugin configuration/,
+        'did not throw with expected message'
+      );
     });
   });
 
@@ -361,7 +217,7 @@ describe('CloudantClient', function() {
 
       var cloudantClient = new Client({
         maxAttempt: 5,
-        plugin: testPlugin.AlwaysRetry
+        plugins: testPlugin.AlwaysRetry
       });
       assert.equal(cloudantClient._plugins.length, 1);
 
@@ -495,7 +351,7 @@ describe('CloudantClient', function() {
             .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
-        cloudantClient.addPlugins(testPlugin.NoopPlugin);
+        cloudantClient._addPlugins(testPlugin.NoopPlugin);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -526,7 +382,7 @@ describe('CloudantClient', function() {
             .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
         var cloudantClient = new Client({ plugins: [] });
-        cloudantClient.addPlugins(testPlugin.NoopPlugin);
+        cloudantClient._addPlugins(testPlugin.NoopPlugin);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var readable = new stream.PassThrough();
@@ -558,7 +414,7 @@ describe('CloudantClient', function() {
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: [] });
-        cloudantClient.addPlugins(testPlugin.NoopPlugin);
+        cloudantClient._addPlugins(testPlugin.NoopPlugin);
 
         var options = {
           url: SERVER + DBNAME,
@@ -586,9 +442,9 @@ describe('CloudantClient', function() {
             .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
-        cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
-        cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
-        cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
+        cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
+        cloudantClient._addPlugins(testPlugin.NoopPlugin2); // plugin 2
+        cloudantClient._addPlugins(testPlugin.NoopPlugin3); // plugin 3
         assert.equal(cloudantClient._plugins.length, 3);
 
         var options = {
@@ -621,9 +477,9 @@ describe('CloudantClient', function() {
             .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
         var cloudantClient = new Client({ plugins: [] });
-        cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
-        cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
-        cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
+        cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
+        cloudantClient._addPlugins(testPlugin.NoopPlugin2); // plugin 2
+        cloudantClient._addPlugins(testPlugin.NoopPlugin3); // plugin 3
         assert.equal(cloudantClient._plugins.length, 3);
 
         var readable = new stream.PassThrough();
@@ -655,9 +511,9 @@ describe('CloudantClient', function() {
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: [] });
-        cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
-        cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
-        cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
+        cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
+        cloudantClient._addPlugins(testPlugin.NoopPlugin2); // plugin 2
+        cloudantClient._addPlugins(testPlugin.NoopPlugin3); // plugin 3
         assert.equal(cloudantClient._plugins.length, 3);
 
         var options = {
@@ -695,7 +551,7 @@ describe('CloudantClient', function() {
         }
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin1);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin1);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -733,7 +589,7 @@ describe('CloudantClient', function() {
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin1);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin1);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -770,7 +626,7 @@ describe('CloudantClient', function() {
           });
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin2);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin2);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -805,7 +661,7 @@ describe('CloudantClient', function() {
             .reply(200, {ok: true});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin2);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin2);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -845,7 +701,7 @@ describe('CloudantClient', function() {
           .reply(200, {ok: true});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin3);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin3);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -875,7 +731,7 @@ describe('CloudantClient', function() {
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin3);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin3);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -905,7 +761,7 @@ describe('CloudantClient', function() {
         }
 
         var cloudantClient = new Client({ maxAttempt: 3, plugins: [] });
-        cloudantClient.addPlugins([
+        cloudantClient._addPlugins([
           testPlugin.PluginA,
           testPlugin.PluginB,
           testPlugin.PluginC,
@@ -937,7 +793,7 @@ describe('CloudantClient', function() {
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 3, plugins: [] });
-        cloudantClient.addPlugins([
+        cloudantClient._addPlugins([
           testPlugin.PluginA,
           testPlugin.PluginB,
           testPlugin.PluginC,
@@ -1025,7 +881,7 @@ describe('CloudantClient', function() {
             .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
-        cloudantClient.addPlugins(testPlugin.NoopPlugin);
+        cloudantClient._addPlugins(testPlugin.NoopPlugin);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -1062,7 +918,7 @@ describe('CloudantClient', function() {
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: [] });
-        cloudantClient.addPlugins(testPlugin.NoopPlugin);
+        cloudantClient._addPlugins(testPlugin.NoopPlugin);
 
         var options = {
           url: SERVER + DBNAME,
@@ -1091,9 +947,9 @@ describe('CloudantClient', function() {
             .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
-        cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
-        cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
-        cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
+        cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
+        cloudantClient._addPlugins(testPlugin.NoopPlugin2); // plugin 2
+        cloudantClient._addPlugins(testPlugin.NoopPlugin3); // plugin 3
         assert.equal(cloudantClient._plugins.length, 3);
 
         var options = {
@@ -1130,9 +986,9 @@ describe('CloudantClient', function() {
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: [] });
-        cloudantClient.addPlugins(testPlugin.NoopPlugin1); // plugin 1
-        cloudantClient.addPlugins(testPlugin.NoopPlugin2); // plugin 2
-        cloudantClient.addPlugins(testPlugin.NoopPlugin3); // plugin 3
+        cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
+        cloudantClient._addPlugins(testPlugin.NoopPlugin2); // plugin 2
+        cloudantClient._addPlugins(testPlugin.NoopPlugin3); // plugin 3
         assert.equal(cloudantClient._plugins.length, 3);
 
         var options = {
@@ -1171,7 +1027,7 @@ describe('CloudantClient', function() {
         }
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin1);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin1);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -1215,7 +1071,7 @@ describe('CloudantClient', function() {
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin1);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin1);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -1253,7 +1109,7 @@ describe('CloudantClient', function() {
           });
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin2);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin2);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -1294,7 +1150,7 @@ describe('CloudantClient', function() {
             .reply(200, {ok: true});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin2);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin2);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -1339,7 +1195,7 @@ describe('CloudantClient', function() {
           .reply(200, {ok: true});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin3);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin3);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -1374,7 +1230,7 @@ describe('CloudantClient', function() {
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
-        cloudantClient.addPlugins(testPlugin.ComplexPlugin3);
+        cloudantClient._addPlugins(testPlugin.ComplexPlugin3);
         assert.equal(cloudantClient._plugins.length, 1);
 
         var options = {
@@ -1405,7 +1261,7 @@ describe('CloudantClient', function() {
         }
 
         var cloudantClient = new Client({ maxAttempt: 3, plugins: [] });
-        cloudantClient.addPlugins([
+        cloudantClient._addPlugins([
           testPlugin.PluginA,
           testPlugin.PluginB,
           testPlugin.PluginC,
@@ -1443,7 +1299,7 @@ describe('CloudantClient', function() {
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 3, plugins: [] });
-        cloudantClient.addPlugins([
+        cloudantClient._addPlugins([
           testPlugin.PluginA,
           testPlugin.PluginB,
           testPlugin.PluginC,
@@ -1474,7 +1330,7 @@ describe('CloudantClient', function() {
             .get(DBNAME)
             .reply(200, {doc_count: 1});
 
-        var cloudantClient = new Client({ plugin: 'promises' });
+        var cloudantClient = new Client({ plugins: 'promises' });
         assert.equal(cloudantClient._plugins.length, 0);
         assert.ok(cloudantClient._cfg.usePromises);
 
@@ -1502,7 +1358,7 @@ describe('CloudantClient', function() {
             .get(DBNAME)
             .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-        var cloudantClient = new Client({ plugin: 'promises' });
+        var cloudantClient = new Client({ plugins: 'promises' });
         assert.equal(cloudantClient._plugins.length, 0);
         assert.ok(cloudantClient._cfg.usePromises);
 
