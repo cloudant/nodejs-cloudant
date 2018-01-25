@@ -44,7 +44,7 @@ const MOCK_ACCESS_TOKEN = 'eyJraWQiOiIyMDE3MDQwMi0wMDowMDowMCIsImFsZyI6IlJTMj' +
 'OX-qNFjdNUGnRpU7FmULy0r7RxLd8mhG-M1yxVzRBAZzvM63s0XXfMnk1oLi-BuUUTqVOdrM0KyY' +
 'MWfD0Q72PTo4Exa17V-R_73Nq8VPCwpOvZcwKRA2sPTVgTMzU34max8b5kpTzVGJ6SXSItTVOUdA' +
 'ygZBng';
-const MOCK_OIDC_TOKEN_RESPONSE = {
+const MOCK_IAM_TOKEN_RESPONSE = {
   'access_token': MOCK_ACCESS_TOKEN,
   'token_type': 'Bearer',
   'expires_in': 3600, // 60mins
@@ -113,12 +113,12 @@ describe('IAMAuth Plugin', function() {
   it('performs request and returns 200 response', function(done) {
     // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
     var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
 
     var cloudantMocks = nock(SERVER)
       .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
@@ -144,12 +144,12 @@ describe('IAMAuth Plugin', function() {
   it('performs multiple requests that return 200 responses with only a single session request', function(done) {
     // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
     var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
 
     var cloudantMocks = nock(SERVER);
     if (!process.env.NOCK_OFF) {
@@ -205,12 +205,12 @@ describe('IAMAuth Plugin', function() {
     }
 
     var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
 
     var cloudantMocks = nock(SERVER)
       .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
@@ -237,12 +237,12 @@ describe('IAMAuth Plugin', function() {
     }
 
     var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
 
     var cloudantMocks = nock(SERVER)
       .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
@@ -267,18 +267,18 @@ describe('IAMAuth Plugin', function() {
     }
 
     var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
       .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
 
     var cloudantMocks = nock(SERVER)
       .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
@@ -305,7 +305,7 @@ describe('IAMAuth Plugin', function() {
     }
 
     var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
@@ -335,13 +335,13 @@ describe('IAMAuth Plugin', function() {
     }
 
     var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
       .times(2)
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
 
     var cloudantMocks = nock(SERVER)
       .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
@@ -370,12 +370,12 @@ describe('IAMAuth Plugin', function() {
     }
 
     var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
 
     var cloudantMocks = nock(SERVER)
       .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
@@ -402,13 +402,13 @@ describe('IAMAuth Plugin', function() {
     }
 
     var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
       .times(2)
-      .reply(200, MOCK_OIDC_TOKEN_RESPONSE);
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
 
     var cloudantMocks = nock(SERVER)
       .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
@@ -439,7 +439,7 @@ describe('IAMAuth Plugin', function() {
     }
 
     var iamMocks = nock(TOKEN_SERVER)
-      .post('/oidc/token', {
+      .post('/identity/token', {
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
