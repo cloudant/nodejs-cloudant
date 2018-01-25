@@ -281,7 +281,7 @@ var mydb = cloudant.db.use('mydb');
 
    This plugin will automatically exchange your IAM API key for a token. It will handle the authentication and ensure that the token is refreshed as required.
 
-   The production IAM token service at https://iam.bluemix.net/oidc/token is used by default. You can set `iamTokenUrl` in your plugin configuration to override this.
+   The production IAM token service at https://iam.bluemix.net/identity/token is used by default. You can set `iamTokenUrl` in your plugin configuration to override this.
 
    For example:
    ```js
