@@ -47,7 +47,7 @@ var onBefore = function(done) {
       .put('/' + dbName).reply(200, { 'ok': true })
       .put('/' + dbName + '/mydoc').reply(200, { id: 'mydoc', rev: '1-1' });
 
-  cc = Cloudant({account: ME, password: PASSWORD, plugins: 'retryerror'});
+  cc = Cloudant({account: ME, password: PASSWORD, plugins: 'retry'});
   cc.db.create(dbName, function(er, d) {
     should(er).equal(null);
     d.should.be.an.Object;
@@ -94,7 +94,7 @@ describe('retry-on-429 plugin', function() {
       mocks.persist().get('/' + dbName).reply(200, {});
     }
     var cloudant = Cloudant({plugins: 'retry', account: ME, password: PASSWORD});
-    cloudant.cc._addPlugins('retryerror'); // retry socket hang up errors
+    cloudant.cc._addPlugins('retry'); // retry socket hang up errors
     var db = cloudant.db.use(dbName);
     this.timeout(10000);
     db.info(function(err, data) {

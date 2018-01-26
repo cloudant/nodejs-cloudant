@@ -22,7 +22,7 @@ The `cloudant.request` object is a duplex stream and cannot be used inside
 an event hook function. For example:
 
 ```js
-var cloudant = new Cloudant({ url: myUrl, plugins: [ 'retry429', 'retryerror' ] });
+var cloudant = new Cloudant({ url: myUrl, plugins: [ 'cookieauth', 'retry' ] });
 
 // make a custom request
 var r = cloudant.request({ path: '_all_dbs' })
@@ -45,9 +45,3 @@ Note that if you wish to use cookie authentication alongside other plugins you
 will need to include `cookieauth` in your plugins list. If you wish to disable
 all plugins then pass an empty array to the `plugins` parameter during
 construction.
-
-Finally, the following plugin configuration flags have been renamed:
-- `retryAttempts` -> `maxAttempt`
-- `retryTimeout` -> `retryInitialDelayMsecs`
-If you don't change these in your client code the default settings will be
-applied.
