@@ -312,7 +312,7 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ 'iamauth', {
 
    This plugin will retry requests on error (e.g. connection reset errors) or on a predetermined HTTP status code response using an exponential back-off.
 
-   For example, Cloudant's multi-tenant offering may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. You can ensure these requests are suitably retried:
+   For example, Cloudant may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. You can ensure these requests are suitably retried:
 
    ```js
    var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429 ] } } });
