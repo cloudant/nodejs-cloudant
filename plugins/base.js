@@ -32,6 +32,26 @@ class BasePlugin {
     this._lockFile = tmp.tmpNameSync({ postfix: '.lock' });
   }
 
+  get id() {
+    return this.constructor.id;
+  }
+
+  // NOOP Base Hooks
+
+  onRequest(state, request, callback) {
+    callback(state);
+  }
+
+  onResponse(state, response, callback) {
+    callback(state);
+  }
+
+  onError(state, error, callback) {
+    callback(state);
+  }
+
+  // Helpers
+
   // Acquire a file lock on the specified path. Release the file lock on
   // completion of the callback.
   withLock(opts, callback) {
@@ -55,10 +75,6 @@ class BasePlugin {
         });
       }
     });
-  }
-
-  get id() {
-    return this.constructor.id;
   }
 }
 
