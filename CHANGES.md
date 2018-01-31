@@ -2,13 +2,22 @@
 - [NEW] Added API for upcoming IBM Cloud Identity and Access Management support
   for Cloudant on IBM Cloud. Note: IAM API key support is not yet enabled in the
   service.
-- [NEW] Support multiple plugins. See 'api-migration.md' for migration details.
+- [NEW] Support multiple plugins.
+  _See [api-migration.md](https://github.com/cloudant/nodejs-cloudant/blob/master/api-migration.md)
+  for migration details._
 - [NEW] Allow custom service name in CloudFoundry VCAP_SERVICES environment
   variable.
 - [FIXED] Fix `get_security`/`set_security` asymmetry.
-- [FIXED] Support piping of request payload.
-- [BREAKING CHANGE] Rename client plugin configuration flags:
-  `retryAttempts` -> `maxAttempt` & `retryTimeout` -> `retryInitialDelayMsecs`
+- [FIXED] Support piping of request payload with plugins.
+- [BREAKING CHANGE] Replace `retryAttempts` option with `maxAttempts`. This
+  defines the maximum number of times the request will be attempted.
+- [BREAKING CHANGE] By default the `retry` plugin will retry requests on HTTP
+  429 status codes, a subset of 5xx server error status codes and also TCP/IP
+  errors.
+  _See [api-migration.md](https://github.com/cloudant/nodejs-cloudant/blob/master/api-migration.md)
+  for migration details._
+- [REMOVED] Remove global `retryTimeout` option (replaced by plugin specific
+  configuration).
 - [IMPROVED] Updated documentation by replacing deprecated Cloudant links with
   the latest bluemix.net links.
 - [REMOVED] Remove previously deprecated method `set_permissions`.

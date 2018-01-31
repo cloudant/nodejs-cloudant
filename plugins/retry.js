@@ -1,4 +1,4 @@
-// Copyright © 2015, 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2018 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,54 @@
 // limitations under the License.
 'use strict';
 
-const Retry429Plugin = require('./retry429.js');
+const BasePlugin = require('./base.js');
 
-// support legacy plugin 'retry'
+/**
+ * Retry plugin.
+ */
+class RetryPlugin extends BasePlugin {
+  constructor(client, cfg) {
+    cfg = Object.assign({
+      retryDelayMultiplier: 2,
+      retryErrors: true,
+      retryInitialDelayMsecs: 500,
+      retryStatusCodes: [
+        429, // 429 Too Many Requests
+        500, // 500 Internal Server Error
+        501, // 501 Not Implemented
+        502, // 502 Bad Gateway
+        503, // 503 Service Unavailable
+        504  // 504 Gateway Timeout
+      ]
+    }, cfg);
+    super(client, cfg);
+  }
 
-module.exports = Retry429Plugin; // alias for plugin 'retry429'
+  onResponse(state, response, callback) {
+    if (this._cfg.retryStatusCodes.indexOf(response.statusCode) !== -1) {
+      state.retry = true;
+      if (state.attempt === 1) {
+        state.retryDelayMsecs = this._cfg.retryInitialDelayMsecs;
+      } else {
+        state.retryDelayMsecs *= this._cfg.retryDelayMultiplier;
+      }
+    }
+    callback(state);
+  }
+
+  onError(state, error, callback) {
+    if (this._cfg.retryErrors) {
+      state.retry = true;
+      if (state.attempt === 1) {
+        state.retryDelayMsecs = this._cfg.retryInitialDelayMsecs;
+      } else {
+        state.retryDelayMsecs *= this._cfg.retryDelayMultiplier;
+      }
+    }
+    callback(state);
+  }
+}
+
+RetryPlugin.id = 'retry';
+
+module.exports = RetryPlugin;

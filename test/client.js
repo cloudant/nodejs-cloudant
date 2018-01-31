@@ -36,7 +36,7 @@ describe('CloudantClient', function() {
         .post(DBNAME) // create document
         .reply(201, {ok: true, id: DOCID, rev: '1-xxxxxxxx'});
 
-    var cloudantClient = new Client({ plugins: 'retryerror' });
+    var cloudantClient = new Client({ plugins: 'retry' });
 
     var options = {
       url: SERVER + DBNAME,
@@ -70,7 +70,7 @@ describe('CloudantClient', function() {
         .delete(DBNAME)
         .reply(200, {ok: true});
 
-    var cloudantClient = new Client({ plugins: 'retryerror' });
+    var cloudantClient = new Client({ plugins: 'retry' });
 
     var options = {
       url: SERVER + DBNAME,

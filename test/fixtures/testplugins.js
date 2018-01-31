@@ -73,9 +73,9 @@ class AlwaysRetry extends BasePlugin {
     this.onErrorCallCount++;
     state.retry = true;
     if (state.attempt === 1) {
-      state.retryDelayMsecs = this._cfg.retryInitialDelayMsecs;
+      state.retryDelayMsecs = 500;
     } else {
-      state.retryDelayMsecs *= this._cfg.retryDelayMultiplier;
+      state.retryDelayMsecs *= 2;
     }
     callback(state);
   }
@@ -84,9 +84,9 @@ class AlwaysRetry extends BasePlugin {
     this.onResponseCallCount++;
     state.retry = true;
     if (state.attempt === 1) {
-      state.retryDelayMsecs = this._cfg.retryInitialDelayMsecs;
+      state.retryDelayMsecs = 500;
     } else {
-      state.retryDelayMsecs *= this._cfg.retryDelayMultiplier;
+      state.retryDelayMsecs *= 2;
     }
     callback(state);
   }

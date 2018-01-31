@@ -239,17 +239,12 @@ Plugins can be used to modify an outgoing request, edit an incoming response or 
 
 #### Plugin Configuration
 
-The following global configurations can be defined to affect the behavior of all plugins:
--	`maxAttempt` - The maximum number of times the request will be attempted _(default: 3)_.
--	`retryInitialDelayMsecs` - The initial retry delay in milliseconds _(default: 500)_.
--	`retryDelayMultiplier` - The multiplication factor used for increasing the timeout after each subsequent attempt _(default: 2)_.
+The `maxAttempt` is a global configuration that applies to all plugins. It's the maximum number of times the request will be attempted _(default: 3)_.
 
-Note that `retryInitialDelayMsecs` and `retryDelayMultiplier` can be overriden by plugin specific configuration. This is achieved by passing the plugin (and its associated configuration) as an object.
+All other configuration is plugin specific. It must be passed within an object to the `plugins` parameter in the client constructor. For example:
 
-For example:
 ```js
-var cloudant = new Cloudant({ url: myurl, retryDelayMultiplier: 3, plugins: [ 'retryerror', { retry5xx: { retryDelayMultiplier: 4 } } ]);
-var mydb = cloudant.db.use('mydb');
+var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ 'iamauth', { retry: { retryDelayMultiplier: 4 } } ]);
 ```
 
 `maxAttempt` can _not_ be overridden by plugin specific configuration.
@@ -313,43 +308,39 @@ var mydb = cloudant.db.use('mydb');
    });
    ```
 
-4. The retry plugins
+4. `retry`
 
-    - `retry429` (or `retry`)
+   This plugin will retry requests on error (e.g. connection reset errors) or on a predetermined HTTP status code response using an exponential back-off.
 
-      On occasion Cloudant's multi-tenant offering may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. The `retry429` plugin will automatically retry your request with an exponential back-off.
+   For example, Cloudant may reply with an HTTP 429 response because you've exceed the number of API requests in a given amount of time. You can ensure these requests are suitably retried:
 
-      _For example:_
-      ```js
-      var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, retryInitialDelayMsecs: 1000, plugins: 'retry429' });
-      var mydb = cloudant.db.use('mydb');
-      ```
+   ```js
+   var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429 ] } } });
+   ```
 
-    - `retry5xx`
+   The plugin has the following configuration options:
 
-      The plugin will automatically retry 5xx responses with an exponential back-off.
+    - `retryDelayMultiplier`
 
-      _For example:_
-      ```js
-      var cloudant = new Cloudant({ url: myurl, retryDelayMultiplier: 3, plugins: 'retry5xx' });
-      var mydb = cloudant.db.use('mydb');
-      ```
+      The multiplication factor used for increasing the timeout after each subsequent attempt _(default: 2)_.
 
-    - `retryerror`
+    - `retryErrors`
 
-      The plugin will automatically retry request errors (e.g. connection reset errors) with an exponential back-off.
+      Automatically retry a request on error (e.g. connection reset errors) _(default: true)_.
 
-      _For example:_
-      ```js
-      var cloudant = new Cloudant({ url: myurl, maxAttempt: 10, plugins: 'retry' });
-      var mydb = cloudant.db.use('mydb');
-      ```
+    - `retryInitialDelayMsecs`
+
+      The initial retry delay in milliseconds _(default: 500)_.
+
+    - `retryStatusCodes`
+
+      A list of HTTP status codes that should be retried _(default: 429, 500, 501, 502, 503, 504)_.
 
 #### Using Multiple Plugins
 
 You can pass the plugins as an array, for example:
 ```js
-var cloudant = new Cloudant({ url: myurl, plugins: [ 'cookieauth', 'promises', { retry5xx: { retryDelayMultiplier: 4 } } ] });
+var cloudant = new Cloudant({ url: myurl, plugins: [ 'cookieauth', 'promises', { retry: { retryDelayMultiplier: 4 } } ] });
 var mydb = cloudant.db.use('mydb');
 mydb.get('mydoc', function(err, data) {
   console.log(`Document contents: ${data.toString('utf8')}`);

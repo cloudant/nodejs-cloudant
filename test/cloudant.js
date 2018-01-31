@@ -1,4 +1,4 @@
-// Copyright © 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2018 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ describe('Cloudant', function() {
       .put(`/${DBNAME}`)
       .reply(201, { ok: true });
 
-    var cloudantClient = new Client({ plugin: 'retryerror' });
+    var cloudantClient = new Client({ plugin: 'retry' });
 
     var options = {
       url: `${SERVER}/${DBNAME}`,
@@ -52,7 +52,7 @@ describe('Cloudant', function() {
       .delete(`/${DBNAME}`)
       .reply(200, { ok: true });
 
-    var cloudantClient = new Client({ plugin: 'retryerror' });
+    var cloudantClient = new Client({ plugin: 'retry' });
 
     var options = {
       url: `${SERVER}/${DBNAME}`,
