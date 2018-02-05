@@ -47,7 +47,7 @@ status codes as well as any request errors (such as connection reset errors).
 Example:
 - __Old__ plugin configuration:
   ```js
-  var cloudant = new Cloudant({ url: myUrl, plugin: 'retry', retryAttempts: 5, retryTimeout: 1000 });
+  var cloudant = new Cloudant({ url: myUrl, plugins: 'retry', retryAttempts: 5, retryTimeout: 1000 });
   ```
 - __New__ plugin configuration _(to mimic 1.x 429 `retry` behavior)_:
   ```js

@@ -34,7 +34,7 @@ describe('Stream', function() {
         .put(DBNAME)
         .reply(201, {ok: true});
 
-    var cloudantClient = new Client({ plugin: 'retry' });
+    var cloudantClient = new Client({ plugins: 'retry' });
 
     var options = {
       url: SERVER + DBNAME,
@@ -54,7 +54,7 @@ describe('Stream', function() {
         .delete(DBNAME)
         .reply(200, {ok: true});
 
-    var cloudantClient = new Client({ plugin: 'retry' });
+    var cloudantClient = new Client({ plugins: 'retry' });
 
     var options = {
       url: SERVER + DBNAME,
@@ -76,7 +76,7 @@ describe('Stream', function() {
       .get(DBNAME)
       .reply(200, { doc_count: 5096 });
 
-    var cloudantClient = new Client({ plugin: 'retry' });
+    var cloudantClient = new Client({ plugins: 'retry' });
 
     var options = {
       url: SERVER + DBNAME + '/_bulk_docs',
@@ -113,7 +113,7 @@ describe('Stream', function() {
       .query({ include_docs: true })
       .reply(200, fs.readFileSync('test/fixtures/all_docs_include_docs.json'));
 
-    var cloudantClient = new Client({ plugin: 'retry' });
+    var cloudantClient = new Client({ plugins: 'retry' });
 
     var options = {
       url: SERVER + DBNAME + '/_all_docs',
