@@ -68,3 +68,6 @@ construction (see below).
 ```js
 var cloudant = new Cloudant({ url: myUrl, plugins: [] });
 ```
+
+Finally, the `promise` plugin now throws a `CloudantError` (extended from
+`Error`) rather than a `string` which was considered bad practice.
