@@ -1,0 +1,155 @@
+{
+  "docs": [
+    {
+      "_id": "_design/views101",
+      "indexes": {
+        "animals": {
+          "index": "function(doc){\n  index(\"default\", doc._id);\n  if(doc.min_length){\n    index(\"min_length\", doc.min_length, {\"store\": \"yes\"});\n  }\n  if(doc.diet){\n    index(\"diet\", doc.diet, {\"store\": \"yes\"});\n  }\n  if (doc.latin_name){\n    index(\"latin_name\", doc.latin_name, {\"store\": \"yes\"});\n  }\n  if (doc['class']){\n    index(\"class\", doc['class'], {\"store\": \"yes\"});\n  }\n}"
+        }
+      },
+      "views": {
+        "latin_name_jssum": {
+          "map": "function(doc) {\n  if(doc.latin_name){\n    emit(doc.latin_name, doc.latin_name.length);\n  }\n}",
+          "reduce": "function (key, values, rereduce){\n  return sum(values);\n}"
+        },
+        "latin_name": {
+          "map": "function(doc) {\n  if(doc.latin_name){\n    emit(doc.latin_name, doc.latin_name.length);\n  }\n}"
+        },
+        "diet_sum": {
+          "map": "function(doc) {\n  if(doc.diet){\n    emit(doc.diet, 1);\n  }\n}",
+          "reduce": "_sum"
+        },
+        "diet_count": {
+          "map": "function(doc) {\n  if(doc.diet && doc.latin_name){\n    emit(doc.diet, doc.latin_name);\n  }\n}",
+          "reduce": "_count"
+        },
+        "complex_count": {
+          "map": "function(doc){\n  if(doc.class && doc.diet){\n    emit([doc.class, doc.diet], 1);\n  }\n}",
+          "reduce": "_count"
+        },
+        "diet": {
+          "map": "function(doc) {\n  if(doc.diet){\n    emit(doc.diet, 1);\n  }\n}"
+        },
+        "complex_latin_name_count": {
+          "map": "function(doc){\n  if(doc.latin_name){\n    emit([doc.class, doc.diet, doc.latin_name], doc.latin_name.length)\n  }\n}",
+          "reduce": "_count"
+        },
+        "diet_jscount": {
+          "map": "function(doc) {\n  if(doc.diet){\n    emit(doc.diet, 1);\n  }\n}",
+          "reduce": "function (key, values, rereduce){\n  return values.length;\n}"
+        },
+        "latin_name_count": {
+          "map": "function(doc) {\n  if(doc.latin_name){\n    emit(doc.latin_name, doc.latin_name.length);\n  }\n}",
+          "reduce": "_count"
+        },
+        "latin_name_sum": {
+          "map": "function(doc) {\n  if(doc.latin_name){\n    emit(doc.latin_name, doc.latin_name.length);\n  }\n}",
+          "reduce": "_sum"
+        }
+      }
+    },
+    {
+      "min_length": 1,
+      "min_weight": 40,
+      "latin_name": "Orycteropus afer",
+      "diet": "omnivore",
+      "max_length": 2.2,
+      "wiki_page": "http://en.wikipedia.org/wiki/Aardvark",
+      "_id": "aardvark",
+      "class": "mammal",
+      "max_weight": 65
+    },
+    {
+      "min_length": 0.6,
+      "min_weight": 7,
+      "latin_name": "Meles meles",
+      "diet": "omnivore",
+      "max_length": 0.9,
+      "wiki_page": "http://en.wikipedia.org/wiki/Badger",
+      "_id": "badger",
+      "class": "mammal",
+      "max_weight": 30
+    },
+    {
+      "min_length": 3.2,
+      "min_weight": 4700,
+      "diet": "herbivore",
+      "max_length": 4,
+      "wiki_page": "http://en.wikipedia.org/wiki/African_elephant",
+      "_id": "elephant",
+      "class": "mammal",
+      "max_weight": 6050
+    },
+    {
+      "min_length": 5,
+      "min_weight": 830,
+      "diet": "herbivore",
+      "max_length": 6,
+      "wiki_page": "http://en.wikipedia.org/wiki/Giraffe",
+      "_id": "giraffe",
+      "class": "mammal",
+      "max_weight": 1600
+    },
+    {
+      "min_length": 0.28,
+      "latin_name": "Dacelo novaeguineae",
+      "diet": "carnivore",
+      "max_length": 0.42,
+      "wiki_page": "http://en.wikipedia.org/wiki/Kookaburra",
+      "_id": "kookaburra",
+      "class": "bird"
+    },
+    {
+      "min_length": 0.95,
+      "min_weight": 2.2,
+      "diet": "omnivore",
+      "max_length": 1.1,
+      "wiki_page": "http://en.wikipedia.org/wiki/Ring-tailed_lemur",
+      "_id": "lemur",
+      "class": "mammal",
+      "max_weight": 2.2
+    },
+    {
+      "min_length": 1.7,
+      "min_weight": 130,
+      "latin_name": "Lama glama",
+      "diet": "herbivore",
+      "max_length": 1.8,
+      "wiki_page": "http://en.wikipedia.org/wiki/Llama",
+      "_id": "llama",
+      "class": "mammal",
+      "max_weight": 200
+    },
+    {
+      "min_length": 1.2,
+      "min_weight": 75,
+      "diet": "carnivore",
+      "max_length": 1.8,
+      "wiki_page": "http://en.wikipedia.org/wiki/Panda",
+      "_id": "panda",
+      "class": "mammal",
+      "max_weight": 115
+    },
+    {
+      "min_length": 0.25,
+      "min_weight": 0.08,
+      "latin_name": "Gallinago gallinago",
+      "diet": "omnivore",
+      "max_length": 0.27,
+      "wiki_page": "http://en.wikipedia.org/wiki/Common_Snipe",
+      "_id": "snipe",
+      "class": "bird",
+      "max_weight": 0.14
+    },
+    {
+      "min_length": 2,
+      "min_weight": 175,
+      "diet": "herbivore",
+      "max_length": 2.5,
+      "wiki_page": "http://en.wikipedia.org/wiki/Plains_zebra",
+      "_id": "zebra",
+      "class": "mammal",
+      "max_weight": 387
+    }
+  ]
+}
