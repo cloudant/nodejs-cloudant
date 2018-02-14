@@ -1,4 +1,6 @@
-# 2.0.2 (UNRELEASED)
+# 2.0.2 (2018-02-14)
+- [FIXED] Updated `require` references to use newly scoped package
+  `@cloudant/cloudant`.
 
 # 2.0.1 (2018-02-14)
 - [NEW] Added API for upcoming IBM Cloud Identity and Access Management support
