@@ -1,3 +1,24 @@
+***
+# NOTICE
+## This package is now _scoped_. We no longer publish new versions here.
+
+Newer versions can be installed by referencing the scoped name [@cloudant/cloudant](https://www.npmjs.com/package/@cloudant/cloudant), in __npm install__:
+```sh
+npm install @cloudant/cloudant
+```
+Or in __package.json__:
+```json
+"dependencies": {
+  "@cloudant/cloudant": "^2.0.1"
+}
+```
+Because scoped packages are installed into a scope folder, you have to include the name of the scope when requiring them in your code too, e.g.
+```js
+require('@cloudant/cloudant')
+```
+See the [NPM docs](https://docs.npmjs.com/misc/scope) for more information.
+***
+
 # Cloudant Node.js Client
 
 This is the official Cloudant library for Node.js.

@@ -1,3 +1,6 @@
+# 1.10.0-NOTICE (2018-02-14)
+- [NOTE] Add scoped NPM package `@cloudant/cloudant` notice.
+
 # 1.10.0 (2017-11-01)
 - [UPGRADED] Upgrade package: cloudant-nano@6.7.0.
 

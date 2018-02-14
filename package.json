@@ -1,5 +1,5 @@
 {
-  "name": "@cloudant/cloudant",
+  "name": "cloudant",
   "description": "Cloudant Node.js client",
   "license": "Apache-2.0",
   "homepage": "http://github.com/cloudant/nodejs-cloudant",
@@ -7,7 +7,7 @@
     "type": "git",
     "url": "git@github.com:cloudant/nodejs-cloudant.git"
   },
-  "version": "1.10.0",
+  "version": "1.10.0-NOTICE",
   "author": {
     "name": "IBM Cloudant",
     "email": "support@cloudant.com"
