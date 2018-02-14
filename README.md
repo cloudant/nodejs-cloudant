@@ -38,11 +38,11 @@ This is the official Cloudant library for Node.js.
 
 The best way to use the Cloudant client is to begin with your own Node.js project, and define this work as your dependency. In other words, put me in your package.json dependencies. The `npm` tool can do this for you, from the command line:
 
-    $ npm install --save cloudant
+    $ npm install --save @cloudant/cloudant
 
 Notice that your package.json will now reflect this package. Everything is working if you can run this command with no errors:
 
-    $ node -e 'require("cloudant"); console.log("Cloudant works");'
+    $ node -e 'require("@cloudant/cloudant"); console.log("Cloudant works");'
     Cloudant works
 
 ### Getting Started
@@ -53,7 +53,7 @@ Initialize your Cloudant connection by supplying your *account* and *password*, 
 
 ~~~ js
 // Load the Cloudant library.
-var Cloudant = require('cloudant');
+var Cloudant = require('@cloudant/cloudant');
 
 var me = 'nodejs'; // Set this to your own account
 var password = process.env.cloudant_password;
@@ -89,7 +89,7 @@ Here is simple but complete example of working with data:
 require('dotenv').load();
 
 // Load the Cloudant library.
-var Cloudant = require('cloudant');
+var Cloudant = require('@cloudant/cloudant');
 
 // Initialize Cloudant with settings from .env
 var username = process.env.cloudant_username || "nodejs";
@@ -129,7 +129,7 @@ You can find a further CRUD example in the [example](https://github.com/cloudant
 
 ### Initialization
 
-To use Cloudant, add `require('cloudant')` in your code. In general, the common style is that `Cloudant` (upper-case) is the **package** you load; whereas `cloudant` (lower-case) is your connection to your database (i.e. the result of calling `Cloudant()`).
+To use Cloudant, add `require('@cloudant/cloudant')` in your code. In general, the common style is that `Cloudant` (upper-case) is the **package** you load; whereas `cloudant` (lower-case) is your connection to your database (i.e. the result of calling `Cloudant()`).
 
 You can initialize your client in _one_ of the following ways:
 
@@ -138,7 +138,7 @@ You can initialize your client in _one_ of the following ways:
 You can initialize Cloudant with a URL:
 
 ~~~ js
-var Cloudant = require('cloudant')
+var Cloudant = require('@cloudant/cloudant')
 var cloudant = Cloudant("http://MYUSERNAME:MYPASSWORD@localhost:5984");
 ~~~
 
@@ -149,14 +149,14 @@ var cloudant = Cloudant("http://MYUSERNAME:MYPASSWORD@localhost:5984");
 You can just pass your account name and password (see the [security note](#security-note) about placing your password into your source code).
 
 ~~~ js
-var Cloudant = require('cloudant');
+var Cloudant = require('@cloudant/cloudant');
 var cloudant = Cloudant({account:me, password:password});
 ~~~
 
 By default, when you connect to your cloudant account (i.e. "me.cloudant.com"), you authenticate as the account owner (i.e. "me"). However, you can use Cloudant with any username and password. Just provide an additional "username" option when you initialize Cloudant. This will connect to your account, but using the username as the authenticated user. (And of course, use the appropriate password.)
 
 ~~~ js
-var Cloudant = require('cloudant');
+var Cloudant = require('@cloudant/cloudant');
 var me = "nodejs";         // Substitute with your Cloudant user account.
 var otherUsername = "jhs"; // Substitute with some other Cloudant user account.
 var otherPassword = process.env.other_cloudant_password;
@@ -188,7 +188,7 @@ Cloudant({url:"companycloudant.local", username:"somebody", password:"somebody's
 You can initialize Cloudant directly from the `VCAP_SERVICES` environment variable. Just pass `vcapServices` and your `vcapInstanceName` (or alias `instanceName`) in the client configuration:
 
 ~~~ js
-var Cloudant = require('cloudant');
+var Cloudant = require('@cloudant/cloudant');
 var cloudant = Cloudant({ vcapInstanceName: 'foo', vcapServices: JSON.parse(process.env.VCAP_SERVICES) });
 ~~~
 
@@ -203,7 +203,7 @@ You can optionally provide a callback to the Cloudant initialization function. T
 Here is a simple example of initializing asynchronously, using its optional callback parameter:
 
 ~~~ js
-var Cloudant = require('cloudant');
+var Cloudant = require('@cloudant/cloudant');
 var me = 'nodejs'; // Replace with your account.
 var password = process.env.cloudant_password;
 
@@ -391,7 +391,7 @@ Use the authorization feature to generate new API keys to access your data. An A
 ### Generate an API key
 
 ~~~ js
-var Cloudant = require('cloudant');
+var Cloudant = require('@cloudant/cloudant');
 var me = 'nodejs'; // Replace with your account.
 var password = process.env.cloudant_password;
 var cloudant = Cloudant({account:me, password:password});
@@ -458,7 +458,7 @@ See the [Authorization] documentation for further details.
 To use an API key, initialize a new Cloudant connection, and provide an additional "key" option when you initialize Cloudant. This will connect to your account, but using the "key" as the authenticated user. (And of course, use the appropriate password associated with the API key.)
 
 ~~~ js
-var Cloudant = require('cloudant');
+var Cloudant = require('@cloudant/cloudant');
 var cloudant = Cloudant({account:"me", key:api.key, password:api.password});
 ~~~
 
@@ -804,7 +804,7 @@ var options =
   , "password"        : "secret"
   , "requestDefaults": { "proxy": "http://localhost:8080" }
   }
-var cloudant = require('cloudant')(opts);
+var cloudant = require('@cloudant/cloudant')(opts);
 // Now using the HTTP proxy...
 
 ~~~
@@ -831,7 +831,7 @@ var myagent = new HttpsAgent({
     maxKeepAliveRequests: 0,
     maxKeepAliveTime: 30000
   });
-var cloudant = require('cloudant')({account:"me", password:"secret", requestDefaults:{agent:myagent}});
+var cloudant = require('@cloudant/cloudant')({account:"me", password:"secret", requestDefaults:{agent:myagent}});
 // Using Cloudant with myagent...
 ~~~
 
@@ -929,7 +929,7 @@ Now your project has the dependency in place, however you can work on both of th
 Here is simple but complete example of working with data:
 
 ~~~ js
-var Cloudant = require('cloudant')
+var Cloudant = require('@cloudant/cloudant')
 
 var me = 'nodejs' // Set this to your own account
 var password = process.env.cloudant_password

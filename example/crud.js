@@ -20,7 +20,7 @@ if (!process.env.CLOUDANT_URL) {
 
 // load the Cloudant library
 var async = require('async');
-var Cloudant = require('cloudant');
+var Cloudant = require('@cloudant/cloudant');
 var cloudant = Cloudant({url: process.env.CLOUDANT_URL});
 var dbname = 'crud';
 var db = null;
