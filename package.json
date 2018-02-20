@@ -23,6 +23,8 @@
     "database"
   ],
   "dependencies": {
+    "@types/nano": "^6.4.5",
+    "@types/request": "^2.47.0",
     "async": "2.1.2",
     "cloudant-nano": "6.7.0",
     "concat-stream": "^1.6.0",
@@ -32,30 +34,33 @@
     "tmp": "0.0.33"
   },
   "devDependencies": {
+    "dotenv": "2.0.0",
+    "dtslint": "^0.2.0",
     "eslint": "^3.19.0",
-    "eslint-plugin-standard": "^3.0.1",
+    "eslint-config-semistandard": "^11.0.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-header": "^1.0.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-node": "^5.1.0",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-react": "^7.0.0",
-    "eslint-config-standard": "^10.2.1",
-    "eslint-config-semistandard": "^11.0.0",
-    "eslint-plugin-header": "^1.0.0",
-    "dotenv": "2.0.0",
-    "mocha": "3.1.2",
+    "eslint-plugin-standard": "^3.0.1",
     "md5-file": "^3.2.3",
+    "mocha": "3.1.2",
     "nock": "9.0.0",
     "nsp": "^2.6.3",
     "should": "6.0.3",
     "uuid": "^3.0.1"
   },
   "scripts": {
-    "test": "eslint --ignore-path .eslintignore . && mocha && nsp check",
+    "test": "eslint --ignore-path .eslintignore . && mocha && npm run dtslint && nsp check",
     "test-verbose": "env DEBUG='*,-mocha:*' npm run test",
     "test-live": "NOCK_OFF=true mocha",
-    "test-live-verbose": "env DEBUG='*,-mocha:*' npm run test-live"
+    "test-live-verbose": "env DEBUG='*,-mocha:*' npm run test-live",
+    "dtslint": "dtslint types"
   },
   "main": "./cloudant.js",
+  "types": "types",
   "engines": {
     "node": ">=6.13.0"
   }
