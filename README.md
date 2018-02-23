@@ -811,6 +811,10 @@ var cloudant = require('@cloudant/cloudant')(opts);
 
 Please check [Request][request] for more information on the defaults. They support features like cookie jar, proxies, ssl, etc.
 
+### TLS 1.2 Support
+
+If your server enforces the use of TLS 1.2 then the nodejs-cloudant client will continue to work as expected (assuming you're running a version of Node/OpenSSL that supports TLS 1.2).
+
 ### Pool size and open sockets
 
 A very important configuration parameter if you have a high traffic website and are using Cloudant is setting up the `pool.size`. By default, the node.js https global agent (client) has a certain size of active connections that can run simultaneously, while others are kept in a queue. Pooling can be disabled by setting the `agent` property in `requestDefaults` to false, or adjust the global pool size using:
