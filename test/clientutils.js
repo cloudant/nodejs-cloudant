@@ -95,7 +95,7 @@ describe('Client Utilities', function() {
           .get('/')
           .reply(200, {couchdb: 'Welcome'});
 
-      var r = { abort: false, clientStream: {}, response: request.get(SERVER) };
+      var r = { abort: false, clientStream: { destinations: [] }, response: request.get(SERVER) };
       r.state = {
         abortWithResponse: undefined,
         attempt: 3,
@@ -114,7 +114,7 @@ describe('Client Utilities', function() {
           .get('/')
           .reply(200, {couchdb: 'Welcome'});
 
-      var r = { abort: false, clientStream: {}, response: request.get(SERVER) };
+      var r = { abort: false, clientStream: { destinations: [] }, response: request.get(SERVER) };
       r.state = {
         abortWithResponse: undefined,
         attempt: 1,

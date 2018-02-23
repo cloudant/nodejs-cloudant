@@ -1,4 +1,5 @@
 # 2.0.3 (UNRELEASED)
+- [NEW] Allow pipes to be defined inside request event handlers.
 
 # 2.0.2 (2018-02-14)
 - [FIXED] Updated `require` references to use newly scoped package
