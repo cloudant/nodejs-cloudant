@@ -82,12 +82,12 @@ stage('Build') {
   }
 }
 
-stage('QA: Node4x') {
-  setupNodeAndTest('lts/argon') //4.x LTS
-}
-
 stage('QA: Node6x') {
   setupNodeAndTest('lts/boron') // 6.x LTS
+}
+
+stage('QA: Node8x') {
+  setupNodeAndTest('lts/carbon') //8.x LTS
 }
 
 stage('QA: Node') {
