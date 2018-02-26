@@ -135,4 +135,39 @@ describe('Stream', function() {
         done();
       });
   });
+
+  it('all documents to file (when piping inside response handler)', function(done) {
+    var mocks = nock(SERVER)
+      .get(DBNAME + '/_all_docs')
+      .query({ include_docs: true })
+      .reply(200, fs.readFileSync('test/fixtures/all_docs_include_docs.json'));
+
+    var cloudantClient = new Client({ plugins: 'retry' });
+
+    var options = {
+      url: SERVER + DBNAME + '/_all_docs',
+      qs: { include_docs: true },
+      auth: { username: ME, password: PASSWORD },
+      method: 'GET'
+    };
+    var req = cloudantClient.request(options, function(err, resp, data) {
+      assert.equal(err, null);
+      assert.equal(resp.statusCode, 200);
+    })
+      .on('response', function(resp) {
+        if (resp.statusCode !== 200) {
+          assert.fail(`Failed to GET /_all_docs. Status code: ${resp.statusCode}`);
+        } else {
+          req
+            .pipe(new stream.PassThrough({ highWaterMark: 1000 }))
+            .pipe(fs.createWriteStream('data.json'))
+            .on('finish', function() {
+              assert.equal(md5File.sync('data.json'), md5File.sync('test/fixtures/all_docs_include_docs.json'));
+              fs.unlinkSync('data.json');
+              mocks.done();
+              done();
+            });
+        }
+      });
+  });
 });
