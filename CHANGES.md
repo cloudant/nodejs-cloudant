@@ -1,6 +1,7 @@
 # 2.0.3 (UNRELEASED)
 - [NEW] Allow pipes to be defined inside request event handlers.
 - [NOTE] Update engines in preparation for Node.js 4 “Argon” end-of-life.
+- [UPGRADED] Using nano==6.4.3 dependancy.
 
 # 2.0.2 (2018-02-14)
 - [FIXED] Updated `require` references to use newly scoped package
