@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import cloudant = require("@cloudant/cloudant");
+import nano = require("nano");
 
 /*
  * Instantiate with configuration object
@@ -31,6 +32,8 @@ const instance =  <cloudant.ServerScope> cloudant(
   "http://localhost:5984/emails"
 );
 
+instance.ping((pong) => {});
+
 instance.generate_api_key((error, key) => {});
 
 const cors: cloudant.CORS = {
@@ -40,6 +43,7 @@ const cors: cloudant.CORS = {
 };
 
 instance.set_cors(cors, (error, data) => {});
+instance.get_cors((error, data) => {});
 
 const virtualHost: cloudant.VirtualHost = {
   host: 'www.example.com',
@@ -51,27 +55,24 @@ instance.get_virtual_hosts((error, hosts) => {});
 instance.delete_virtual_host(virtualHost, (error, resp) => {});
 
 /*
- * Database Scope
+ * Document Scope
  */
-const db: cloudant.DatabaseScope = instance.db;
+
+const mydb: cloudant.DocumentScope<{}> = instance.use("mydb");
+
+const docs: nano.BulkModifyDocsWrapper = {
+  docs: [ { id: 'doc1' }, { id: 'doc2' } ]
+};
+
+mydb.bulk_get(docs, (results) => {});
 
 const security: cloudant.Security = {
   nobody: [],
   nodejs : [ '_reader', '_writer', '_admin', '_replicator' ]
 };
 
-db.set_security(security, (error, resp) => {});
-db.get_security((err, resp) => {});
-
-/*
- * Database Scope
- */
-
-interface SomeDocument {
-  name: string;
-}
-
-const mydb: cloudant.DocumentScope<SomeDocument> = instance.use("mydb");
+mydb.set_security(security, (error, resp) => {});
+mydb.get_security((err, resp) => {});
 
 const params: cloudant.SearchParams = {
   limit: 10,
@@ -87,3 +88,20 @@ const geoParams: cloudant.GeoParams = {
 };
 
 mydb.geo('design', "docname", geoParams, (err, result) => {});
+
+const myIndex = {
+  index: { fields: [ 'foo' ] },
+  name: 'foo-index',
+  type: 'json'
+};
+
+mydb.index(myIndex, (err, resp) => {}); // create index
+
+mydb.index((err: any, resp: any) => {}); // see all indexes
+
+const myDeleteSpec: cloudant.QueryDeleteSpec = {
+    ddoc: '_design/1f003ce73056238720c2e8f7da545390a8ea1dc5',
+    name: 'foo-index'
+};
+
+mydb.index.del(myDeleteSpec, (err, resp) => {}); // delete index
