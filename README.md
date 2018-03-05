@@ -764,6 +764,34 @@ db.geo('city', 'city_points', query, function(er, result) {
 });
 ~~~
 
+## TypeScript Support
+
+TypeScript is a superset of JavaScript which primarily provides optional static
+typing, classes and interfaces. One of the big benefits is to enable IDEs to
+provide a richer environment for spotting common errors as you type the code.
+
+The `nodejs-cloudant` package includes TypeScript declaration files. It also
+pulls in declaration files for its core dependencies (namely `nano` and
+`request`).
+
+TypeScript compiles to clean, simple JavaScript code which runs on any browser,
+in Node.js, or in any JavaScript engine that supports ECMAScript 3 (or newer).
+
+_Note:_ The TypeScript declaration files do not support `Promise` return
+types. To silence compiler warnings you must cast your return type to the `Any`
+type. For example:
+
+```js
+import * as Cloudant from '@cloudant/cloudant';
+
+var cloudant = Cloudant({ account: 'me', password: 'password', plugins: [ 'promises' ] });
+var client = cloudant as Cloudant.ServerScope;
+
+(client.db.list() as any).then((d) => { console.log(d); });
+```
+
+See [here](https://www.typescriptlang.org) for further details.
+
 ## Advanced Features
 
 ### Debugging
