@@ -21,6 +21,8 @@ import nano = require("nano");
 const config: cloudant.Configuration = {
   account: "my-cloudant-account",
   password: "my-password",
+  plugins: 'retry',
+  maxAttempt: 3
 };
 
 const cfgInstance = cloudant(config);
