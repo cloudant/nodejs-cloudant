@@ -18,7 +18,7 @@ import { Request, CoreOptions } from "request";
 declare function cloudant(
     config: cloudant.Configuration | string,
     callback?: (error: any, client?: cloudant.ServerScope, pong?: any) => void
-): cloudant.ServerScope | cloudant.DocumentScope<any>;
+): cloudant.ServerScope;
 
 declare namespace cloudant {
     type Callback<R> = (error: any, response: R, headers?: any) => void;

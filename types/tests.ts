@@ -41,9 +41,7 @@ cloudant(config, (error, client, pong) => {
 /*
  * Server Scope
  */
-const instance =  <cloudant.ServerScope> cloudant(
-  "http://localhost:5984/emails"
-);
+const instance = cloudant("http://localhost:5984");
 
 instance.ping((pong) => {});
 
