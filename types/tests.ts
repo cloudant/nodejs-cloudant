@@ -28,6 +28,17 @@ const config: cloudant.Configuration = {
 const cfgInstance = cloudant(config);
 
 /*
+ * Run Initialization Callback
+ */
+cloudant(config, (error, client, pong) => {
+  if (error) {
+    return;
+  } else if (client) {
+    client.db.list((error, allDbs) => {});
+  }
+});
+
+/*
  * Server Scope
  */
 const instance =  <cloudant.ServerScope> cloudant(

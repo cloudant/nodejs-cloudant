@@ -16,7 +16,8 @@ import * as nano from 'nano';
 import { Request, CoreOptions } from "request";
 
 declare function cloudant(
-    config: cloudant.Configuration | string
+    config: cloudant.Configuration | string,
+    callback?: (error: any, client?: cloudant.ServerScope, pong?: any) => void
 ): cloudant.ServerScope | cloudant.DocumentScope<any>;
 
 declare namespace cloudant {
