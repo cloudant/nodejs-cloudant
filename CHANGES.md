@@ -1,4 +1,5 @@
 # UNRELEASED
+- [FIXED] Add missing `maxAttempt` parameter to TypeScript definition.
 
 # 2.1.0 (2018-03-05)
 - [NEW] Add TypeScript definitions.

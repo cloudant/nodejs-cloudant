@@ -38,7 +38,8 @@ declare namespace cloudant {
         log?(id: string, args: any): void;
         parseUrl?: boolean;
         request?(params: any): void;
-        plugins?: any[];
+        plugins?: any;
+        maxAttempt?: number;
     }
 
     interface CORS {
