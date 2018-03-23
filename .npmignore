@@ -3,6 +3,7 @@
 # build tool config
 .travis.yml
 Jenkinsfile
+types/tsconfig.json
 
 # code examples
 example*
@@ -20,6 +21,8 @@ DCO1.1.txt
 
 # linters
 .eslintrc*
+.eslintignore
+types/tslint.json
 
 # npm
 .npmignore
@@ -29,6 +32,7 @@ DCO1.1.txt
 citest
 test*
 toxytests
+soak_tests
 
 # test logs
 *.log
