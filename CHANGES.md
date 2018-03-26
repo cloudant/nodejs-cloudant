@@ -1,5 +1,6 @@
 # UNRELEASED
 - [FIXED] Add missing `maxAttempt` parameter to TypeScript definition.
+- [FIXED] Removed test and lint data that bloated npm package size.
 
 # 2.1.0 (2018-03-05)
 - [NEW] Add TypeScript definitions.
