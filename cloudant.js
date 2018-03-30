@@ -111,9 +111,9 @@ function Cloudant(options, callback) {
     // https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#query
     var index = function(definition, callback) {
       // if no definition is provided, then the user wants see all the indexes
-      if (typeof definition === 'function') {
+      if (typeof definition === 'function' || typeof definition === 'undefined') {
         callback = definition;
-        nano.request({ path: encodeURIComponent(db) + '/_index' }, callback);
+        return nano.request({ path: encodeURIComponent(db) + '/_index' }, callback);
       } else {
         // the user wants to create a new index
         return nano.request({ path: encodeURIComponent(db) + '/_index',
