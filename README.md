@@ -784,8 +784,7 @@ type. For example:
 ```js
 import * as Cloudant from '@cloudant/cloudant';
 
-var cloudant = Cloudant({ account: 'me', password: 'password', plugins: [ 'promises' ] });
-var client = cloudant as Cloudant.ServerScope;
+var client = Cloudant({ account: 'me', password: 'password', plugins: [ 'promises' ] });
 
 (client.db.list() as any).then((d) => { console.log(d); });
 ```
