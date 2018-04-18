@@ -1,6 +1,7 @@
 # UNRELEASED
 - [FIXED] Add missing `maxAttempt` parameter to TypeScript definition.
 - [FIXED] Include client initialization callback in TypeScript definition.
+- [FIXED] Prevent client executing done callback multiple times.
 - [FIXED] Removed test and lint data that bloated npm package size.
 - [FIXED] Support Cloudant query when using promises request plugin.
 
