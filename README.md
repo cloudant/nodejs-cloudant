@@ -7,9 +7,7 @@ This is the official Cloudant library for Node.js.
 * [Installation and Usage](#installation-and-usage)
 * [Getting Started](#getting-started)
   * [Initialization](#initialization)
-  * [Callback Signature](#callback-signature)
-  * [Password Authentication](#password-authentication)
-  * [Cloudant Local](#cloudant-local)
+  * [Initialization Callback](#initialization-callback)
   * [Request Plugins](#request-plugins)
 * [API Reference](#api-reference)
 * [Authorization and API Keys](#authorization-and-api-keys)
@@ -19,9 +17,12 @@ This is the official Cloudant library for Node.js.
 * [Virtual Hosts](#virtual-hosts)
 * [Cloudant Query](#cloudant-query)
 * [Cloudant Search](#cloudant-search)
-* [Cookie Authentication](#cookie-authentication)
+* [Cloudant Geospatial](#cloudant-geospatial)
+* [TypeScript Support](#typescript-support)
 * [Advanced Features](#advanced-features)
+  * [Debugging](#debugging)
   * [Advanced Configuration](#advanced-configuration)
+  * [TLS 1.2 Support](#tls-12-support)
   * [Pool size and open sockets](#pool-size-and-open-sockets)
   * [Extending the Cloudant Library](#extending-the-cloudant-library)
   * [Pipes](#pipes)
@@ -32,7 +33,6 @@ This is the official Cloudant library for Node.js.
   * [Security Note](#security-note)
 * [License](#license)
 * [Reference](#reference)
-
 
 ## Installation and Usage
 
