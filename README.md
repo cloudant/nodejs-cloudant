@@ -107,7 +107,7 @@ cloudant.db.destroy('alice', function(err) {
     var alice = cloudant.db.use('alice')
 
     // ...and insert a document in it.
-    alice.insert({ crazy: true }, 'panda', function(err, body, header) {
+    alice.insert({ crazy: true }, 'panda', function(err, body, headers) {
       if (err) {
         return console.log('[alice.insert] ', err.message);
       }
@@ -226,7 +226,7 @@ Cloudant({account:me, password:password}, function(err, cloudant) {
 Callback functions receive three arguments:
 
 ```js
-function(err, body, header) {}
+function(err, body, headers) {}
 ```
 
 * `err` - The _error_ (if any). For example, fetching a document that doesn't exist:
@@ -273,7 +273,7 @@ As shown above, the corresponding database `request`, `headers` and `statusCode`
 * `body` - The HTTP _response body_ (if no error). For example:
 
 ```js
-cloudant.db.list(function(err, body, header) {
+cloudant.db.list(function(err, body, headers) {
     console.log(body);
 });
 ```
@@ -282,11 +282,11 @@ cloudant.db.list(function(err, body, header) {
 [ '_replicator', '_users' ]
 ```
 
-* `header` - The HTTP _response header_ (if no error). For example:
+* `headers` - The HTTP _response headers_ (if no error). For example:
 
 ```js
-cloudant.db.list(function(err, body, header) {
-    console.log(header);
+cloudant.db.list(function(err, body, headers) {
+    console.log(headers);
 });
 ```
 
@@ -1052,7 +1052,7 @@ Cloudant({account:me, password:password}, function(er, cloudant) {
       // specify the database we are going to use
       var alice = cloudant.db.use('alice')
       // and insert a document in it
-      alice.insert({ crazy: true }, 'panda', function(err, body, header) {
+      alice.insert({ crazy: true }, 'panda', function(err, body, headers) {
         if (err)
           return console.log('[alice.insert] ', err.message)
 
