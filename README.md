@@ -7,9 +7,8 @@ This is the official Cloudant library for Node.js.
 * [Installation and Usage](#installation-and-usage)
 * [Getting Started](#getting-started)
   * [Initialization](#initialization)
+  * [Initialization Callback](#initialization-callback)
   * [Callback Signature](#callback-signature)
-  * [Password Authentication](#password-authentication)
-  * [Cloudant Local](#cloudant-local)
   * [Request Plugins](#request-plugins)
 * [API Reference](#api-reference)
 * [Authorization and API Keys](#authorization-and-api-keys)
@@ -19,9 +18,12 @@ This is the official Cloudant library for Node.js.
 * [Virtual Hosts](#virtual-hosts)
 * [Cloudant Query](#cloudant-query)
 * [Cloudant Search](#cloudant-search)
-* [Cookie Authentication](#cookie-authentication)
+* [Cloudant Geospatial](#cloudant-geospatial)
+* [TypeScript Support](#typescript-support)
 * [Advanced Features](#advanced-features)
+  * [Debugging](#debugging)
   * [Advanced Configuration](#advanced-configuration)
+  * [TLS 1.2 Support](#tls-12-support)
   * [Pool size and open sockets](#pool-size-and-open-sockets)
   * [Extending the Cloudant Library](#extending-the-cloudant-library)
   * [Pipes](#pipes)
@@ -32,7 +34,6 @@ This is the official Cloudant library for Node.js.
   * [Security Note](#security-note)
 * [License](#license)
 * [Reference](#reference)
-
 
 ## Installation and Usage
 
@@ -106,7 +107,7 @@ cloudant.db.destroy('alice', function(err) {
     var alice = cloudant.db.use('alice')
 
     // ...and insert a document in it.
-    alice.insert({ crazy: true }, 'panda', function(err, body, header) {
+    alice.insert({ crazy: true }, 'panda', function(err, body, headers) {
       if (err) {
         return console.log('[alice.insert] ', err.message);
       }
@@ -220,13 +221,88 @@ Cloudant({account:me, password:password}, function(err, cloudant) {
 });
 ~~~
 
-After initialization, in general, callback functions receive three arguments:
+### Callback Signature
 
-* `err` - the error, if any
-* `body` - the http _response body_ from Cloudant, if no error.
-* `header` - the http _response header_ from Cloudant, if no error
+Callback functions receive three arguments:
 
-The `ping()` function is the only exception to this rule. It does not return headers since a "ping" is made from multiple requests to gather various bits of information.
+```js
+function(err, body, headers) {}
+```
+
+* `err` - The _error_ (if any). For example, fetching a document that doesn't exist:
+
+```js
+var mydb = cloudant.db.use('mydb');
+mydb.get('non-existent-doc', function(err, data) {
+    console.log(err);
+});
+```
+
+```
+{ Error: deleted
+    at Object.clientCallback (/usr/src/app/node_modules/nano/lib/nano.js:248:15)
+    at Request._callback (/usr/src/app/node_modules/@cloudant/cloudant/lib/clientutils.js:154:11)
+    ...
+  name: 'Error',
+  error: 'not_found',
+  reason: 'deleted',
+  scope: 'couch',
+  statusCode: 404,
+  request:
+   { method: 'GET',
+     headers:
+      { 'content-type': 'application/json',
+        accept: 'application/json' },
+     uri: 'http://localhost:5984/_users/895c3440-42e7-11e8-b9b2-358fa5dee4a0' },
+  headers:
+  { 'x-couchdb-body-time': '0',
+    'x-couch-request-id': '1c16b2b81f',
+    'transfer-encoding': 'chunked',
+    etag: '"7Q4MT2X8W1RO3JQOLSA4KGMV7"',
+    date: 'Fri, 27 Apr 2018 08:49:26 GMT',
+    'content-type': 'application/json',
+    'cache-control': 'must-revalidate',
+    statusCode: 404,
+    uri: 'http://localhost:5984/_users/895c3440-42e7-11e8-b9b2-358fa5dee4a0' },
+  errid: 'non_200',
+  description: 'couch returned 404' }
+```
+
+As shown above, the corresponding database `request`, `headers` and `statusCode` are also returned in the error.
+
+* `body` - The HTTP _response body_ (if no error). For example:
+
+```js
+cloudant.db.list(function(err, body, headers) {
+    console.log(body);
+});
+```
+
+```
+[ '_replicator', '_users' ]
+```
+
+* `headers` - The HTTP _response headers_ (if no error). For example:
+
+```js
+cloudant.db.list(function(err, body, headers) {
+    console.log(headers);
+});
+```
+
+```
+{ 'x-couchdb-body-time': '0',
+  'x-couch-request-id': '591be401f1',
+  'transfer-encoding': 'chunked',
+  etag: '"7Q4MT2X8W1RO3JQOLSA4KGMV7"',
+  date: 'Fri, 27 Apr 2018 08:49:49 GMT',
+  'content-type': 'application/json',
+  'cache-control': 'must-revalidate',
+  statusCode: 200,
+  uri: 'http://localhost:5984/_all_dbs' }
+```
+
+Note that the `statusCode` and `uri` and also included amongst the response headers.
 
 ### Request Plugins
 
@@ -976,7 +1052,7 @@ Cloudant({account:me, password:password}, function(er, cloudant) {
       // specify the database we are going to use
       var alice = cloudant.db.use('alice')
       // and insert a document in it
-      alice.insert({ crazy: true }, 'panda', function(err, body, header) {
+      alice.insert({ crazy: true }, 'panda', function(err, body, headers) {
         if (err)
           return console.log('[alice.insert] ', err.message)
 
