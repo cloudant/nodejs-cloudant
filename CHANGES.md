@@ -1,3 +1,5 @@
+# UNRELEASED
+
 # 2.2.0 (2018-04-30)
 - [FIXED] Add missing `maxAttempt` parameter to TypeScript definition.
 - [FIXED] Include client initialization callback in TypeScript definition.
