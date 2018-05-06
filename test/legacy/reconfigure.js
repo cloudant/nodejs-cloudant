@@ -1,4 +1,4 @@
-// Copyright © 2015, 2017 IBM Corp. All rights reserved.
+// Copyright © 2015, 2018 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,162 +32,200 @@ describe('Reconfigure', function() {
 
   it('allows only an account to be passed in', function(done) {
     var credentials = { account: 'myaccount'};
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('https://myaccount.cloudant.com');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://myaccount.cloudant.com');
     done();
   });
 
   it('allows an account and a password to be passed in', function(done) {
     var credentials = { account: 'myaccount', password: 'mypassword'};
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('https://myaccount:mypassword@myaccount.cloudant.com');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://myaccount:mypassword@myaccount.cloudant.com');
     done();
   });
 
   it('allows a key and an account and a password to be passed in', function(done) {
     var credentials = { account: 'myaccount', password: 'mypassword', key: 'mykey'};
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('https://mykey:mypassword@myaccount.cloudant.com');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mykey:mypassword@myaccount.cloudant.com');
     done();
   });
 
   it('allows a username and an account and a password to be passed in', function(done) {
     var credentials = { account: 'myaccount', password: 'mypassword', username: 'myusername'};
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('https://myusername:mypassword@myaccount.cloudant.com');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://myusername:mypassword@myaccount.cloudant.com');
     done();
   });
 
   it('allows a key and an full domain and a password to be passed in', function(done) {
     var credentials = { account: 'myaccount.cloudant.com', password: 'mypassword', key: 'mykey'};
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('https://mykey:mypassword@myaccount.cloudant.com');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mykey:mypassword@myaccount.cloudant.com');
     done();
   });
 
   it('allows complex passwords', function(done) {
     var credentials = { account: 'myaccount', password: 'mypassword[]{}!#&='};
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('https://myaccount:mypassword%5B%5D%7B%7D!%23%26%3D@myaccount.cloudant.com');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://myaccount:mypassword%5B%5D%7B%7D!%23%26%3D@myaccount.cloudant.com');
     done();
   });
 
   it('allows a local CouchDB url to used', function(done) {
     var credentials = { url: 'http://localhost:5984' };
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('http://localhost:5984');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('http://localhost:5984');
     done();
   });
 
   it('allows an HTTP Cloudant URL - switching to HTTPS', function(done) {
     var credentials = { url: 'http://mykey:mypassword@mydomain.cloudant.com' };
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('https://mykey:mypassword@mydomain.cloudant.com');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mykey:mypassword@mydomain.cloudant.com');
     done();
   });
 
   it('allows an HTTP Cloudant URL with a port number - switching to HTTPS', function(done) {
     var credentials = { url: 'http://mykey:mypassword@mydomain.cloudant.com:80' };
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('https://mykey:mypassword@mydomain.cloudant.com');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mykey:mypassword@mydomain.cloudant.com');
     done();
   });
 
   // Issue cloudant/nodejs-cloudant#129
   it('fixes a Cloudant URL with a trailing / - removing the /', function(done) {
     var credentials = { url: 'https://mykey:mypassword@mydomain.cloudant.com/' };
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('https://mykey:mypassword@mydomain.cloudant.com');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mykey:mypassword@mydomain.cloudant.com');
     done();
   });
 
   // Issue cloudant/nodejs-cloudant#141
   it('Allows account names with dashes', function(done) {
     var credentials = { account: 'this-account-has-dashes.cloudant.com', password: 'bacon' };
-    var url = reconfigure(credentials);
-    url.should.be.a.String;
-    url.should.equal('https://this-account-has-dashes:bacon@this-account-has-dashes.cloudant.com');
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://this-account-has-dashes:bacon@this-account-has-dashes.cloudant.com');
     done();
   });
 
-  it('gets first URL from vcap containing single service', function(done) {
+  it('gets first host from vcap containing single service', function(done) {
     var config = {vcapServices: {cloudantNoSQLDB: [
-      {credentials: {url: 'http://mykey:mypassword@mydomain.cloudant.com'}}
+      {credentials: {host: 'mydomain.cloudant.com'}}
     ]}};
-    var url = reconfigure(config);
-    url.should.be.a.String;
-    url.should.equal('http://mykey:mypassword@mydomain.cloudant.com');
+    var outCreds = reconfigure(config);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mydomain.cloudant.com');
     done();
   });
 
-  it('gets URL by instance name from vcap containing single service', function(done) {
+  it('gets host by instance name from vcap containing single service', function(done) {
     var config = {instanceName: 'serviceA',
       vcapServices: {cloudantNoSQLDB: [
-      {name: 'serviceA', credentials: {url: 'http://mykey:mypassword@mydomain.cloudant.com'}}
+      {name: 'serviceA', credentials: {host: 'mydomain.cloudant.com'}}
       ]}};
-    var url = reconfigure(config);
-    url.should.be.a.String;
-    url.should.equal('http://mykey:mypassword@mydomain.cloudant.com');
+    var outCreds = reconfigure(config);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mydomain.cloudant.com');
     done();
   });
 
-  it('gets URL by instance name alias from vcap containing single service', function(done) {
+  it('gets host by instance name alias from vcap containing single service', function(done) {
     var config = { vcapInstanceName: 'serviceA', // alias of 'instanceName'
       vcapServices: { cloudantNoSQLDB: [
-        { name: 'serviceA', credentials: { url: 'http://mykey:mypassword@mydomain.cloudant.com' } }
+        { name: 'serviceA', credentials: { host: 'mydomain.cloudant.com' } }
       ]}
     };
-    var url = reconfigure(config);
-    url.should.be.a.String;
-    url.should.equal('http://mykey:mypassword@mydomain.cloudant.com');
+    var outCreds = reconfigure(config);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mydomain.cloudant.com');
     done();
   });
 
-  it('gets URL by service name and instance name from vcap containing single service', function(done) {
+  it('gets host by service name and instance name from vcap containing single service', function(done) {
     var config = {
       vcapServiceName: 'myNoSQLDB', vcapInstanceName: 'instanceA',
       vcapServices: { myNoSQLDB: [
-        { name: 'instanceA', credentials: { url: 'http://mykey:mypassword@mydomain.cloudant.com' } }
+        { name: 'instanceA', credentials: { host: 'mydomain.cloudant.com' } }
       ]}
     };
-    var url = reconfigure(config);
-    url.should.be.a.String;
-    url.should.equal('http://mykey:mypassword@mydomain.cloudant.com');
+    var outCreds = reconfigure(config);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mydomain.cloudant.com');
     done();
   });
 
-  it('gets first URL from vcap containing multiple services', function(done) {
+  it('gets first host from vcap containing multiple services', function(done) {
     var config = {vcapServices: {cloudantNoSQLDB: [
-      {credentials: {url: 'http://mykey:mypassword@mydomain.cloudant.com'}},
-      {credentials: {url: 'http://foo.bar'}},
-      {credentials: {url: 'http://foo.bar'}}
+      {credentials: {host: 'mydomain.cloudant.com'}},
+      {credentials: {host: 'foo.bar'}},
+      {credentials: {host: 'foo.bar'}}
     ]}};
-    var url = reconfigure(config);
-    url.should.be.a.String;
-    url.should.equal('http://mykey:mypassword@mydomain.cloudant.com');
+    var outCreds = reconfigure(config);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mydomain.cloudant.com');
     done();
   });
 
-  it('gets URL by instance name from vcap containing multiple services', function(done) {
+  it('gets host by instance name from vcap containing multiple services', function(done) {
     var config = {instanceName: 'serviceC',
       vcapServices: {cloudantNoSQLDB: [
-      {name: 'serviceA', credentials: {url: 'http://foo.bar'}},
-      {name: 'serviceB', credentials: {url: 'http://foo.bar'}},
-      {name: 'serviceC', credentials: {url: 'http://mykey:mypassword@mydomain.cloudant.com'}}
+      {name: 'serviceA', credentials: {host: 'foo.bar'}},
+      {name: 'serviceB', credentials: {host: 'foo.bar'}},
+      {name: 'serviceC', credentials: {host: 'mydomain.cloudant.com'}}
       ]}};
-    var url = reconfigure(config);
-    url.should.be.a.String;
-    url.should.equal('http://mykey:mypassword@mydomain.cloudant.com');
+    var outCreds = reconfigure(config);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://mydomain.cloudant.com');
+    done();
+  });
+
+  it('gets first IAM key from vcap containing single service', function(done) {
+    var config = {vcapServices: {cloudantNoSQLDB: [
+      {credentials: {apikey: '1234api', host: 'user-bluemix.cloudant.com'}}
+    ]}};
+    var outCreds = reconfigure(config);
+    outCreds.iamApiKey.should.be.a.String;
+    outCreds.iamApiKey.should.equal('1234api');
+    outCreds.outUrl.should.equal('https://user-bluemix.cloudant.com');
+    done();
+  });
+
+  it('gets first host from vcap containing multiple services', function(done) {
+    var config = {vcapServices: {cloudantNoSQLDB: [
+      {credentials: {apikey: 'a1234api', host: 'a-user-bluemix.cloudant.com'}},
+      {credentials: {host: 'foo.bar'}},
+      {credentials: {host: 'foo.bar'}}
+    ]}};
+    var outCreds = reconfigure(config);
+    outCreds.iamApiKey.should.be.a.String;
+    outCreds.iamApiKey.should.equal('a1234api');
+    outCreds.outUrl.should.equal('https://a-user-bluemix.cloudant.com');
+    done();
+  });
+
+  it('gets IAM key by instance name from vcap containing multiple services', function(done) {
+    var config = {instanceName: 'serviceB',
+      vcapServices: {cloudantNoSQLDB: [
+      {name: 'serviceA', credentials: {apikey: 'a1234api', host: 'a-user-bluemix.cloudant.com'}},
+      {name: 'serviceB', credentials: {apikey: 'b1234api', host: 'b-user-bluemix.cloudant.com'}},
+      {name: 'serviceC', credentials: {host: 'mydomain.cloudant.com'}}
+      ]}};
+    var outCreds = reconfigure(config);
+    outCreds.iamApiKey.should.be.a.String;
+    outCreds.iamApiKey.should.equal('b1234api');
+    outCreds.outUrl.should.equal('https://b-user-bluemix.cloudant.com');
     done();
   });
 
@@ -206,8 +244,8 @@ describe('Reconfigure', function() {
   it('errors for missing service in vcap', function(done) {
     var config = {instanceName: 'serviceC',
       vcapServices: {cloudantNoSQLDB: [
-      {name: 'serviceA', credentials: {url: 'http://foo.bar'}},
-      {name: 'serviceB', credentials: {url: 'http://foo.bar'}} // missing "serviceC"
+      {name: 'serviceA', credentials: {host: 'foo.bar'}},
+      {name: 'serviceB', credentials: {host: 'foo.bar'}} // missing "serviceC"
       ]}};
     should(function() { reconfigure(config); }).throw('Missing Cloudant service in vcapServices');
     done();
@@ -221,30 +259,35 @@ describe('Reconfigure', function() {
     done();
   });
 
-  it('errors for invalid service in vcap - missing url', function(done) {
+  it('errors for invalid service in legacy vcap - missing host', function(done) {
     var config = {vcapServices: {cloudantNoSQLDB: [
-      {name: 'serviceA', credentials: {}} // invalid service, missing url
+      {name: 'serviceA', credentials: {}} // invalid service, missing host
     ]}};
     should(function() { reconfigure(config); }).throw('Invalid Cloudant service in vcapServices');
     done();
   });
 
-  it('detects bad urls', function(done) {
-    var credentials = { url: 'invalid' };
-    var url = reconfigure(credentials);
-    assert.equal(url, null);
-    var credentials = { url: '' };
-    var url = reconfigure(credentials);
-    assert.equal(url, null);
-    var credentials = { url: 'http://' };
-    var url = reconfigure(credentials);
-    assert.equal(url, null);
+  it('errors for invalid service in vcap - missing host', function(done) {
+    var config = {vcapServices: {cloudantNoSQLDB: [
+      {name: 'serviceA', credentials: {apikey: 'a1234api'}} // invalid service, missing host
+    ]}};
+    should(function() { reconfigure(config); }).throw('Invalid Cloudant service in vcapServices');
+    done();
+  });
+
+  it('detects bad hosts', function(done) {
+    var credentials = { host: 'invalid' };
+    var outCreds = reconfigure(credentials);
+    assert.equal(outCreds.outUrl, null);
+    var credentials = { host: '' };
+    var outCreds = reconfigure(credentials);
+    assert.equal(outCreds.outUrl, null);
     var credentials = { };
-    var url = reconfigure(credentials);
-    assert.equal(url, null);
+    var outCreds = reconfigure(credentials);
+    assert.equal(outCreds.outUrl, null);
     var credentials = 'invalid';
-    var url = reconfigure(credentials);
-    assert.equal(url, null);
+    var outCreds = reconfigure(credentials);
+    assert.equal(outCreds.outUrl, null);
 
     done();
   });
