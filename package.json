@@ -46,8 +46,8 @@
     "eslint-plugin-react": "^7.0.0",
     "eslint-plugin-standard": "^3.0.1",
     "md5-file": "^3.2.3",
-    "mocha": "3.1.2",
-    "nock": "9.0.0",
+    "mocha": "^5.1.1",
+    "nock": "^9.2.5",
     "nsp": "^2.6.3",
     "should": "6.0.3",
     "uuid": "^3.0.1"
