@@ -300,28 +300,32 @@ describe('custom plugin', function() {
   before(onBefore);
   after(onAfter);
 
-  var doNothingPlugin = function(opts, callback) {
-    callback(null, { statusCode: 200 }, { ok: true });
-  };
-
   var defaultPlugin = function(opts, callback) {
     return request(opts, callback);
   };
 
   it('should allow custom plugins', function(done) {
-    var cloudant = Cloudant({ plugins: doNothingPlugin, account: ME, password: PASSWORD });
-    var db = cloudant.db.use(dbName);
-    db.info(function(err, data) {
+    var mocks = nock(SERVER)
+      .get('/')
+      .reply(200, { couchdb: 'Welcome', version: '1.0.2', cloudant_build: '2488' });
+
+    var cloudant = Cloudant({ plugins: defaultPlugin, account: ME, password: PASSWORD });
+    cloudant.ping(function(err, data) {
       assert.equal(err, null);
-      assert.ok(data.ok);
+      assert.equal(data.couchdb, 'Welcome');
+      mocks.done();
       done();
     });
   });
 
+  var defaultPlugin2 = function(opts, callback) {
+    return request(opts, callback);
+  };
+
   it('errors if multiple custom plugins are specified', function() {
     assert.throws(
       () => {
-        Cloudant({ plugins: [ doNothingPlugin, defaultPlugin ], account: ME, password: PASSWORD });
+        Cloudant({ plugins: [ defaultPlugin, defaultPlugin2 ], account: ME, password: PASSWORD });
       },
       /Using multiple legacy plugins is not permitted/,
       'did not throw with expected message'
