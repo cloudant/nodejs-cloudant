@@ -1,4 +1,4 @@
-// Copyright © 2015, 2017 IBM Corp. All rights reserved.
+// Copyright © 2015, 2018 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,17 +33,19 @@ function Cloudant(options, callback) {
     options = { url: options };
   }
 
-  var theurl = reconfigure(options);
-  if (theurl === null) {
+  var creds = reconfigure(options);
+  if (!creds || creds.outUrl === null) {
     var err = new Error('Invalid URL');
     if (callback) {
       return callback(err);
     } else {
       throw err;
     }
+  } else {
+    options.creds = creds;
   }
 
-  if (theurl.match(/^http:/)) {
+  if (creds.outUrl.match(/^http:/)) {
     options.https = false;
   }
 
@@ -53,7 +55,7 @@ function Cloudant(options, callback) {
     return cloudantClient.request(req, callback);
   };
 
-  var nanoOptions = { url: theurl, request: cloudantRequest, log: nanodebug };
+  var nanoOptions = { url: creds.outUrl, request: cloudantRequest, log: nanodebug };
   if (options.cookie) {
     nanoOptions.cookie = options.cookie; // legacy - sets 'X-CouchDB-WWW-Authenticate' header
   }
