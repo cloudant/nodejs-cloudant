@@ -1224,9 +1224,8 @@ describe('Retry Plugin', function() {
 
         var startTs = (new Date()).getTime();
         cloudantClient.request(req, function(err, resp, data) {
-          assert.equal(err, null);
-          assert.equal(resp.statusCode, 500);
-          assert.ok(data.indexOf('"error":"internal_server_error"') > -1);
+          assert.equal(err.code, 'ECONNRESET');
+          assert.equal(err.message, 'socket hang up');
         })
           .on('error', function(err) {
             assert.equal(err.code, 'ECONNRESET');
