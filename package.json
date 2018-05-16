@@ -46,14 +46,14 @@
     "eslint-plugin-react": "^7.0.0",
     "eslint-plugin-standard": "^3.0.1",
     "md5-file": "^3.2.3",
-    "mocha": "3.1.2",
-    "nock": "9.0.0",
-    "nsp": "^2.6.3",
+    "mocha": "^5.1.1",
+    "nock": "^9.2.5",
     "should": "6.0.3",
+    "typescript": "^2.8.3",
     "uuid": "^3.0.1"
   },
   "scripts": {
-    "test": "eslint --ignore-path .eslintignore . && mocha && npm run dtslint && nsp check",
+    "test": "eslint --ignore-path .eslintignore . && mocha --exit && npm run dtslint && npm audit",
     "test-verbose": "env DEBUG='*,-mocha:*' npm run test",
     "test-live": "NOCK_OFF=true mocha",
     "test-live-verbose": "env DEBUG='*,-mocha:*' npm run test-live",

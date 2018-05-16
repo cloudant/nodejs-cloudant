@@ -1224,7 +1224,7 @@ describe('CookieAuth Plugin', function() {
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
         if (!process.env.NOCK_OFF) {
-          assert.equal(resp.request.headers.cookie, MOCK_COOKIE);
+          assert.equal(resp.request.headers.cookie, MOCK_COOKIE_2);
         }
         assert.equal(resp.request.uri.auth, null);
         assert.equal(resp.statusCode, 200);
