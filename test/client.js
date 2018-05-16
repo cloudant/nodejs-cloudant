@@ -1327,20 +1327,21 @@ describe('CloudantClient', function() {
     describe('with no other plugins', function() {
       it('performs request and returns response with promise client', function(done) {
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 1});
+            .get(`${DBNAME}/${DOCID}`)
+            .reply(200, { _id: DOCID, _rev: '1-xxxxxx', foo: 'bar' });
 
         var cloudantClient = new Client({ plugins: 'promises' });
         assert.equal(cloudantClient._plugins.length, 0);
         assert.ok(cloudantClient._cfg.usePromises);
 
         var options = {
-          url: SERVER + DBNAME,
+          url: SERVER + DBNAME + '/' + DOCID,
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
         var p = cloudantClient.request(options).then(function(data) {
-          assert.equal(data.doc_count, 1);
+          assert.equal(Object.keys(data).length, 3);
+          assert.equal(data.foo, 'bar');
           mocks.done();
           done();
         }).catch(function(err) {
