@@ -12,7 +12,7 @@ pattern. All existing plugins included with this library have been rewritten
 to support the new implementation.
 
 Plugins must be passed via the `plugins` parameter in the Cloudant client
-constructor.
+constructor (formerly known as `plugin`).
 
 The library continues to support legacy plugins. They can be used in conjunction
 with new plugins. Your plugins list may contain any number of new plugins but
@@ -25,7 +25,7 @@ status codes as well as any request errors (such as connection reset errors).
 Example:
 - __Old__ plugin configuration:
   ```js
-  var cloudant = new Cloudant({ url: myUrl, plugins: 'retry', retryAttempts: 5, retryTimeout: 1000 });
+  var cloudant = new Cloudant({ url: myUrl, plugin: 'retry', retryAttempts: 5, retryTimeout: 1000 });
   ```
 - __New__ plugin configuration _(to mimic 1.x 429 `retry` behavior)_:
   ```js
