@@ -920,27 +920,27 @@ If your server enforces the use of TLS 1.2 then the nodejs-cloudant client will 
 
 ### Pool size and open sockets
 
-A very important configuration parameter if you have a high traffic website and are using Cloudant is setting up the `pool.size`. By default, the node.js https global agent (client) has a certain size of active connections that can run simultaneously, while others are kept in a queue. Pooling can be disabled by setting the `agent` property in `requestDefaults` to false, or adjust the global pool size using:
+A very important configuration parameter if you have a high traffic website and are using Cloudant
+is setting up the pool size. By default, the nodejs-cloudant agent is configured to use a maximum of
+6 sockets.
+
+You can change the maximum number of sockets by passing a custom agent to `requestDefaults`.
+
+Here is an example where the agent is configured with a maximum of 50 sockets and a keep-alive time
+of 30s:
 
 ~~~ js
-var https = require('https')
-https.globalAgent.maxSockets = 20
-~~~
-
-You can also increase the size in your calling context using `requestDefaults` if this is problematic. refer to the [Request][request] documentation and examples for further clarification.
-
-Here is an example of explicitly using the keep alive agent (installed using `npm install agentkeepalive`), especially useful to limit your open sockets when doing high-volume access to Cloudant:
-
-~~~ js
-var HttpsAgent = require('agentkeepalive').HttpsAgent;
-var myagent = new HttpsAgent({
-    maxSockets: 50,
-    maxKeepAliveRequests: 0,
-    maxKeepAliveTime: 30000
-  });
+var protocol = require('https');
+var myagent = new protocol.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50
+});
 var cloudant = require('@cloudant/cloudant')({account:"me", password:"secret", requestDefaults:{agent:myagent}});
 // Using Cloudant with myagent...
 ~~~
+
+For more details, refer to the [Request][request] documentation and examples.
 
 ### Extending the Cloudant Library
 
