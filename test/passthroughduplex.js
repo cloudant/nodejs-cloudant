@@ -71,11 +71,18 @@ describe('Pass Through Duplex', function() {
 
   it('captures pipe event', function(done) {
     var duplex = new PassThroughDuplex();
+    var readable = new stream.Readable();
+
+    readable._read = function noop() {
+      this.push(null);
+    };
+
+    readable.pipe(duplex.passThroughReadable);
 
     duplex.on('pipe', function() {
       done();
     });
 
-    process.stdin.pipe(duplex);
+    readable.pipe(duplex);
   });
 });
