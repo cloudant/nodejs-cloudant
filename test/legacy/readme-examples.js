@@ -160,7 +160,7 @@ describe('Password authentication', function() {
   });
   before(function() {
     if (process.env.NOCK_OFF) {
-      this.skip();
+      return this.skip();
     }
     mocks = nock(SERVER)
       .post('/_session').reply(200, {ok:true})
@@ -193,7 +193,7 @@ describe('Authorization and API Keys', function() {
   });
   before(function() {
     if (process.env.NOCK_OFF) {
-      this.skip();
+      return this.skip();
     }
     mocks = nock(SERVER)
       .post('/_api/v2/api_keys')
@@ -257,8 +257,15 @@ describe('Authorization and API Keys', function() {
 
 describe('CORS', function() {
   var mocks;
-  after(function() { mocks.done(); });
+  after(function() {
+    if (!process.env.NOCK_OFF) {
+      mocks.done();
+    }
+  });
   before(function() {
+    if (process.env.NOCK_OFF) {
+      return this.skip();
+    }
     mocks = nock(SERVER)
       .put('/_api/v2/user/config/cors')
       .reply(200, {ok: true})
@@ -314,8 +321,15 @@ describe('CORS', function() {
 
 describe('Virtual Hosts', function() {
   var mocks;
-  after(function() { mocks.done(); });
+  after(function() {
+    if (!process.env.NOCK_OFF) {
+      mocks.done();
+    }
+  });
   before(function() {
+    if (process.env.NOCK_OFF) {
+      return this.skip();
+    }
     mocks = nock(SERVER)
       .post('/_api/v2/user/virtual_hosts')
       .reply(200, {ok: true})

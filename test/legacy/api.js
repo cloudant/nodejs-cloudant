@@ -68,7 +68,7 @@ describe('Initialization', function() {
 
   it('should detect missing cloudant', function(done) {
     if (process.env.NOCK_OFF) {
-      this.skip();
+      return this.skip();
     }
 
     var mocks = nock(SERVER)
@@ -111,6 +111,12 @@ describe('Initialization', function() {
 });
 
 describe('Authentication', function() {
+  before(function() {
+    if (process.env.NOCK_OFF) {
+      return this.skip();
+    }
+  });
+
   it('supports Authentication API - POST /_api/v2/api_keys', function(done) {
     var mocks = nock(SERVER)
       .post('/_api/v2/api_keys').reply(200, { 'password': 'Eivln4jPiLS8BoTxjXjVukDT', 'ok': true, 'key': 'thandoodstrenterprourete' });
@@ -133,6 +139,13 @@ describe('Authentication', function() {
 });
 
 describe('CORS', function() {
+
+  before(function() {
+    if (process.env.NOCK_OFF) {
+      return this.skip();
+    }
+  });
+
   it('supports CORS API - GET /_api/v2/user/config/cors', function(done) {
     var mocks = nock(SERVER)
       .get('/_api/v2/user/config/cors').reply(200, { 'enable_cors': true, 'allow_credentials': true, 'origins': ['*']});
@@ -174,6 +187,10 @@ describe('Authorization', function() {
   var dbName;
 
   before(function(done) {
+    if (process.env.NOCK_OFF) {
+      return this.skip();
+    }
+
     const unique = uuid();
     dbName = 'nodejs_cloudant_test_' + unique;
     var mocks = nock(SERVER)
@@ -222,6 +239,10 @@ describe('Authorization', function() {
   });
 
   after(function(done) {
+    if (process.env.NOCK_OFF) {
+      return done();
+    }
+
     var mocks = nock(SERVER)
       .delete('/' + dbName).reply(200, { 'ok': true });
 
@@ -562,7 +583,7 @@ describe('Changes follower', function() {
 
   it('supports since="now"', function(done) {
     if (process.env.NOCK_OFF) {
-      this.skip();
+      return this.skip();
     }
 
     var docId = firstChange.id;
@@ -965,6 +986,12 @@ function test_gzip() {
 
 describe('Virtual Hosts', function() {
   var myHost = `${uuid()}.myhost.com`;
+
+  before(function() {
+    if (process.env.NOCK_OFF) {
+      return this.skip();
+    }
+  });
 
   it('supports virtual hosts API - GET /_api/v2/user/virtual_hosts', function(done) {
     var mocks = nock(SERVER)
