@@ -53,7 +53,7 @@
     "uuid": "^3.0.1"
   },
   "scripts": {
-    "test": "eslint --ignore-path .eslintignore . && mocha --exit && npm run dtslint && npm audit",
+    "test": "eslint --ignore-path .eslintignore . && mocha && npm run dtslint && npm audit",
     "test-verbose": "env DEBUG='*,-mocha:*' npm run test",
     "test-live": "NOCK_OFF=true mocha",
     "test-live-verbose": "env DEBUG='*,-mocha:*' npm run test-live",
