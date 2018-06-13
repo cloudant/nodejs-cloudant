@@ -148,6 +148,12 @@ var Cloudant = require('@cloudant/cloudant')
 var cloudant = Cloudant("http://MYUSERNAME:MYPASSWORD@localhost:5984");
 ~~~
 
+**Note**: If you pass in a `username`, `password`, and `url` that contains credentials, the `username` and `password` will supercede the credentials within the `url`.  For example, `myusername` and `mypassword` will be used in the code below during authentication:
+~~~ js
+var Cloudant = require('@cloudant/cloudant')
+var cloudant = Cloudant({username:'myusername', password:'mypassword', url:'http://user:pass@localhost:5984'});
+~~~
+
 #### 2. Using account credentials:
 
 ##### 2.1. Connecting to Cloudant
