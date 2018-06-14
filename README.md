@@ -361,7 +361,7 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ 'iamauth', {
 
    For example:
    ```js
-   var cloudant = new Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx' } } });
+   var cloudant = new Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx' } } });
    var mydb = cloudant.db.use('mydb');
    mydb.get('mydoc', function(err, data) {
      console.log(`Document contents: ${data.toString('utf8')}`);
