@@ -62,6 +62,23 @@ describe('Reconfigure', function() {
     done();
   });
 
+  // Issue cloudant/nodejs-cloudant#323
+  it('allows a username, a password, and url to be passed in', function(done) {
+    var credentials = { username: 'myusername', password: 'mypassword', url: 'http://localhost:8081' };
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('http://myusername:mypassword@localhost:8081');
+    done();
+  });
+
+  it('allows a username and password to supersede credentials supplied in a url', function(done) {
+    var credentials = { username: 'myusername', password: 'mypassword', url: 'http://user:pass@localhost:8081' };
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('http://myusername:mypassword@localhost:8081');
+    done();
+  });
+
   it('allows a key and an full domain and a password to be passed in', function(done) {
     var credentials = { account: 'myaccount.cloudant.com', password: 'mypassword', key: 'mykey'};
     var outCreds = reconfigure(credentials);

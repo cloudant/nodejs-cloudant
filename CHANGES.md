@@ -1,4 +1,5 @@
 # UNRELEASED
+- [FIXED] Case where `username` and `password` options were not used if a `url` was supplied.
 
 # 2.3.0 (2018-06-08)
 - [FIXED] Removed addition of `statusCode` to response objects returned by promises.
