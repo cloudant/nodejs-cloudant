@@ -246,6 +246,15 @@ describe('Reconfigure', function() {
     done();
   });
 
+  // Issue cloudant/nodejs-cloudant#327
+  it('allows a vcap_services basic-auth url', function(done) {
+    var credentials = { vcapServices: {"cloudantNoSQLDB":[{"credentials":{"username":"x","password":"y","host":"z.cloudant.com","port":443,"url":"https://x:y@z.cloudant.com"},"syslog_drain_url":null,"volume_mounts":[],"label":"cloudantNoSQLDB","provider":null,"plan":"Shared","name":"iot-cloudantNoSQLDB","tags":["data_management","ibm_created","lite","ibm_dedicated_public"]}]} };
+    var outCreds = reconfigure(credentials);
+    outCreds.outUrl.should.be.a.String;
+    outCreds.outUrl.should.equal('https://x:y@z.cloudant.com');
+    done();
+  });
+
   it('errors for empty vcap', function(done) {
     var config = {vcapServices: {}};
     should(function() { reconfigure(config); }).throw('Missing Cloudant service in vcapServices');
