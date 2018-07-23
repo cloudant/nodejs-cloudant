@@ -67,6 +67,26 @@ describe('Cloudant', function() {
     });
   });
 
+  describe('nano setup', function() {
+    it('passes the parseUrl flag value true', function() {
+      var cloudant = Cloudant({ account: ME, password: PASSWORD, parseUrl: true });
+
+      assert.equal(cloudant.config.parseUrl, true);
+    });
+
+    it('passes the parseUrl flag value false', function() {
+      var cloudant = Cloudant({ account: ME, password: PASSWORD, parseUrl: false });
+
+      assert.equal(cloudant.config.parseUrl, false);
+    });
+
+    it('uses undefined as default for parseUrl', function() {
+      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+
+      assert.equal(cloudant.config.parseUrl, undefined);
+    });
+  });
+
   describe('set_security', function() {
     it('add _reader nobody role', function(done) {
       var security = { cloudant: { nobody: [ '_reader' ] } };

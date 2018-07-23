@@ -923,6 +923,20 @@ var cloudant = require('@cloudant/cloudant')(opts);
 
 ~~~
 
+You can also pass the `parseUrl` option to Nano.
+
+~~~ js
+
+// Pass the parseUrl option to Nano.
+var options =
+  { "account"         : "my_account"
+  , "password"        : "secret"
+  , "parseUrl": false
+  }
+var cloudant = require('@cloudant/cloudant')(opts);
+
+~~~
+
 Please check [Request][request] for more information on the defaults. They support features like cookie jar, proxies, ssl, etc.
 
 ### TLS 1.2 Support

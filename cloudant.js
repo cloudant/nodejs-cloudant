@@ -55,7 +55,7 @@ function Cloudant(options, callback) {
     return cloudantClient.request(req, callback);
   };
 
-  var nanoOptions = { url: creds.outUrl, request: cloudantRequest, log: nanodebug };
+  var nanoOptions = { url: creds.outUrl, request: cloudantRequest, log: nanodebug, parseUrl: options.parseUrl };
   if (options.cookie) {
     nanoOptions.cookie = options.cookie; // legacy - sets 'X-CouchDB-WWW-Authenticate' header
   }

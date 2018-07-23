@@ -1,6 +1,7 @@
 # UNRELEASED
 - [FIXED] Case where `username` and `password` options were not used if a `url` was supplied.
 - [FIXED] Case where vcapServices was supplied with a basic-auth url
+- [NEW] Add parseUrl flag for nano.
 
 # 2.3.0 (2018-06-08)
 - [FIXED] Removed addition of `statusCode` to response objects returned by promises.
