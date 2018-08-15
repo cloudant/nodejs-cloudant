@@ -63,20 +63,10 @@ def setupNodeAndTest(version, testSuite='test') {
   }
 }
 
-String getVersionFromPackageJson() {
-  packageInfo = readJSON file: 'package.json'
-  return packageInfo.version
-}
-
-String version = null;
-boolean isReleaseVersion = false;
-
 stage('Build') {
   // Checkout, build
   node {
     checkout scm
-    version = getVersionFromPackageJson();
-    isReleaseVersion = !version.toUpperCase(Locale.ENGLISH).contains('SNAPSHOT')
     sh 'npm install'
     stash name: 'built'
   }
@@ -98,9 +88,13 @@ stage('QA: Node') {
 stage('Publish') {
   if (env.BRANCH_NAME == "master") {
     node {
-      checkout scm // re-checkout to be able to git tag
+      unstash 'built'
 
-      // Upload using the ossrh creds (upload destination logic is in build.gradle)
+      def v = com.ibm.cloudant.integrations.VersionHelper.readVersion(this, 'package.json')
+      String version = v.version
+      boolean isReleaseVersion = v.isReleaseVersion
+
+      // Upload using the NPM creds
       withCredentials([string(credentialsId: 'npm-mail', variable: 'NPM_EMAIL'),
                        usernamePassword(credentialsId: 'npm-creds', passwordVariable: 'NPM_PASS', usernameVariable: 'NPM_USER')]) {
         // Actions:
@@ -115,37 +109,12 @@ stage('Publish') {
           npm publish ${isReleaseVersion ? '' : '--tag snapshot'}
         """
       }
-
-      // if it is a release build then do the git tagging
-      if (isReleaseVersion) {
-
-        // Read the CHANGES.md to get the tag message
-        tagMessage = ''
-        for (line in readFile('CHANGES.md').readLines()) {
-          if (!''.equals(line)) {
-            // append the line to the tagMessage
-            tagMessage = "${tagMessage}${line}\n"
-          } else {
-            break
-          }
-        }
-
-        // Use git to tag the release at the version
-        try {
-          // Awkward workaround until resolution of https://issues.jenkins-ci.org/browse/JENKINS-28335
-          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'github-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
-            sh "git config user.email \"nomail@hursley.ibm.com\""
-            sh "git config user.name \"Jenkins CI\""
-            sh "git config credential.username ${env.GIT_USERNAME}"
-            sh "git config credential.helper '!echo password=\$GIT_PASSWORD; echo'"
-            sh "git tag -a ${version} -m '${tagMessage}'"
-            sh "git push origin ${version}"
-          }
-        } finally {
-          sh "git config --unset credential.username"
-          sh "git config --unset credential.helper"
-        }
-      }
     }
+  }
+
+  // Run the gitTagAndPublish which tags/publishes to github for release builds
+  gitTagAndPublish {
+      versionFile='package.json'
+      releaseApiUrl='https://api.github.com/repos/cloudant/nodejs-cloudant/releases'
   }
 }
