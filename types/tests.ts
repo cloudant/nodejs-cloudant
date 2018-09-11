@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import cloudant = require("@cloudant/cloudant");
-import nano = require("nano");
+/* tslint:disable:no-empty */
+import cloudant = require('@cloudant/cloudant');
+import nano = require('nano');
 
 /*
  * Instantiate with configuration object
  */
 const config: cloudant.Configuration = {
-  account: "my-cloudant-account",
-  password: "my-password",
-  plugins: 'retry',
-  maxAttempt: 3
+  account: 'my-cloudant-account',
+  maxAttempt: 3,
+  password: 'my-password',
+  plugins: 'retry'
 };
 
 const cfgInstance = cloudant(config);
@@ -34,23 +35,23 @@ cloudant(config, (error, client, pong) => {
   if (error) {
     return;
   } else if (client) {
-    client.db.list((error, allDbs) => {});
+    client.db.list((err, allDbs) => {});
   }
 });
 
 /*
  * Server Scope
  */
-const instance = cloudant("http://localhost:5984");
+const instance = cloudant('http://localhost:5984');
 
 instance.ping((pong) => {});
 
 instance.generate_api_key((error, key) => {});
 
 const cors: cloudant.CORS = {
-  enable_cors: true,
   allow_credentials: true,
-  origins: ["*"]
+  enable_cors: true,
+  origins: ['*']
 };
 
 instance.set_cors(cors, (error, data) => {});
@@ -69,7 +70,7 @@ instance.delete_virtual_host(virtualHost, (error, resp) => {});
  * Document Scope
  */
 
-const mydb: cloudant.DocumentScope<{}> = instance.use("mydb");
+const mydb: cloudant.DocumentScope<{}> = instance.use('mydb');
 
 const docs: nano.BulkModifyDocsWrapper = {
   docs: [ { id: 'doc1' }, { id: 'doc2' } ]
@@ -90,7 +91,7 @@ const params: cloudant.SearchParams = {
   q: 'bird:*'
 };
 
-mydb.search("design", "doc", params, (err, resp) => {});
+mydb.search('design', 'doc', params, (err, resp) => {});
 
 const geoParams: cloudant.GeoParams = {
   include_docs: true,
@@ -98,7 +99,7 @@ const geoParams: cloudant.GeoParams = {
   lon: 28.00
 };
 
-mydb.geo('design', "docname", geoParams, (err, result) => {});
+mydb.geo('design', 'docname', geoParams, (err, result) => {});
 
 const myIndex = {
   index: { fields: [ 'foo' ] },
