@@ -53,7 +53,7 @@ def setupNodeAndTest(version, testSuite='test') {
             nvm install ${version}
             nvm use ${version}
             npm install mocha-jenkins-reporter --save-dev
-            ./node_modules/mocha/bin/mocha --timeout $MOCHA_TIMEOUT --reporter mocha-jenkins-reporter --reporter-options junit_report_path=./${testSuite}/test-results.xml,junit_report_stack=true,junit_report_name=${testSuite} ${testSuite}
+            ./node_modules/mocha/bin/mocha --timeout $MOCHA_TIMEOUT --reporter mocha-jenkins-reporter --reporter-options junit_report_path=./${testSuite}/test-results.xml,junit_report_stack=true,junit_report_name=${testSuite} ${testSuite} --grep 'Virtual Hosts' --invert
           """
         } finally {
           junit '**/test-results.xml'
@@ -72,16 +72,21 @@ stage('Build') {
   }
 }
 
-stage('QA: Node6x') {
-  setupNodeAndTest('lts/boron') // 6.x LTS
-}
-
-stage('QA: Node8x') {
-  setupNodeAndTest('lts/carbon') //8.x LTS
-}
-
-stage('QA: Node') {
-  setupNodeAndTest('node') // Current
+stage('QA') {
+  parallel([
+    Node6x : {
+      // 6.x LTS
+      setupNodeAndTest('lts/boron')
+     },
+    Node8x : {
+      //8.x LTS
+      setupNodeAndTest('lts/carbon')
+    },
+    Node : {
+      // Current
+      setupNodeAndTest('node')
+    },
+  ])
 }
 
 // Publish the master branch
