@@ -28,8 +28,8 @@
 require('dotenv').config({silent: true});
 
 var should = require('should');
-
 var nock = require('../nock.js');
+const uuid = require('uuid/v4');
 var ME = process.env.cloudant_username || 'nodejs';
 var PASSWORD = process.env.cloudant_password || 'sjedon';
 var SERVER = 'https://' + ME + '.cloudant.com';
@@ -43,13 +43,15 @@ require = function(module) {
 
 // Disable console.log
 var console = { log: function() {} };
+const alice = `nodejs_cloudant_test_${uuid()}`
+const my_db = `nodejs_cloudant_test_${uuid()}`
 
 describe('Getting Started', function() {
   var mocks;
   after(function(done) {
     var Cloudant = require('@cloudant/cloudant');
     var cloudant = Cloudant({account: ME, password: PASSWORD, plugins: 'retry'});
-    cloudant.db.destroy('alice', function(er, d) {
+    cloudant.db.destroy(alice, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
       d.should.have.a.property('ok');
@@ -62,10 +64,10 @@ describe('Getting Started', function() {
   before(function() {
     mocks = nock(SERVER)
       .get('/_all_dbs').reply(200, ['database_changes', 'third_party_db'])
-      .delete('/alice').reply(404, {error: 'not_found', reason: 'Database does not exist.'})
-      .put('/alice').reply(201, {ok: true})
-      .put('/alice/rabbit').reply(201, {ok: true, id: 'rabbit', rev: '1-6e4cb465d49c0368ac3946506d26335d'})
-      .delete('/alice').reply(200, {ok: true});
+      .delete(`/${alice}`).reply(404, {error: 'not_found', reason: 'Database does not exist.'})
+      .put(`/${alice}`).reply(201, {ok: true})
+      .put(`/${alice}/rabbit`).reply(201, {ok: true, id: 'rabbit', rev: '1-6e4cb465d49c0368ac3946506d26335d'})
+      .delete(`/${alice}`).reply(200, {ok: true});
   });
 
   it('Example 1', function(done) {
@@ -95,14 +97,14 @@ describe('Getting Started', function() {
     var cloudant = Cloudant({account: username, password: password, plugins: 'retry'});
 
     // Remove any existing database called "alice".
-    cloudant.db.destroy('alice', function(err) {
+    cloudant.db.destroy(alice, function(err) {
       // Create a new "alice" database.
-      cloudant.db.create('alice', function() {
+      cloudant.db.create(alice, function() {
         // Specify the database we are going to use (alice)...
-        var alice = cloudant.db.use('alice');
+        var aliceDb = cloudant.db.use(alice);
 
         // ...and insert a document in it.
-        alice.insert({ crazy: true }, 'rabbit', function(err, body, header) {
+        aliceDb.insert({ crazy: true }, 'rabbit', function(err, body, header) {
           if (err) {
             return console.log('[alice.insert] ', err.message);
           }
@@ -369,15 +371,15 @@ describe('Cloudant Query', function() {
   var mocks;
   before(function() {
     mocks = nock(SERVER)
-      .put('/my_db')
+      .put(`/${my_db}`)
       .reply(200, {ok: true})
-      .get('/my_db/_index')
+      .get(`/${my_db}/_index`)
       .reply(200, {indexes: [ {name: '_all_docs', type: 'special', def: {fields: [{_id: 'asc'}]}} ]})
-      .post('/my_db/_index')
+      .post(`/${my_db}/_index`)
       .reply(200, { result: 'created', id: '_design/778580d5684fd367424e39735f7857f2e9fb0eb9', name: 'first-name' })
-      .post('/my_db/_find')
+      .post(`/${my_db}/_find`)
       .reply(200, {docs: []})
-      .delete('/my_db')
+      .delete(`/${my_db}`)
       .reply(200, {ok: true});
   });
 
@@ -385,14 +387,14 @@ describe('Cloudant Query', function() {
   before(function(done) {
     var Cloudant = require('@cloudant/cloudant');
     cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: 'retry'});
-    cloudant.db.create('my_db', function(er) {
+    cloudant.db.create(my_db, function(er) {
       if (er) throw er;
-      db = cloudant.db.use('my_db');
+      db = cloudant.db.use(my_db);
       done();
     });
   });
   after(function(done) {
-    cloudant.db.destroy('my_db', function(er) {
+    cloudant.db.destroy(my_db, function(er) {
       if (er) throw er;
       mocks.done();
       done();
@@ -429,7 +431,7 @@ describe('Cloudant Query', function() {
   });
 
   it('Example 3', function(done) {
-    db.find({selector: {name: 'Alice'}}, function(er, result) {
+    db.find({selector: {name: alice}}, function(er, result) {
       if (er) {
         throw er;
       }
@@ -449,17 +451,17 @@ describe('Cloudant Search', function() {
   var mocks;
   before(function() {
     mocks = nock(SERVER)
-      .put('/my_db')
+      .put(`/${my_db}`)
       .reply(200, {ok: true})
-      .post('/my_db/_bulk_docs')
+      .post(`/${my_db}/_bulk_docs`)
       .reply(200, [ { id: '764de7aeca95c27fdd7fb6565dcfc0fe', rev: '1-eadaf74c0058257fcb498c3017dde3e5' },
                     { id: '764de7aeca95c27fdd7fb6565dcfc4f5', rev: '1-c22d5563f4b9cddde6f26a47cd1ce88f' },
                     { id: '764de7aeca95c27fdd7fb6565dcfc727', rev: '1-86039ff130d36c08a71b3f293fd4ea7e' }])
-      .post('/my_db')
+      .post(`/${my_db}`)
       .reply(200, { ok: true, id: '_design/library', rev: '1-cdbb57f890d060055b7fb8cb07628068' })
-      .get('/my_db/_design/library/_search/books').query(true)
+      .get(`/${my_db}/_design/library/_search/books`).query(true)
       .reply(200, {total_rows: 2, rows: [{id: '764de7aeca95c27fdd7fb6565dcfc0fe'}, {id: '764de7aeca95c27fdd7fb6565dcfc727'}]})
-      .delete('/my_db')
+      .delete(`/${my_db}`)
       .reply(200, {ok: true});
   });
 
@@ -467,14 +469,14 @@ describe('Cloudant Search', function() {
   before(function(done) {
     var Cloudant = require('@cloudant/cloudant');
     cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: 'retry'});
-    cloudant.db.create('my_db', function(er) {
+    cloudant.db.create(my_db, function(er) {
       if (er) throw er;
-      db = cloudant.db.use('my_db');
+      db = cloudant.db.use(my_db);
       done();
     });
   });
   after(function(done) {
-    cloudant.db.destroy('my_db', function(er) {
+    cloudant.db.destroy(my_db, function(er) {
       if (er) throw er;
       mocks.done();
       done();
@@ -554,7 +556,7 @@ describe('Cookie Authentication', function() {
   after(function(done) {
     var Cloudant = require('@cloudant/cloudant');
     cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: []});
-    cloudant.db.destroy('alice', function() {
+    cloudant.db.destroy(alice, function() {
       mocks.done();
       done();
     });
@@ -562,14 +564,14 @@ describe('Cookie Authentication', function() {
   before(function(done) {
     mocks = nock(SERVER)
       .post('/_session').reply(200, { ok: true, name: ME, roles: [] }, {'set-cookie': ['AuthSession=bm9kZWpzOjU1RTA1NDdEOsUsoq9lykQCEBhwTpIyEbgmYpvX; Version=1; Expires=Sat, 29 Aug 2015 12:30:53 GMT; Max-Age=86400; Path=/; HttpOnly; Secure']})
-      .put('/alice').reply(200, { ok: true })
-      .post('/alice').reply(200, { ok: true, id: '72e0367f3e195340e239948164bbb7e7', rev: '1-feb5539029f4fc50dc3f827b164a2088' })
+      .put(`/${alice}`).reply(200, { ok: true })
+      .post(`/${alice}`).reply(200, { ok: true, id: '72e0367f3e195340e239948164bbb7e7', rev: '1-feb5539029f4fc50dc3f827b164a2088' })
       .get('/_session').reply(200, {ok: true, userCtx: {name: ME, roles: ['_admin', '_reader', '_writer']}})
-      .delete('/alice').reply(200, {ok: true});
+      .delete(`/${alice}`).reply(200, {ok: true});
 
     var Cloudant = require('@cloudant/cloudant');
     cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: []});
-    cloudant.db.create('alice', function() {
+    cloudant.db.create(alice, function() {
       done();
     });
   });
@@ -611,8 +613,8 @@ describe('Cookie Authentication', function() {
     var username = ME; // Set this to your own account
     var other_cloudant = Cloudant({account: username, cookie: cookies[username], plugins: []});
 
-    var alice = other_cloudant.db.use('alice');
-    alice.insert({'I use cookies': true}, function(er, body, headers) {
+    var aliceDb = other_cloudant.db.use(alice);
+    aliceDb.insert({'I use cookies': true}, function(er, body, headers) {
       if (er) {
         return console.log('Failed to insert into alice database: ' + er.message);
       }
