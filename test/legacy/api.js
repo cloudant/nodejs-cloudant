@@ -611,7 +611,7 @@ describe('Cloudant Query', function() {
 
   before(function(done) {
     const unique = uuid();
-    dbName = 'couchbackup_test_' + unique;
+    dbName = 'nodejs_cloudant_test_' + unique;
     var mocks = nock(SERVER)
       .put('/' + dbName).reply(200, { 'ok': true });
 
@@ -942,7 +942,7 @@ if (!process.env.NOCK_OFF) {
 }
 function test_gzip() {
   it('checks that the zipped response is unzipped', function(done) {
-    var dbName = 'mydb';
+    var dbName = `nodejs_cloudant_test_${uuid()}`;
     var mocks = nock(SERVER)
       .get('/' + dbName + '/x/y.css').replyWithFile(200, __dirname + '/y.css.gz', {
         'content-encoding': 'gzip',
