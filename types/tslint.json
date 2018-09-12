@@ -1,6 +1,12 @@
 {
-  "extends": "dtslint/dtslint.json",
-  "rules": {
-    "no-implicit-dependencies": false
-  }
+  "extends": "tslint:recommended",
+    "rules": {
+        "quotemark": [
+            true,
+            "single",
+            "avoid-escape"
+        ],
+        "no-implicit-dependencies": false,
+        "trailing-comma": true
+    }
 }
