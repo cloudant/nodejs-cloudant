@@ -87,13 +87,46 @@ declare namespace cloudant {
         name: string;
     }
 
+    // https://console.bluemix.net/docs/services/Cloudant/api/search.html#queries
     interface SearchParams {
-        q: string;
-        include_docs?: boolean;
+        // A bookmark that was received from a previous search. Used for pagination.
         bookmark?: string;
+        // An array of field names for which facet counts are requested.
+        counts?: string[];
+        // Filters the result set using key value pairs supplied to the drilldown parameter.
+        drilldown?: string[];
+        // The name of a string field to group results by.
+        group_field?: string;
+        // The maximum group count when used in conjunction with group_field.
+        group_limit?: number;
+        // Defines the order of the groups in a search when used with group_field.
+        group_sort?: string | string[];
+        // Which fields are to be highlighted.
+        highlight_fields?: string[];
+        // String used before a highlighted word. Defaults to <em>.
+        highlight_pre_tag?: string;
+        // String used after a highlighted word. Defaults to </em>.
+        highlight_post_tag?: string;
+        // The number of gradments that are returned in highlights. Defaults to 1.
+        highlight_number?: number;
+        // The number of characters in each fragment for highlight. Defaults to 100.
+        highlight_size?: number;
+        // Include the full document bodies in the response. Defaults to false
+        include_docs?: boolean;
+        // An array of fields to include in the search results.
+        include_fields?: string[];
+        // The maximum number of returned documents. Positive integer up to 200.
         limit?: number;
-        skip?: number;
-        stale?: string;
+        // Alias of 'query'. One of q or query must be present.
+        q?: string;
+        // The Lucene query to perform. One of q or query must be present.
+        query?: string;
+        // Defines ranges for faceted numeric search fields.
+        ranges?: object;
+        // Specifies the sort order of the results.
+        sort?: string | string[];
+        // Do not wait for the index to finish building to return results.
+        stale?: boolean;
     }
 
     interface Security {
