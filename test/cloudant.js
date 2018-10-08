@@ -26,7 +26,7 @@ const PASSWORD = process.env.cloudant_password || 'sjedon';
 const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 const DBNAME = `nodejs-cloudant-${uuidv4()}`;
 
-describe('Cloudant', function() {
+describe('Cloudant #db', function() {
   before(function(done) {
     var mocks = nock(SERVER)
       .put(`/${DBNAME}`)

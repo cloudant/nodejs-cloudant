@@ -46,7 +46,7 @@ var console = { log: function() {} };
 const alice = `nodejs_cloudant_test_${uuid()}`
 const my_db = `nodejs_cloudant_test_${uuid()}`
 
-describe('Getting Started', function() {
+describe('#db Getting Started', function() {
   var mocks;
   after(function(done) {
     var Cloudant = require('@cloudant/cloudant');
@@ -121,7 +121,7 @@ describe('Getting Started', function() {
   });
 });
 
-describe('Initialization', function() {
+describe('#db Initialization', function() {
   var mocks;
   after(function() {
     mocks.done();
@@ -257,7 +257,7 @@ describe('Authorization and API Keys', function() {
   });
 });
 
-describe('CORS', function() {
+describe('CORS #db', function() {
   var mocks;
   after(function() { mocks.done(); });
   before(function() {
@@ -367,7 +367,7 @@ describe('Virtual Hosts', function() {
   });
 });
 
-describe('Cloudant Query', function() {
+describe('Cloudant Query #db', function() {
   var mocks;
   before(function() {
     mocks = nock(SERVER)
@@ -447,7 +447,7 @@ describe('Cloudant Query', function() {
   });
 });
 
-describe('Cloudant Search', function() {
+describe('Cloudant Search #db', function() {
   var mocks;
   before(function() {
     mocks = nock(SERVER)
@@ -550,7 +550,7 @@ describe('Cloudant Search', function() {
   });
 });
 
-describe('Cookie Authentication', function() {
+describe('Cookie Authentication #db', function() {
   var cloudant;
   var mocks;
   after(function(done) {

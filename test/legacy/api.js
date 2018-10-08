@@ -43,7 +43,7 @@ describe('Cloudant API', function() {
   });
 });
 
-describe('Initialization', function() {
+describe('#db Initialization', function() {
   it('runs synchronously with one argument', function() {
     (function() {
       var db = Cloudant({account: ME});
@@ -110,7 +110,7 @@ describe('Initialization', function() {
   });
 });
 
-describe('Authentication', function() {
+describe('#db Authentication', function() {
   it('supports Authentication API - POST /_api/v2/api_keys', function(done) {
     var mocks = nock(SERVER)
       .post('/_api/v2/api_keys').reply(200, { 'password': 'Eivln4jPiLS8BoTxjXjVukDT', 'ok': true, 'key': 'thandoodstrenterprourete' });
@@ -132,7 +132,7 @@ describe('Authentication', function() {
   });
 });
 
-describe('CORS', function() {
+describe('#db CORS', function() {
   it('supports CORS API - GET /_api/v2/user/config/cors', function(done) {
     var mocks = nock(SERVER)
       .get('/_api/v2/user/config/cors').reply(200, { 'enable_cors': true, 'allow_credentials': true, 'origins': ['*']});
@@ -170,7 +170,7 @@ describe('CORS', function() {
   });
 });
 
-describe('Authorization', function() {
+describe('#db Authorization', function() {
   var dbName;
 
   before(function(done) {
@@ -239,7 +239,7 @@ describe('Authorization', function() {
   });
 });
 
-describe('Cloudant-Specific APIs', function() {
+describe('#db Cloudant-Specific APIs', function() {
   var dbName;
 
   before(function(done) {
@@ -349,7 +349,7 @@ describe('Cloudant-Specific APIs', function() {
   });
 });
 
-describe('Changes query', function() {
+describe('#db Changes query', function() {
   var dbName;
 
   before(function(done) {
@@ -465,7 +465,7 @@ describe('Changes query', function() {
   });
 });
 
-describe('Changes follower', function() {
+describe('#db Changes follower', function() {
   var dbName;
 
   before(function(done) {
@@ -606,7 +606,7 @@ describe('Changes follower', function() {
   });
 });
 
-describe('Cloudant Query', function() {
+describe('#db Cloudant Query', function() {
   var dbName;
 
   before(function(done) {
@@ -749,7 +749,7 @@ describe('Cloudant Query', function() {
   });
 });
 
-describe('Cloudant Search', function() {
+describe('#db Cloudant Search', function() {
   var dbName;
 
   before(function(done) {
@@ -938,7 +938,7 @@ describe('Gzip header tests', function() {
 });
 
 if (!process.env.NOCK_OFF) {
-  describe('Gzip attachment tests', test_gzip);
+  describe('#db Gzip attachment tests', test_gzip);
 }
 function test_gzip() {
   it('checks that the zipped response is unzipped', function(done) {

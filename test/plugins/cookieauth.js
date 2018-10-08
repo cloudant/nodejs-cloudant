@@ -37,7 +37,7 @@ const MOCK_SET_COOKIE_HEADER = { 'set-cookie': `${MOCK_COOKIE}; Version=1; Max-A
 const MOCK_COOKIE_2 = 'AuthSession=Q2fbIWc0kQspdc39OQL89eS4PWECcYEZDxgdgy-0RCp2i0dcrDkfoWX7OI5A';
 const MOCK_SET_COOKIE_HEADER_2 = { 'set-cookie': `${MOCK_COOKIE_2}; Version=1; Max-Age=86400; Path=/; HttpOnly` };
 
-describe('CookieAuth Plugin', function() {
+describe('#db CookieAuth Plugin', function() {
   before(function(done) {
     var mocks = nock(SERVER)
         .put(DBNAME)

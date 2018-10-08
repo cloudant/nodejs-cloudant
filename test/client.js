@@ -239,7 +239,7 @@ describe('CloudantClient', function() {
       }, 8000);
     });
 
-    it('after plugin execution phase', function(done) {
+    it('after plugin execution phase #db', function(done) {
       var mocks = nock(SERVER)
           .get(DBNAME)
           .reply(200, {doc_count: 1});
@@ -264,7 +264,7 @@ describe('CloudantClient', function() {
     });
   });
 
-  describe('using callbacks', function() {
+  describe('#db using callbacks', function() {
     describe('with no plugins', function() {
       it('performs request and returns response', function(done) {
         var mocks = nock(SERVER)
@@ -816,7 +816,7 @@ describe('CloudantClient', function() {
     });
   });
 
-  describe('using listeners', function() {
+  describe('#db using listeners', function() {
     describe('with no plugins', function() {
       it('performs request and returns response', function(done) {
         var mocks = nock(SERVER)

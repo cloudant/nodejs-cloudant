@@ -84,7 +84,7 @@ var onAfter = function(done) {
   });
 };
 
-describe('retry-on-429 plugin', function() {
+describe('retry-on-429 plugin #db', function() {
   before(onBefore);
   after(onAfter);
 
@@ -125,7 +125,7 @@ describe('retry-on-429 plugin', function() {
   });
 });
 
-describe('promise plugin', function() {
+describe('promise plugin #db', function() {
   before(onBefore);
   after(onAfter);
 
@@ -159,7 +159,7 @@ describe('promise plugin', function() {
   });
 });
 
-describe('cookieauth plugin', function() {
+describe('cookieauth plugin #db', function() {
   before(onBefore);
   after(onAfter);
 
@@ -296,7 +296,7 @@ describe('cookieauth plugin', function() {
   });
 });
 
-describe('custom plugin', function() {
+describe('custom plugin #db', function() {
   before(onBefore);
   after(onAfter);
 

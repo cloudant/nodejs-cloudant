@@ -64,7 +64,7 @@ const MOCK_SET_IAM_SESSION_HEADER = {
   'set-cookie': `${MOCK_IAM_SESSION}; Version=1; Max-Age=3599; Secure; Path=/; HttpOnly; Secure`
 };
 
-describe('IAMAuth Plugin', function() {
+describe('#db IAMAuth Plugin', function() {
   beforeEach(function() {
     if (process.env.SKIP_IAM_TESTS) {
       this.skip();
