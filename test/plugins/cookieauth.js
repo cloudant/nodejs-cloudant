@@ -23,9 +23,10 @@ const uuidv4 = require('uuid/v4'); // random
 const ME = process.env.cloudant_username || 'nodejs';
 const PASSWORD = process.env.cloudant_password || 'sjedon';
 const BAD_PASSWORD = 'bAD-Pa$$w0rd123';
-const SERVER = `https://${ME}.cloudant.com`;
-const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${ME}.cloudant.com`;
-const SERVER_WITH_BAD_CREDS = `https://${ME}:${BAD_PASSWORD}@${ME}.cloudant.com`;
+const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
+const SERVER_NO_PROTOCOL = SERVER.replace(/^https?:\/\//, '');
+const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${SERVER_NO_PROTOCOL}`;
+const SERVER_WITH_BAD_CREDS = `https://${ME}:${BAD_PASSWORD}@${SERVER_NO_PROTOCOL}`;
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 
 // mock cookies

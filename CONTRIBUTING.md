@@ -49,3 +49,11 @@ You can add verbose debug messages while running tests by doing:
 ```
 DEBUG=* npm test
 ```
+
+### Test configuration
+
+When testing with a real server (i.e. `NOCK_OFF=true`) these options are
+available to set as environment variables:
+`cloudant_username` - username
+`cloudant_password` - password
+`SERVER_URL` - the URL to use (defaults to `https://$cloudant_user.cloudant.com`)

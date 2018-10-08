@@ -32,7 +32,7 @@ var nock = require('../nock.js');
 const uuid = require('uuid/v4');
 var ME = process.env.cloudant_username || 'nodejs';
 var PASSWORD = process.env.cloudant_password || 'sjedon';
-var SERVER = 'https://' + ME + '.cloudant.com';
+var SERVER = process.env.SERVER_URL || 'https://' + ME + '.cloudant.com';
 
 var real_require = require;
 require = function(module) {
@@ -50,7 +50,7 @@ describe('Getting Started', function() {
   var mocks;
   after(function(done) {
     var Cloudant = require('@cloudant/cloudant');
-    var cloudant = Cloudant({account: ME, password: PASSWORD, plugins: 'retry'});
+    var cloudant = Cloudant({url: SERVER, username: ME, password: PASSWORD, plugins: 'retry'});
     cloudant.db.destroy(alice, function(er, d) {
       should(er).equal(null);
       d.should.be.an.Object;
@@ -172,7 +172,7 @@ describe('Password authentication', function() {
   it('Example 1', function(done) {
     var Cloudant = require('@cloudant/cloudant');
 
-    Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, reply) {
+    Cloudant({url: SERVER, username: ME, password: PASSWORD}, function(er, cloudant, reply) {
       if (er) {
         throw er;
       }
@@ -275,7 +275,7 @@ describe('CORS', function() {
   var cloudant;
   before(function() {
     var Cloudant = require('@cloudant/cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: 'retry'});
+    cloudant = Cloudant({url: SERVER, username: ME, password: process.env.cloudant_password, plugins: 'retry'});
   });
 
   it('Example 1', function(done) {
@@ -330,7 +330,7 @@ describe('Virtual Hosts', function() {
   var cloudant;
   before(function() {
     var Cloudant = require('@cloudant/cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: 'retry'});
+    cloudant = Cloudant({url: SERVER, username: ME, password: process.env.cloudant_password, plugins: 'retry'});
   });
 
   it('Example 1', function(done) {
@@ -386,7 +386,7 @@ describe('Cloudant Query', function() {
   var cloudant, db;
   before(function(done) {
     var Cloudant = require('@cloudant/cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: 'retry'});
+    cloudant = Cloudant({url: SERVER, username: ME, password: process.env.cloudant_password, plugins: 'retry'});
     cloudant.db.create(my_db, function(er) {
       if (er) throw er;
       db = cloudant.db.use(my_db);
@@ -468,7 +468,7 @@ describe('Cloudant Search', function() {
   var cloudant, db;
   before(function(done) {
     var Cloudant = require('@cloudant/cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: 'retry'});
+    cloudant = Cloudant({url: SERVER, username: ME, password: process.env.cloudant_password, plugins: 'retry'});
     cloudant.db.create(my_db, function(er) {
       if (er) throw er;
       db = cloudant.db.use(my_db);
@@ -555,7 +555,7 @@ describe('Cookie Authentication', function() {
   var mocks;
   after(function(done) {
     var Cloudant = require('@cloudant/cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: []});
+    cloudant = Cloudant({url: SERVER, username: ME, password: process.env.cloudant_password, plugins: []});
     cloudant.db.destroy(alice, function() {
       mocks.done();
       done();
@@ -570,7 +570,7 @@ describe('Cookie Authentication', function() {
       .delete(`/${alice}`).reply(200, {ok: true});
 
     var Cloudant = require('@cloudant/cloudant');
-    cloudant = Cloudant({account: ME, password: process.env.cloudant_password, plugins: []});
+    cloudant = Cloudant({url: SERVER, username: ME, password: process.env.cloudant_password, plugins: []});
     cloudant.db.create(alice, function() {
       done();
     });

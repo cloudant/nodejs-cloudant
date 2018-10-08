@@ -25,7 +25,7 @@ const uuidv4 = require('uuid/v4'); // random
 
 const ME = process.env.cloudant_username || 'nodejs';
 const PASSWORD = process.env.cloudant_password || 'sjedon';
-const SERVER = `https://${ME}.cloudant.com`;
+const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 
 describe('Stream', function() {

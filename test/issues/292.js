@@ -23,7 +23,7 @@ const uuidv4 = require('uuid/v4'); // random
 
 const ME = process.env.cloudant_username || 'nodejs';
 const PASSWORD = process.env.cloudant_password || 'sjedon';
-const SERVER = `https://${ME}.cloudant.com`;
+const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 const DBNAME = `nodejs-cloudant-${uuidv4()}`;
 
 describe('Issue #292', function() {
@@ -72,7 +72,7 @@ describe('Issue #292', function() {
       .get(`/${DBNAME}/_index`)
       .reply(200, { total_rows: 1, indexes: [ { name: '_all_docs' } ] });
 
-    var cloudant = Cloudant({ account: ME, password: PASSWORD, plugins: 'promises' });
+    var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: 'promises' });
     var db = cloudant.db.use(DBNAME);
 
     db.index().then((d) => {
@@ -94,7 +94,7 @@ describe('Issue #292', function() {
       .post(`/${DBNAME}/_index`, definition)
       .reply(200, { result: 'created' });
 
-    var cloudant = Cloudant({ account: ME, password: PASSWORD, plugins: 'promises' });
+    var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: 'promises' });
     var db = cloudant.db.use(DBNAME);
 
     db.index(definition).then((d) => {

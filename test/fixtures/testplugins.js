@@ -1,4 +1,4 @@
-// Copyright © 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2018 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ const assert = require('assert');
 const BasePlugin = require('../../plugins/base.js');
 
 const ME = process.env.cloudant_username || 'nodejs';
-const SERVER = `https://${ME}.cloudant.com`;
+const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 
 // NoopPlugin for testing
 

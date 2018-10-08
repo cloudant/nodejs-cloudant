@@ -23,7 +23,7 @@ const uuidv4 = require('uuid/v4'); // random
 
 const ME = process.env.cloudant_username || 'nodejs';
 const PASSWORD = process.env.cloudant_password || 'sjedon';
-const SERVER = `https://${ME}.cloudant.com`;
+const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 const DBNAME = `nodejs-cloudant-${uuidv4()}`;
 
 describe('Cloudant', function() {
@@ -77,7 +77,7 @@ describe('Cloudant', function() {
         .get(`/_api/v2/db/${DBNAME}/_security`)
         .reply(200, security);
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
       var db = cloudant.db.use(DBNAME);
 
       db.set_security(security, function(err, result) {
@@ -103,7 +103,7 @@ describe('Cloudant', function() {
         .get(`/_api/v2/db/${DBNAME}/_security`)
         .reply(200, security);
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
       var db = cloudant.db.use(DBNAME);
 
       db.set_security(role, function(err, result) {
@@ -138,7 +138,7 @@ describe('Cloudant', function() {
         .get(`/_api/v2/db/${DBNAME}/_security`)
         .reply(200, security);
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
       var db = cloudant.db.use(DBNAME);
 
       db.set_security(security, function(err, result) {

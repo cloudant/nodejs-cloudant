@@ -23,7 +23,7 @@ const testPlugin = require('./fixtures/testplugins.js');
 const utils = require('../lib/clientutils.js');
 
 const ME = process.env.cloudant_username || 'nodejs';
-const SERVER = `https://${ME}.cloudant.com`;
+const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 
 describe('Client Utilities', function() {
   afterEach(function() {
