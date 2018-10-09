@@ -23,8 +23,9 @@ const uuidv4 = require('uuid/v4'); // random
 const ME = process.env.cloudant_username || 'nodejs';
 const PASSWORD = process.env.cloudant_password || 'sjedon';
 const IAM_API_KEY = process.env.cloudant_iam_api_key || 'CqbrIYzdO3btWV-5t4teJLY_etfT_dkccq-vO-5vCXSo';
-const SERVER = `https://${ME}.cloudant.com`;
-const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${ME}.cloudant.com`;
+const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
+const SERVER_NO_PROTOCOL = SERVER.replace(/^https?:\/\//, '');
+const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${SERVER_NO_PROTOCOL}`;
 const TOKEN_SERVER = 'https://iam.bluemix.net';
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 
@@ -63,7 +64,7 @@ const MOCK_SET_IAM_SESSION_HEADER = {
   'set-cookie': `${MOCK_IAM_SESSION}; Version=1; Max-Age=3599; Secure; Path=/; HttpOnly; Secure`
 };
 
-describe('IAMAuth Plugin', function() {
+describe('#db IAMAuth Plugin', function() {
   beforeEach(function() {
     if (process.env.SKIP_IAM_TESTS) {
       this.skip();

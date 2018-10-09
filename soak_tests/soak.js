@@ -22,7 +22,7 @@ const uuidv4 = require('uuid/v4'); // random
 
 const USER = process.env.cloudant_username || 'nodejs';
 const PASSWORD = process.env.cloudant_password || 'sjedon';
-const SERVER = `https://${USER}:${PASSWORD}@${USER}.cloudant.com`;
+const SERVER = process.env.SERVER_URL || `https://${USER}:${PASSWORD}@${USER}.cloudant.com`;
 
 const MAX_RUNS = parseInt(process.env.max_runs, 10) || 100;
 const CONCURRENCY = parseInt(process.env.concurrency, 10) || 1;
