@@ -17,6 +17,7 @@
 
 const assert = require('assert');
 const Client = require('../../lib/client.js');
+const Cloudant = require('../../cloudant.js');
 const nock = require('../nock.js');
 const uuidv4 = require('uuid/v4'); // random
 
@@ -476,5 +477,40 @@ describe('#db IAMAuth Plugin', function() {
       /Missing IAM API key from configuration/,
       'did not throw with expected message'
     );
+  });
+
+  it('supports using vcap with the promise plugin', function(done) {
+    // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
+    var iamMocks = nock(TOKEN_SERVER)
+      .post('/identity/token', {
+        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
+        'response_type': 'cloud_iam',
+        'apikey': IAM_API_KEY
+      })
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
+
+    var cloudantMocks = nock(SERVER)
+      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
+      .reply(200, {ok: true}, MOCK_SET_IAM_SESSION_HEADER)
+      .get(DBNAME)
+      .reply(200, {doc_count: 0});
+
+    var cloudant = new Cloudant({
+      vcapServices: {
+        cloudantNoSQLDB: [
+          { credentials: { apikey: IAM_API_KEY, host: `${ME}.cloudant.com` } }
+        ]
+      },
+      plugins: 'promises'
+    });
+
+    cloudant.use(DBNAME.substring(1)).info().then((data) => {
+      assert.equal(data.doc_count, 0);
+      iamMocks.done();
+      cloudantMocks.done();
+      done();
+    }).catch(function(err) {
+      assert.fail(`Unexpected reject: ${err}`);
+    });
   });
 });
