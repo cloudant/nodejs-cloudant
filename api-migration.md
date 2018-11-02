@@ -49,3 +49,25 @@ var cloudant = new Cloudant({ url: myUrl, plugins: [] });
 
 Finally, the `promise` plugin now throws a `CloudantError` (extended from
 `Error`) rather than a `string` which was considered bad practice.
+
+## 2.x → 3.x
+
+We've upgraded our [nano](https://www.npmjs.com/package/nano) dependency. This
+means all return types are now a `Promise` (except for the `...AsStream`
+functions). The `promise` plugin is no longer required. It is silently ignored
+when specified in the client configuration.
+
+Example:
+```js
+var cloudant = new Cloudant({ url: myUrl, plugins: [ 'retry' ] });
+
+// Lists all the databases.
+cloudant.db.list().then((dbs) => {
+  dbs.forEach((db) => {
+    console.log(db);
+  });
+}).catch((err) => { console.log(err); });
+```
+
+Nano is responsible for resolving or rejecting all promises. Any errors thrown
+are created from within Nano. The old `CloudantError` type no longer exists.
