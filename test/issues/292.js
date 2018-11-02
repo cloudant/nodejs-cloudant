@@ -67,12 +67,12 @@ describe('#db Issue #292', function() {
     });
   });
 
-  it('lists all query indices using promise plugin', function(done) {
+  it('lists all query indices', function(done) {
     var mocks = nock(SERVER)
       .get(`/${DBNAME}/_index`)
       .reply(200, { total_rows: 1, indexes: [ { name: '_all_docs' } ] });
 
-    var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: 'promises' });
+    var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
     var db = cloudant.db.use(DBNAME);
 
     db.index().then((d) => {
@@ -83,7 +83,7 @@ describe('#db Issue #292', function() {
     .catch((err) => { assert.fail(`Unexpected error: ${err}`); });
   });
 
-  it('creates new query index using promise plugin', function(done) {
+  it('creates new query index', function(done) {
     var definition = {
       index: { fields: [ 'foo' ] },
       name: 'foo-index',
@@ -94,7 +94,7 @@ describe('#db Issue #292', function() {
       .post(`/${DBNAME}/_index`, definition)
       .reply(200, { result: 'created' });
 
-    var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: 'promises' });
+    var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
     var db = cloudant.db.use(DBNAME);
 
     db.index(definition).then((d) => {

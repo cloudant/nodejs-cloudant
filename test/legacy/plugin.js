@@ -113,26 +113,26 @@ describe('retry-on-429 plugin #db', function() {
     setTimeout(done, 1000);
   });
 
-  it('should return a stream', function(done) {
+  it('should return a promise', function(done) {
     var mocks = nock(SERVER)
         .get('/' + dbName).reply(200, { ok: true });
     var cloudant = Cloudant({plugins: 'retry', url: SERVER, username: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
-    var p = db.info(function() {
+    var p = db.info().then(function() {
       done();
     });
-    assert.equal(p instanceof PassThroughDuplex, true);
+    assert.equal(p instanceof Promise, true);
   });
 });
 
-describe('promise plugin #db', function() {
+describe('promises #db', function() {
   before(onBefore);
   after(onAfter);
 
   it('should return a promise', function(done) {
     var mocks = nock(SERVER)
         .get('/' + dbName).reply(200, { ok: true });
-    var cloudant = Cloudant({plugins: 'promises', url: SERVER, username: ME, password: PASSWORD});
+    var cloudant = Cloudant({url: SERVER, username: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
     var p = db.info().then(function(data) {
       data.should.be.an.Object;
@@ -144,7 +144,7 @@ describe('promise plugin #db', function() {
   it('should return an error status code', function(done) {
     var mocks = nock(SERVER)
         .get('/somedbthatdoesntexist').reply(404, { ok: false });
-    var cloudant = Cloudant({plugins: 'promises', url: SERVER, username: ME, password: PASSWORD});
+    var cloudant = Cloudant({url: SERVER, username: ME, password: PASSWORD});
     var db = cloudant.db.use('somedbthatdoesntexist');
     var p = db.info().then(function(data) {
       assert(false);
@@ -163,20 +163,19 @@ describe('cookieauth plugin #db', function() {
   before(onBefore);
   after(onAfter);
 
-  it('should return a stream', function(done) {
+  it('should return a promise', function(done) {
     var mocks = nock(SERVER)
         .post('/_session').reply(200, { ok: true })
         .get('/' + dbName).reply(200, { ok: true });
     var cloudant = Cloudant({plugins: 'cookieauth', url: SERVER, username: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
-    var p = db.info(function(err, data) {
-      assert.equal(err, null);
+    var p = db.info().then(function(data) {
       data.should.be.an.Object;
       // check that we use all the nocked API calls
       mocks.done();
       done();
     });
-    assert.equal(p instanceof PassThroughDuplex, true);
+    assert.equal(p instanceof Promise, true);
   });
 
   it('should authenticate before attempting API call', function(done) {
