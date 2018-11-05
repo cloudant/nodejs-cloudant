@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import * as nano from 'nano';
-import { Request, CoreOptions } from "request";
+import CoreOptions from "request";
 
 declare function cloudant(
     config: cloudant.Configuration | string,
@@ -76,10 +76,10 @@ declare namespace cloudant {
 
     interface Query {
         // https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#query
-        (definition?: any, callback?: Callback<any>): Request;
+        (definition?: any, callback?: Callback<any>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#deleting-an-index
-        del(spec: QueryDeleteSpec, callback?: Callback<any>): Request;
+        del(spec: QueryDeleteSpec, callback?: Callback<any>): Promise<any>;
     }
 
     interface QueryDeleteSpec {
@@ -114,25 +114,25 @@ declare namespace cloudant {
         scope(db: string): DocumentScope<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#creating-a-virtual-host
-        add_virtual_host(virtualHost: VirtualHost, callback?: Callback<any>): Request;
+        add_virtual_host(virtualHost: VirtualHost, callback?: Callback<any>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#deleting-a-virtual-host
-        delete_virtual_host(virtualHost: VirtualHost, callback?: Callback<any>): Request;
+        delete_virtual_host(virtualHost: VirtualHost, callback?: Callback<any>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#api-keys
-        generate_api_key(callback?: Callback<ApiKey>): Request;
+        generate_api_key(callback?: Callback<ApiKey>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cors.html#reading-the-cors-configuration
-        get_cors(callback?: Callback<any>): Request;
+        get_cors(callback?: Callback<any>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#listing-virtual-hosts
-        get_virtual_hosts(callback?: Callback<any>): Request;
+        get_virtual_hosts(callback?: Callback<any>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/account.html#ping
-        ping(callback?: Callback<any>): Request;
+        ping(callback?: Callback<any>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cors.html#setting-the-cors-configuration
-        set_cors(cors: CORS, callback?: Callback<any>): Request;
+        set_cors(cors: CORS, callback?: Callback<any>): Promise<any>;
     }
 
     // Document Scope
@@ -143,7 +143,7 @@ declare namespace cloudant {
         index: Query;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/document.html#the-_bulk_get-endpoint
-        bulk_get(options: nano.BulkModifyDocsWrapper, callback?: Callback<any>): Request;
+        bulk_get(options: nano.BulkModifyDocsWrapper, callback?: Callback<any>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cloudant-geo.html#cloudant-geospatial
         geo(
@@ -151,10 +151,10 @@ declare namespace cloudant {
             docname: string,
             params: GeoParams,
             callback?: Callback<GeoResult>
-        ): Request;
+        ): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#viewing-permissions
-        get_security(callback?: Callback<Security>): Request;
+        get_security(callback?: Callback<Security>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/search.html
         search(
@@ -162,16 +162,16 @@ declare namespace cloudant {
             searchname: string,
             params: SearchParams,
             callback: Callback<any>
-        ): Request;
+        ): Promise<any>;
         search(
             designname: string,
             searchname: string,
             params: any,
             callback?: Callback<any>
-        ): Request;
+        ): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#modifying-permissions
-        set_security(Security: Security, callback?: Callback<any>): Request;
+        set_security(Security: Security, callback?: Callback<any>): Promise<any>;
     }
 }
 

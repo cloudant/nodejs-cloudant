@@ -45,8 +45,10 @@ cloudant(config, (error, client, pong) => {
 const instance = cloudant('http://localhost:5984');
 
 instance.ping((pong) => {});
+instance.ping().then((pong) => {});
 
 instance.generate_api_key((error, key) => {});
+instance.generate_api_key().then((key) => {});
 
 const cors: cloudant.CORS = {
   allow_credentials: true,
@@ -55,7 +57,10 @@ const cors: cloudant.CORS = {
 };
 
 instance.set_cors(cors, (error, data) => {});
+instance.set_cors(cors).then((data) => {});
+
 instance.get_cors((error, data) => {});
+instance.get_cors().then((data) => {});
 
 const virtualHost: cloudant.VirtualHost = {
   host: 'www.example.com',
@@ -63,8 +68,13 @@ const virtualHost: cloudant.VirtualHost = {
 };
 
 instance.add_virtual_host(virtualHost, (error, resp) => {});
+instance.add_virtual_host(virtualHost).then((resp) => {});
+
 instance.get_virtual_hosts((error, hosts) => {});
+instance.get_virtual_hosts().then((hosts) => {});
+
 instance.delete_virtual_host(virtualHost, (error, resp) => {});
+instance.delete_virtual_host(virtualHost).then((resp) => {});
 
 /*
  * Document Scope
@@ -77,6 +87,7 @@ const docs: nano.BulkModifyDocsWrapper = {
 };
 
 mydb.bulk_get(docs, (results) => {});
+mydb.bulk_get(docs).then((results) => {});
 
 const security: cloudant.Security = {
   nobody: [],
@@ -84,7 +95,10 @@ const security: cloudant.Security = {
 };
 
 mydb.set_security(security, (error, resp) => {});
+mydb.set_security(security).then((resp) => {});
+
 mydb.get_security((err, resp) => {});
+mydb.get_security().then((resp) => {});
 
 const params: cloudant.SearchParams = {
   limit: 10,
@@ -92,6 +106,7 @@ const params: cloudant.SearchParams = {
 };
 
 mydb.search('design', 'doc', params, (err, resp) => {});
+mydb.search('design', 'doc', params).then((resp) => {});
 
 const geoParams: cloudant.GeoParams = {
   include_docs: true,
@@ -100,6 +115,7 @@ const geoParams: cloudant.GeoParams = {
 };
 
 mydb.geo('design', 'docname', geoParams, (err, result) => {});
+mydb.geo('design', 'docname', geoParams).then((result) => {});
 
 const myIndex = {
   index: { fields: [ 'foo' ] },
@@ -107,13 +123,19 @@ const myIndex = {
   type: 'json'
 };
 
-mydb.index(myIndex, (err, resp) => {}); // create index
+// Create an index.
+mydb.index(myIndex, (err, resp) => {});
+mydb.index(myIndex).then((resp) => {});
 
-mydb.index((err: any, resp: any) => {}); // see all indexes
+// See all indexes.
+mydb.index((err: any, resp: any) => {});
+mydb.index().then((resp) => {});
 
 const myDeleteSpec: cloudant.QueryDeleteSpec = {
     ddoc: '_design/1f003ce73056238720c2e8f7da545390a8ea1dc5',
     name: 'foo-index'
 };
 
-mydb.index.del(myDeleteSpec, (err, resp) => {}); // delete index
+// Delete an index.
+mydb.index.del(myDeleteSpec, (err, resp) => {});
+mydb.index.del(myDeleteSpec).then((resp) => {});
