@@ -64,6 +64,7 @@ function Cloudant(options, callback) {
   var nano = Nano(nanoOptions);
 
   nano.cc = cloudantClient;  // expose Cloudant client
+  nano.basePlugin = require('./plugins/base.js'); // expose base plugin
 
   // ===========================
   // Cloudant Database Functions
