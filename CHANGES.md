@@ -1,3 +1,6 @@
+# UNRELEASED
+- [FIXED] Don't override `plugins` array when instantiating a new client using VCAP.
+
 # 2.4.0 (2018-09-19)
 - [FIXED] Case where `username` and `password` options were not used if a `url` was supplied.
 - [FIXED] Case where `vcapServices` was supplied with a basic-auth `url`.
