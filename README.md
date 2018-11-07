@@ -14,9 +14,9 @@ This is the official Cloudant library for Node.js.
     * [Callback Signature](#callback-signature)
     * [Request Plugins](#request-plugins)
   * [API Reference](#api-reference)
-  * [Authorization and API Keys](#authorization-and-api-keys)
-    * [Generate an API key](#generate-an-api-key)
-    * [Use an API Key](#use-an-api-key)
+  * [Authorization and Cloudant API Keys](#authorization-and-cloudant-api-keys)
+    * [Generate a Cloudant API key](#generate-a-cloudant-api-key)
+    * [Use a Cloudant API Key](#use-a-cloudant-api-key)
   * [CORS](#cors)
   * [Virtual Hosts](#virtual-hosts)
   * [Cloudant Query](#cloudant-query)
@@ -466,9 +466,9 @@ should be consulted for:
 
 This library adds documentation for the following:
 
-- [Authorization and API Keys](#authorization-and-api-keys)
-  - [Generate an API key](#generate-an-api-key)
-  - [Use an API Key](#use-an-api-key)
+- [Authorization and Cloudant API Keys](#authorization-and-cloudant-api-keys)
+  - [Generate a Cloudant API key](#generate-a-cloudant-api-key)
+  - [Use a Cloudant API Key](#use-a-cloudant-api-key)
 - [CORS](#cors)
 - [Cloudant Query](#cloudant-query)
 - [Cloudant Search](#cloudant-search)
@@ -487,11 +487,11 @@ for more details.
 
 This feature interfaces with the Cloudant [authorization API][Authorization].
 
-Use the authorization feature to generate new API keys to access your data. An
-API key is basically a username/password pair for granting others access to your
-data, without giving them the keys to the castle.
+Use the authorization feature to generate new Cloudant API keys to access your
+data. A Cloudant API key is basically a username/password pair for granting
+others access to your data, without giving them the keys to the castle.
 
-### Generate an API key
+### Generate a Cloudant API key
 
 ~~~ js
 var Cloudant = require('@cloudant/cloudant');
@@ -556,12 +556,12 @@ _Output:_
 
 See the [Authorization] documentation for further details.
 
-### Use an API Key
+### Use a Cloudant API Key
 
-To use an API key, initialize a new Cloudant connection, and provide an
+To use a Cloudant API key, initialize a new Cloudant connection, and provide an
 additional "key" option when you initialize Cloudant. This will connect to your
 account, but using the "key" as the authenticated user. (And of course, use the
-appropriate password associated with the API key.)
+appropriate password associated with the Cloudant API key.)
 
 ~~~ js
 var Cloudant = require('@cloudant/cloudant');
