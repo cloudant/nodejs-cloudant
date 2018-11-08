@@ -62,20 +62,6 @@ instance.set_cors(cors).then((data) => {});
 instance.get_cors((error, data) => {});
 instance.get_cors().then((data) => {});
 
-const virtualHost: cloudant.VirtualHost = {
-  host: 'www.example.com',
-  path: 'the-path'
-};
-
-instance.add_virtual_host(virtualHost, (error, resp) => {});
-instance.add_virtual_host(virtualHost).then((resp) => {});
-
-instance.get_virtual_hosts((error, hosts) => {});
-instance.get_virtual_hosts().then((hosts) => {});
-
-instance.delete_virtual_host(virtualHost, (error, resp) => {});
-instance.delete_virtual_host(virtualHost).then((resp) => {});
-
 /*
  * Document Scope
  */

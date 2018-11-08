@@ -100,11 +100,6 @@ declare namespace cloudant {
         [key: string]: any;
     }
 
-    interface VirtualHost {
-        host: string;
-        path: string;
-    }
-
     // Server Scope
     // ============
 
@@ -113,20 +108,11 @@ declare namespace cloudant {
         use(db: string): DocumentScope<any>;
         scope(db: string): DocumentScope<any>;
 
-        // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#creating-a-virtual-host
-        add_virtual_host(virtualHost: VirtualHost, callback?: Callback<any>): Promise<any>;
-
-        // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#deleting-a-virtual-host
-        delete_virtual_host(virtualHost: VirtualHost, callback?: Callback<any>): Promise<any>;
-
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#api-keys
         generate_api_key(callback?: Callback<ApiKey>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cors.html#reading-the-cors-configuration
         get_cors(callback?: Callback<any>): Promise<any>;
-
-        // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#listing-virtual-hosts
-        get_virtual_hosts(callback?: Callback<any>): Promise<any>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/account.html#ping
         ping(callback?: Callback<any>): Promise<any>;

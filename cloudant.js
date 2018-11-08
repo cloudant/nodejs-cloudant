@@ -186,34 +186,11 @@ function Cloudant(options, callback) {
       body: configuration }, callback);
   };
 
-  // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#listing-virtual-hosts
-  var get_virtual_hosts = function(callback) { // eslint-disable-line camelcase
-    return nano.request({path: '_api/v2/user/virtual_hosts',
-      method: 'get'}, callback);
-  };
-
-  // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#creating-a-virtual-host
-  var add_virtual_host = function(opts, callback) { // eslint-disable-line camelcase
-    return nano.request({path: '_api/v2/user/virtual_hosts',
-      method: 'post',
-      body: opts }, callback);
-  };
-
-  // https://console.bluemix.net/docs/services/Cloudant/api/vhosts.html#deleting-a-virtual-host
-  var delete_virtual_host = function(opts, callback) { // eslint-disable-line camelcase
-    return nano.request({path: '_api/v2/user/virtual_hosts',
-      method: 'delete',
-      body: opts }, callback);
-  };
-
   // add top-level Cloudant-specific functions
   nano.ping = ping;
   nano.get_cors = get_cors; // eslint-disable-line camelcase
   nano.set_cors = set_cors; // eslint-disable-line camelcase
   nano.generate_api_key = generate_api_key; // eslint-disable-line camelcase
-  nano.get_virtual_hosts = get_virtual_hosts; // eslint-disable-line camelcase
-  nano.add_virtual_host = add_virtual_host; // eslint-disable-line camelcase
-  nano.delete_virtual_host = delete_virtual_host; // eslint-disable-line camelcase
 
   if (callback) {
     nano.cc._addPlugins('cookieauth');
