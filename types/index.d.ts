@@ -156,20 +156,6 @@ declare namespace cloudant {
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#viewing-permissions
         get_security(callback?: Callback<Security>): Promise<any>;
 
-        // https://console.bluemix.net/docs/services/Cloudant/api/search.html
-        search(
-            designname: string,
-            searchname: string,
-            params: SearchParams,
-            callback: Callback<any>
-        ): Promise<any>;
-        search(
-            designname: string,
-            searchname: string,
-            params: any,
-            callback?: Callback<any>
-        ): Promise<any>;
-
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#modifying-permissions
         set_security(Security: Security, callback?: Callback<any>): Promise<any>;
     }
