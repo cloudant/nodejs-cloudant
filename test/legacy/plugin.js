@@ -113,6 +113,16 @@ describe('retry-on-429 plugin #db', function() {
     setTimeout(done, 1000);
   });
 
+  it('should return a stream', function(done) {
+    var mocks = nock(SERVER)
+        .get('/' + dbName).reply(200, { ok: true });
+    var cloudant = Cloudant({plugins: 'retry', url: SERVER, username: ME, password: PASSWORD});
+    var dbs = cloudant.db.listAsStream(function() {
+      done();
+    });
+    assert.equal(dbs instanceof PassThroughDuplex, true);
+  });
+
   it('should return a promise', function(done) {
     var mocks = nock(SERVER)
         .get('/' + dbName).reply(200, { ok: true });
