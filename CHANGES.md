@@ -1,4 +1,4 @@
-# UNRELEASED
+# 2.4.1 (2018-11-12)
 - [FIXED] Don't override `plugins` array when instantiating a new client using VCAP.
 
 # 2.4.0 (2018-09-19)
