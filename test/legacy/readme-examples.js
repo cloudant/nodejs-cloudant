@@ -314,59 +314,6 @@ describe('CORS #db', function() {
   });
 });
 
-describe('Virtual Hosts', function() {
-  var mocks;
-  after(function() { mocks.done(); });
-  before(function() {
-    mocks = nock(SERVER)
-      .post('/_api/v2/user/virtual_hosts')
-      .reply(200, {ok: true})
-      .get('/_api/v2/user/virtual_hosts')
-      .reply(200, { virtual_hosts: [ [ 'mysubdomain.mydomain.com', '/mypath' ] ] })
-      .delete('/_api/v2/user/virtual_hosts')
-      .reply(200, {ok: true});
-  });
-
-  var cloudant;
-  before(function() {
-    var Cloudant = require('@cloudant/cloudant');
-    cloudant = Cloudant({url: SERVER, username: ME, password: process.env.cloudant_password, plugins: 'retry'});
-  });
-
-  it('Example 1', function(done) {
-    cloudant.add_virtual_host({ host: 'mysubdomain.mydomain.com', path: '/mypath'}, function(err, data) {
-      console.log(err, data);
-      if (err) {
-        return done(err);
-      }
-      data.should.have.a.property('ok').which.is.equal(true);
-      done();
-    });
-  });
-
-  it('Example 2', function(done) {
-    cloudant.get_virtual_hosts(function(err, data) {
-      console.log(err, data);
-      if (err) {
-        return done(err);
-      }
-      data.should.have.a.property('virtual_hosts').which.is.an.Array;
-      done();
-    });
-  });
-
-  it('Example 3', function(done) {
-    cloudant.delete_virtual_host({ host: 'mysubdomain.mydomain.com', path: '/mypath'}, function(err, data) {
-      console.log(err, data);
-      if (err) {
-        return done(err);
-      }
-      data.should.have.a.property('ok').which.is.equal(true);
-      done();
-    });
-  });
-});
-
 describe('Cloudant Query #db', function() {
   var mocks;
   before(function() {

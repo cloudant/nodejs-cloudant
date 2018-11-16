@@ -18,7 +18,6 @@ This is the official Cloudant library for Node.js.
     * [Generate a Cloudant API key](#generate-a-cloudant-api-key)
     * [Use a Cloudant API Key](#use-a-cloudant-api-key)
   * [CORS](#cors)
-  * [Virtual Hosts](#virtual-hosts)
   * [Cloudant Query](#cloudant-query)
   * [Cloudant Search](#cloudant-search)
   * [Cloudant Geospatial](#cloudant-geospatial)
@@ -611,33 +610,6 @@ Cloudant account.
   ~~~
 
 See [CORS] for further details.
-
-## Virtual Hosts
-
-If you wish to access your Cloudant domain name (myaccount.cloudant.com) using a
-CNAME'd domain name (mysubdomain.mydomain.com) then you can instruct Cloudant to
-do so.
-
-- To add a virtual host:
-  ~~~ js
-  cloudant.add_virtual_host({ host: "mysubdomain.mydomain.com", path: "/mypath"}, function(err, data) {
-    console.log(err, data);
-  });
-  ~~~
-
-- To view virtual host configuration:
-  ~~~ js
-  cloudant.get_virtual_hosts(function(err, data) {
-    console.log(err, data);
-  });
-  ~~~
-
-- To delete a virtual host:
-  ~~~ js
-  cloudant.delete_virtual_host({ host: "mysubdomain.mydomain.com", path: "/mypath"}, function(err, data) {
-    console.log(err, data);
-  });
-  ~~~
 
 ## Cloudant Query
 

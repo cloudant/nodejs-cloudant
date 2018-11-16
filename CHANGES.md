@@ -2,6 +2,7 @@
 - [FIXED] Expose `BasePlugin` type in Cloudant client.
 - [REMOVED] Remove nodejs-cloudant TypeScript type definitions for
   `db.search`. These definitions are now imported directly from Nano.
+- [REMOVED] Removed support for the deprecated Cloudant virtual hosts feature.
 - [UPGRADED] Using nano==7.1.1 dependency.
 
 # 2.4.1 (2018-11-12)
