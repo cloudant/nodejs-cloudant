@@ -1,6 +1,10 @@
-# 3.0.0 UNRELEASED
+# 3.0.0 (2018-11-20)
 - [FIXED] Expose `BasePlugin` type in Cloudant client.
 - [FIXED] Set `parseUrl = false` on underlying Nano instance.
+- [BREAKING CHANGE] Due to the Nano 7.x upgrade all return types are now a
+  `Promise` (except for the `...AsStream` functions). _See
+  [api-migration.md](https://github.com/cloudant/nodejs-cloudant/blob/master/api-migration.md#2x--3x)
+  for migration details._
 - [REMOVED] Remove nodejs-cloudant TypeScript type definitions for
   `db.search`. These definitions are now imported directly from Nano.
 - [REMOVED] Removed support for the deprecated Cloudant virtual hosts feature.
