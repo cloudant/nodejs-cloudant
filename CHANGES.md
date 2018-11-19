@@ -1,5 +1,6 @@
 # 3.0.0 UNRELEASED
 - [FIXED] Expose `BasePlugin` type in Cloudant client.
+- [FIXED] Set `parseUrl = false` on underlying Nano instance.
 - [REMOVED] Remove nodejs-cloudant TypeScript type definitions for
   `db.search`. These definitions are now imported directly from Nano.
 - [REMOVED] Removed support for the deprecated Cloudant virtual hosts feature.
