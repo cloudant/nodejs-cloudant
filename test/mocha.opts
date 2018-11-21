@@ -1,2 +1,3 @@
+--exclude test/typescript/*.js
 --recursive
 --timeout 10000

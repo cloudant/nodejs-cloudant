@@ -6,4 +6,5 @@ jsdoc/
 node_modules/
 templates/
 test/legacy/
+test/typescript/
 tmp/
