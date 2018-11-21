@@ -1,3 +1,6 @@
+# UNRELEASED
+- [FIXED] Use named import for `request.CoreOptions` type.
+
 # 3.0.0 (2018-11-20)
 - [FIXED] Expose `BasePlugin` type in Cloudant client.
 - [FIXED] Set `parseUrl = false` on underlying Nano instance.
