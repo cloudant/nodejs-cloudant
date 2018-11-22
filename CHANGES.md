@@ -1,4 +1,4 @@
-# UNRELEASED
+# 3.0.1 (2018-11-22)
 - [FIXED] Use named import for `request.CoreOptions` type.
 
 # 3.0.0 (2018-11-20)
