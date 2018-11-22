@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import * as nano from 'nano';
-import CoreOptions from "request";
+import { CoreOptions } from 'request';
 
 declare function cloudant(
     config: cloudant.Configuration | string,
