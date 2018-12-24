@@ -1,3 +1,6 @@
+# UNRELEASED
+- [FIXED] Remove unnecessary `@types/nano` dependancy.
+
 # 3.0.1 (2018-11-22)
 - [FIXED] Use named import for `request.CoreOptions` type.
 
