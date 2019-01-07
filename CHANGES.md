@@ -1,4 +1,4 @@
-# UNRELEASED
+# 3.0.2 (2019-01-07)
 - [FIXED] Remove unnecessary `@types/nano` dependancy.
 
 # 3.0.1 (2018-11-22)
