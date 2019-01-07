@@ -23,7 +23,6 @@
     "database"
   ],
   "dependencies": {
-    "@types/nano": "^6.4.5",
     "@types/request": "^2.47.0",
     "async": "2.1.2",
     "concat-stream": "^1.6.0",
