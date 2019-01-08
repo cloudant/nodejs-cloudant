@@ -67,10 +67,10 @@ declare namespace cloudant {
         nearest?: boolean;
     }
 
-    interface GeoResult {
+    interface GeoResult<D> {
         bookmark: string;
         features: any[];
-        row: any[];
+        row: D[];
         type: string;
     }
 
@@ -100,19 +100,23 @@ declare namespace cloudant {
         [key: string]: any;
     }
 
+    interface BulkGetResponse<D> {
+        docs: D[];
+    }
+
     // Server Scope
     // ============
 
     interface ServerScope extends nano.ServerScope {
         db: nano.DatabaseScope;
-        use(db: string): DocumentScope<any>;
-        scope(db: string): DocumentScope<any>;
+        use<D>(db: string): DocumentScope<D>;
+        scope<D>(db: string): DocumentScope<D>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#api-keys
-        generate_api_key(callback?: Callback<ApiKey>): Promise<any>;
+        generate_api_key(callback?: Callback<ApiKey>): Promise<ApiKey>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cors.html#reading-the-cors-configuration
-        get_cors(callback?: Callback<any>): Promise<any>;
+        get_cors(callback?: Callback<any>): Promise<CORS>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/account.html#ping
         ping(callback?: Callback<any>): Promise<any>;
@@ -129,18 +133,18 @@ declare namespace cloudant {
         index: Query;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/document.html#the-_bulk_get-endpoint
-        bulk_get(options: nano.BulkModifyDocsWrapper, callback?: Callback<any>): Promise<any>;
+        bulk_get(options: nano.BulkModifyDocsWrapper, callback?: Callback<any>): Promise<BulkGetResponse<D>>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cloudant-geo.html#cloudant-geospatial
         geo(
             designname: string,
             docname: string,
             params: GeoParams,
-            callback?: Callback<GeoResult>
-        ): Promise<any>;
+            callback?: Callback<GeoResult<D>>
+        ): Promise<GeoResult<D>>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#viewing-permissions
-        get_security(callback?: Callback<Security>): Promise<any>;
+        get_security(callback?: Callback<Security>): Promise<Security>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#modifying-permissions
         set_security(Security: Security, callback?: Callback<any>): Promise<any>;

@@ -1,6 +1,8 @@
 # UNRELEASED
 - [NEW] Added option for client to authenticate with IAM token server.
 - [FIXED] Case where `.resume()` was called on an undefined response.
+- [FIXED] Correct return types in TS definitions.
+- [FIXED] Updated the default IAM token server URL.
 - [BREAKING CHANGE] Nano 7 accepted a callback to the `*AsStream` functions, but
   the correct behaviour when using the `request` object from `*AsStream`
   functions is to use event handlers. Users of the `*AsStream` functions should
@@ -8,7 +10,6 @@
   version.
 - [UPGRADED] Apache CouchDB Nano to a minimum of version 8 for `*AsStream`
   function fixes.
-- [FIXED] Updated the default IAM token server URL.
 
 # 3.0.2 (2019-01-07)
 - [FIXED] Remove unnecessary `@types/nano` dependancy.
