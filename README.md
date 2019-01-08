@@ -391,7 +391,7 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ 'iamauth', {
    This plugin will automatically exchange your IAM API key for a token. It will
    handle the authentication and ensure that the token is refreshed as required.
 
-   The production IAM token service at https://iam.bluemix.net/identity/token is
+   The production IAM token service at https://iam.cloud.ibm.com/identity/token is
    used by default. You can set `iamTokenUrl` in your plugin configuration to
    override this. To authenticate with the IAM token service set `iamClientId`
    and `iamClientSecret` in your plugin configuration.

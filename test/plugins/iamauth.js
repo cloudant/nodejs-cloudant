@@ -27,7 +27,7 @@ const IAM_API_KEY = process.env.cloudant_iam_api_key || 'CqbrIYzdO3btWV-5t4teJLY
 const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 const SERVER_NO_PROTOCOL = SERVER.replace(/^https?:\/\//, '');
 const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${SERVER_NO_PROTOCOL}`;
-const TOKEN_SERVER = 'https://iam.bluemix.net';
+const TOKEN_SERVER = 'https://iam.cloud.ibm.com';
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 
 // mocks
