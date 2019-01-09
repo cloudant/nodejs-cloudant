@@ -1,4 +1,4 @@
-// Copyright © 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -125,11 +125,15 @@ class IAMPlugin extends BasePlugin {
       var accessToken = null;
       async.series([
         function(callback) {
+          var accessTokenAuth;
+          if (typeof cfg.iamClientId !== 'undefined' && typeof cfg.iamClientSecret !== 'undefined') {
+            accessTokenAuth = { user: cfg.iamClientId, pass: cfg.iamClientSecret };
+          }
           // get access token
           self._client({
             url: self.tokenUrl,
             method: 'POST',
-            auth: { user: 'bx', pass: 'bx' },
+            auth: accessTokenAuth,
             headers: { 'Accepts': 'application/json' },
             form: {
               'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',

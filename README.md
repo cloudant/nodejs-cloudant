@@ -393,7 +393,8 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ 'iamauth', {
 
    The production IAM token service at https://iam.bluemix.net/identity/token is
    used by default. You can set `iamTokenUrl` in your plugin configuration to
-   override this.
+   override this. To authenticate with the IAM token service set `iamClientId`
+   and `iamClientSecret` in your plugin configuration.
 
    For example:
    ```js
