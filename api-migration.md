@@ -5,6 +5,43 @@ has breaking API changes. Each section covers migrating from one major version
 to another. The section titles state the versions between which the change was
 made.
 
+## 3.x → 4.x
+
+[Apache CouchDB Nano](https://www.npmjs.com/package/nano) version 7 used in
+`nodejs-cloudant` 3.x had an API error that allowed specifying a callback when
+using `*AsStream` functions. Using a callback with the `request` object caused a
+`Buffer` allocation attempt for the entire response size, which would fail for
+large streams. The correct approach is to use event listeners on the response
+stream.
+
+To prevent incorrect usage the option of providing a callback was removed from
+the Apache CouchDB Nano API in version 8 and consequently nodejs-cloudant 4.x.
+Consumers of the `*AsStream` functions using callbacks need to adapt their code
+to use event listeners instead. For example:
+
+```js
+cloudant.db.listAsStream(function(error, response, body) {
+  if (error) {
+    console.log('ERROR');
+  } else {
+    console.log('DONE');
+  }
+}).pipe(process.stdout);
+```
+
+may be replaced with:
+
+```js
+cloudant.db.listAsStream()
+  .on('error', function(error) {
+    console.log('ERROR');
+  })
+  .on('end', function(error) {
+    console.log('DONE');
+  })
+  .pipe(process.stdout);
+```
+
 ## 2.x → 3.x
 
 We've upgraded our [nano](https://www.npmjs.com/package/nano) dependency. This
