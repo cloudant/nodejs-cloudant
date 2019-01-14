@@ -1,4 +1,4 @@
-// Copyright © 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ const TOKEN_SERVER = 'https://iam.bluemix.net';
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 
 // mocks
+const MOCK_TOKEN_SERVER_USER = 'ASPialYTheOS';
+const MOCK_TOKEN_SERVER_PASS = 'Zr28yT54^y!Kk&$M';
 const MOCK_ACCESS_TOKEN = 'eyJraWQiOiIyMDE3MDQwMi0wMDowMDowMCIsImFsZyI6IlJTMj' +
 'U2In0.eeyJraWQiOiIyMDE3MDQwMi0wMDowMDowMCIsImFsZyI6IlJTMjU2In0.eyJpYW1faWQiO' +
 'iJJQk1pZC0yNzAwMDdHRjBEIiwiaWQiOiJJQk1pZC0yNzAwMDdHRjBEIiwicmVhbG1pZCI6IklCT' +
@@ -129,6 +131,45 @@ describe('#db IAMAuth Plugin', function() {
       .reply(200, {doc_count: 0});
 
     var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var req = { url: SERVER + DBNAME, method: 'GET' };
+    cloudantClient.request(req, function(err, resp, data) {
+      assert.equal(err, null);
+      if (!process.env.NOCK_OFF) {
+        assert.equal(resp.request.headers.cookie, MOCK_IAM_SESSION);
+      }
+      assert.equal(resp.statusCode, 200);
+      assert.ok(data.indexOf('"doc_count":0') > -1);
+      iamMocks.done();
+      cloudantMocks.done();
+      done();
+    });
+  });
+
+  it('performs request and returns 200 response when authenticating with IAM token service', function(done) {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
+
+    var iamMocks = nock(TOKEN_SERVER)
+      .post('/identity/token', {
+        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
+        'response_type': 'cloud_iam',
+        'apikey': IAM_API_KEY
+      })
+      .basicAuth({ user: MOCK_TOKEN_SERVER_USER, pass: MOCK_TOKEN_SERVER_PASS })
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
+
+    var cloudantMocks = nock(SERVER)
+      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
+      .reply(200, {ok: true}, MOCK_SET_IAM_SESSION_HEADER)
+      .get(DBNAME)
+      .reply(200, {doc_count: 0});
+
+    var cloudantClient = new Client({ plugins: { iamauth: {
+      iamApiKey: IAM_API_KEY,
+      iamClientId: MOCK_TOKEN_SERVER_USER,
+      iamClientSecret: MOCK_TOKEN_SERVER_PASS
+    }}});
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
