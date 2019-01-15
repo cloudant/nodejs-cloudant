@@ -201,6 +201,35 @@ describe('CloudantClient', function() {
     });
   });
 
+  describe('Error Handling', function() {
+    it('Propagate request error: Invalid protocol.', function(done) {
+      var cloudantClient = new Client();
+      cloudantClient.request('abc://localhost:5984', function(err) {
+        assert.equal(err.message, 'Invalid protocol: abc:');
+        done();
+      });
+    });
+
+    it('Propagate request error: Base URL must be type string.', function(done) {
+      var cloudantClient = new Client();
+      cloudantClient.request({ baseUrl: 123, url: '/_all_dbs' }, function(err) {
+        assert.equal(err.message, 'options.baseUrl must be a string');
+        done();
+      });
+    });
+
+    it('Propagate request error: `unix://` URL scheme is no longer supported.', function(done) {
+      var cloudantClient = new Client();
+      cloudantClient.request('unix://abc', function(err) {
+        assert.equal(
+          err.message,
+          '`unix://` URL scheme is no longer supported. Please use the format `http://unix:SOCKET:PATH`'
+        );
+        done();
+      });
+    });
+  });
+
   describe('aborts request', function() {
     it('during plugin execution phase', function(done) {
       if (process.env.NOCK_OFF) {

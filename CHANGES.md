@@ -1,5 +1,6 @@
 # UNRELEASED
 - [NEW] Added option for client to authenticate with IAM token server.
+- [FIXED] Case where `.resume()` was called on an undefined response.
 
 # 3.0.2 (2019-01-07)
 - [FIXED] Remove unnecessary `@types/nano` dependancy.
