@@ -980,6 +980,25 @@ getpandarev('4-2e6cdc4c7e26b745c2881a24e0eeece2', function(err, body) {
 })
 ~~~
 
+### Pipes
+
+When using the `*AsStream` functions instead of a `Promise` a `request` object
+is returned that may be piped as a stream. For example:
+
+```js
+cloudant.db.listAsStream()
+  .on('error', function(error) {
+    console.log('ERROR');
+  })
+  .on('end', function(error) {
+    console.log('DONE');
+  })
+  .pipe(process.stdout);
+```
+
+Note that there are no callbacks when using these streams and event listeners
+must be used instead.
+
 ## Development and Contribution
 
 This is an open-source library, published under the Apache 2.0 license. We very
