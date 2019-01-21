@@ -8,6 +8,7 @@
   version.
 - [UPGRADED] Apache CouchDB Nano to a minimum of version 8 for `*AsStream`
   function fixes.
+- [FIXED] Updated the default IAM token server URL.
 
 # 3.0.2 (2019-01-07)
 - [FIXED] Remove unnecessary `@types/nano` dependancy.

@@ -31,7 +31,7 @@ class IAMPlugin extends BasePlugin {
     self.iamApiKey = null;
     self.baseUrl = cfg.baseUrl || null;
     self.cookieJar = request.jar();
-    self.tokenUrl = cfg.iamTokenUrl || 'https://iam.bluemix.net/identity/token';
+    self.tokenUrl = cfg.iamTokenUrl || 'https://iam.cloud.ibm.com/identity/token';
 
     // Specifies whether IAM authentication should be applied to the request being intercepted.
     self.shouldApplyIAMAuth = true;
