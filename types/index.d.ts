@@ -1,4 +1,4 @@
-// Copyright © 2018 IBM Corp. All rights reserved.
+// Copyright © 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,6 +49,21 @@ declare namespace cloudant {
         origins: string[];
     }
 
+    interface GeoGeometry {
+        type: "Point" | "LineString" | "Polygon" | "MultiPoint" |
+            "MultiLineString" | "MultiPolygon" | "GeometryCollection",
+        coordinates: number[]
+    }
+
+    interface GeoJson {
+        type: "Feature",
+        geometry: GeoGeometry,
+        properties?: any
+    }
+
+    interface GeoDocument extends GeoJson, nano.Document {
+    }
+
     interface GeoParams {
         include_docs?: boolean;
         bookmark?: string;
@@ -69,8 +84,8 @@ declare namespace cloudant {
 
     interface GeoResult<D> {
         bookmark: string;
-        features: any[];
-        row: D[];
+        features?: any[];
+        rows?: D[];
         type: string;
     }
 
@@ -140,8 +155,8 @@ declare namespace cloudant {
             designname: string,
             docname: string,
             params: GeoParams,
-            callback?: Callback<GeoResult<D>>
-        ): Promise<GeoResult<D>>;
+            callback?: Callback<GeoResult<GeoDocument>>
+        ): Promise<GeoResult<GeoDocument>>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#viewing-permissions
         get_security(callback?: Callback<Security>): Promise<Security>;
