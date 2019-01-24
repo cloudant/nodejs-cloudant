@@ -17,15 +17,23 @@ import { CoreOptions } from 'request';
 
 declare function cloudant(
     config: cloudant.Configuration | string,
-    callback?: (error: any, client?: cloudant.ServerScope, pong?: any) => void
+    callback?: (error?: cloudant.CloudantError, client?: cloudant.ServerScope, pong?: any) => void
 ): cloudant.ServerScope;
 
 declare namespace cloudant {
-    type Callback<R> = (error: any, response: R, headers?: any) => void;
-
     interface ApiKey {
         key: string;
         password: string;
+    }
+
+    interface CloudantError extends Error {
+        // need the additional error stuff here
+        message: string
+        scope: 'couch',
+        statusCode: number,
+        request: any,
+        headers: {[key: string]: string},
+        errid: string
     }
 
     interface Configuration {
@@ -89,12 +97,48 @@ declare namespace cloudant {
         type: string;
     }
 
+    interface QueryCreatedResponse {
+        result: "created"
+    }
+
+    interface TextIndexDefinition {
+        type: "text",
+        name: string,
+        ddoc: string,
+        index: {
+            default_field?: {
+                enabled: boolean,
+                analyzer: string,
+            },
+            selector?: any,
+            fields: {
+                name: string,
+                type: 'boolean' | 'string' | 'number'
+            }
+        }
+    }
+
+    interface JSONIndexDefinition {
+        index: {
+            fields: (string | {[key: string]: 'asc'| 'desc'}) [],
+            partial_filter_selector?: {} // query def
+        },
+        name: string,
+        ddoc?: string,
+        type?: 'json' | 'text'
+    }
+
+    interface IndexesResponse {
+        indexes: (TextIndexDefinition|JSONIndexDefinition)[]
+    }
+
     interface Query {
         // https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#query
-        (definition?: any, callback?: Callback<any>): Promise<any>;
+        (definition?: TextIndexDefinition | JSONIndexDefinition, callback?: nano.Callback<QueryCreatedResponse>): Promise<QueryCreatedResponse>; //creates index
+        (callback?: nano.Callback<QueryCreatedResponse>): Promise<IndexesResponse>; //reads index
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#deleting-an-index
-        del(spec: QueryDeleteSpec, callback?: Callback<any>): Promise<any>;
+        del(spec: QueryDeleteSpec, callback?: nano.Callback<nano.OkResponse>): Promise<nano.OkResponse>;
     }
 
     interface QueryDeleteSpec {
@@ -112,6 +156,7 @@ declare namespace cloudant {
     }
 
     interface Security {
+        cloudant: {[key: string]: string[]},
         [key: string]: any;
     }
 
@@ -123,21 +168,18 @@ declare namespace cloudant {
     // ============
 
     interface ServerScope extends nano.ServerScope {
-        db: nano.DatabaseScope;
-        use<D>(db: string): DocumentScope<D>;
-        scope<D>(db: string): DocumentScope<D>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#api-keys
-        generate_api_key(callback?: Callback<ApiKey>): Promise<ApiKey>;
+        generate_api_key(callback?: nano.Callback<ApiKey>): Promise<ApiKey>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cors.html#reading-the-cors-configuration
-        get_cors(callback?: Callback<any>): Promise<CORS>;
+        get_cors(callback?: nano.Callback<CORS>): Promise<CORS>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/account.html#ping
-        ping(callback?: Callback<any>): Promise<any>;
+        ping(callback?: nano.Callback<{[key:string] : any}>): Promise<{[key:string] : any}>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cors.html#setting-the-cors-configuration
-        set_cors(cors: CORS, callback?: Callback<any>): Promise<any>;
+        set_cors(cors: CORS, callback?: nano.Callback<nano.OkResponse>): Promise<nano.OkResponse>;
     }
 
     // Document Scope
@@ -148,21 +190,21 @@ declare namespace cloudant {
         index: Query;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/document.html#the-_bulk_get-endpoint
-        bulk_get(options: nano.BulkModifyDocsWrapper, callback?: Callback<any>): Promise<BulkGetResponse<D>>;
+        bulk_get(options: nano.BulkModifyDocsWrapper, callback?: nano.Callback<BulkGetResponse<D>>): Promise<BulkGetResponse<D>>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/cloudant-geo.html#cloudant-geospatial
         geo(
             designname: string,
             docname: string,
             params: GeoParams,
-            callback?: Callback<GeoResult<GeoDocument>>
+            callback?: nano.Callback<GeoResult<GeoDocument>>
         ): Promise<GeoResult<GeoDocument>>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#viewing-permissions
-        get_security(callback?: Callback<Security>): Promise<Security>;
+        get_security(callback?: nano.Callback<Security>): Promise<Security>;
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#modifying-permissions
-        set_security(Security: Security, callback?: Callback<any>): Promise<any>;
+        set_security(Security: Security, callback?: nano.Callback<nano.OkResponse>): Promise<nano.OkResponse>;
     }
 }
 
