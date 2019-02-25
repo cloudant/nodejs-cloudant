@@ -1,4 +1,4 @@
-// Copyright © 2019 IBM Corp. All rights reserved.
+// Copyright © 2018, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import * as nano from 'nano';
-import { CoreOptions } from 'request';
+import { CoreOptions, Headers } from 'request';
 
 declare function cloudant(
     config: cloudant.Configuration | string,
@@ -27,12 +27,11 @@ declare namespace cloudant {
     }
 
     interface CloudantError extends Error {
-        // need the additional error stuff here
         message: string
-        scope: 'couch',
+        scope: 'couch' | 'socket',
         statusCode: number,
         request: any,
-        headers: {[key: string]: string},
+        headers: Headers,
         errid: string
     }
 
@@ -58,13 +57,13 @@ declare namespace cloudant {
     }
 
     interface GeoGeometry {
-        type: "Point" | "LineString" | "Polygon" | "MultiPoint" |
-            "MultiLineString" | "MultiPolygon" | "GeometryCollection",
+        type: 'Point' | 'LineString' | 'Polygon' | 'MultiPoint' |
+            'MultiLineString' | 'MultiPolygon' | 'GeometryCollection',
         coordinates: number[]
     }
 
     interface GeoJson {
-        type: "Feature",
+        type: 'Feature',
         geometry: GeoGeometry,
         properties?: any
     }
@@ -98,11 +97,11 @@ declare namespace cloudant {
     }
 
     interface QueryCreatedResponse {
-        result: "created"
+        result: 'created'
     }
 
     interface TextIndexDefinition {
-        type: "text",
+        type: 'text',
         name: string,
         ddoc: string,
         index: {
