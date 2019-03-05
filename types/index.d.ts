@@ -88,15 +88,6 @@ declare namespace cloudant {
         name: string;
     }
 
-    interface SearchParams {
-        q: string;
-        include_docs?: boolean;
-        bookmark?: string;
-        limit?: number;
-        skip?: number;
-        stale?: string;
-    }
-
     interface Security {
         [key: string]: any;
     }

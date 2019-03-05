@@ -98,7 +98,7 @@ mydb.set_security(security).then((resp) => {});
 mydb.get_security((err, resp) => {});
 mydb.get_security().then((resp) => {});
 
-const params: cloudant.SearchParams = {
+const params: nano.DocumentSearchParams = {
   limit: 10,
   q: 'bird:*'
 };
