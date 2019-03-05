@@ -1,4 +1,4 @@
-// Copyright © 2018 IBM Corp. All rights reserved.
+// Copyright © 2018, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,6 +27,18 @@ const config: cloudant.Configuration = {
 };
 
 const cfgInstance = cloudant(config);
+
+/*
+ * Instantiate with VCAP configuration object
+ */
+
+const vcapConfig: cloudant.Configuration = {
+    vcapInstanceName: 'foo',
+    vcapServiceName: 'cloudantXYZ',
+    vcapServices: JSON.parse(process.env.VCAP_SERVICES || '{}')
+};
+
+const vcapInstance = cloudant(vcapConfig);
 
 /*
  * Run Initialization Callback
