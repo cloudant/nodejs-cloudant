@@ -1,4 +1,4 @@
-# UNRELEASED
+# 4.0.0 (2019-03-12)
 - [NEW] Added option for client to authenticate with IAM token server.
 - [FIXED] Add `vcapServiceName` configuration option to TS declarations.
 - [FIXED] Case where `.resume()` was called on an undefined response.
