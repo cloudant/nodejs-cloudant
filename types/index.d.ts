@@ -1,4 +1,4 @@
-// Copyright © 2018 IBM Corp. All rights reserved.
+// Copyright © 2018, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ declare namespace cloudant {
         password?: string;
         vcapInstanceName?: string;
         vcapServices?: string;
+        vcapServiceName?: string;
         url?: string;
         cookie?: string;
         requestDefaults?: CoreOptions;
@@ -85,15 +86,6 @@ declare namespace cloudant {
     interface QueryDeleteSpec {
         ddoc: string;
         name: string;
-    }
-
-    interface SearchParams {
-        q: string;
-        include_docs?: boolean;
-        bookmark?: string;
-        limit?: number;
-        skip?: number;
-        stale?: string;
     }
 
     interface Security {
