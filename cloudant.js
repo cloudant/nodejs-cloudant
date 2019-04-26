@@ -1,4 +1,4 @@
-// Copyright © 2015, 2018 IBM Corp. All rights reserved.
+// Copyright © 2015, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,18 @@ const Client = require('./lib/client.js');
 // Parse an object (i.e. { account: "myaccount", password: "mypassword" }) and
 // return a URL.
 var reconfigure = require('./lib/reconfigure.js');
+
+// Helper function for optional parameter `opts`.
+function getCallback(opts, callback) {
+  if (typeof opts === 'function') {
+    callback = opts;
+    opts = {};
+  }
+  if (typeof opts === 'undefined') {
+    opts = {};
+  }
+  return {opts, callback};
+}
 
 // This IS the Cloudant API. It is mostly nano, with a few functions.
 function Cloudant(options, callback) {
@@ -150,7 +162,81 @@ function Cloudant(options, callback) {
         body: query}, callback);
     };
 
+    // Partitioned Databases
+    // ---------------------
+
+    function partitionInfo(partitionKey, callback) {
+      return nano.request(
+        {db: db, path: '_partition/' + partitionKey}, callback
+      );
+    }
+
+    function executePartitionedView(partitionKey, ddoc, viewName, meta, qs, callback) {
+      meta.viewPath = '_partition/' + partitionKey + '/_design/' + ddoc + '/_' +
+        meta.type + '/' + viewName;
+      // Note: No need to pass `ddoc` or `viewName` to the `baseView` function
+      // as they are passed in the `meta.viewPath`.
+      return nano._use(db).baseView(null, null, meta, qs, callback);
+    }
+
+    function partitionedList(partitionKey, qs0, callback0) {
+      const {opts, callback} = getCallback(qs0, callback0);
+      let path = '_partition/' + partitionKey + '/_all_docs';
+      return nano.request({db: db, path: path, qs: opts}, callback);
+    }
+
+    function partitionedListAsStream(partitionKey, qs) {
+      let path = '_partition/' + partitionKey + '/_all_docs';
+      return nano.request(
+        {db: db, path: path, qs: qs, stream: true}, callback
+      );
+    }
+
+    function partitionedFind(partitionKey, selector, callback) {
+      return nano.request({
+        db: db,
+        path: '_partition/' + partitionKey + '/_find',
+        method: 'POST',
+        body: selector
+      }, callback);
+    }
+
+    function partitionedFindAsStream(partitionKey, selector) {
+      return nano.request({
+        db: db,
+        path: '_partition/' + partitionKey + '/_find',
+        method: 'POST',
+        body: selector,
+        stream: true
+      });
+    }
+
+    function partitionedSearch(partitionKey, ddoc, viewName, qs, callback) {
+      return executePartitionedView(
+        partitionKey, ddoc, viewName, {type: 'search'}, qs, callback
+      );
+    }
+
+    function partitionedSearchAsStream(partitionKey, ddoc, viewName, qs) {
+      return executePartitionedView(
+        partitionKey, ddoc, viewName, {type: 'search', stream: true}, qs
+      );
+    }
+
+    function partitionedView(partitionKey, ddoc, viewName, qs, callback) {
+      return executePartitionedView(
+        partitionKey, ddoc, viewName, {type: 'view'}, qs, callback
+      );
+    }
+
+    function partitionedViewAsStream(partitionKey, ddoc, viewName, qs) {
+      return executePartitionedView(
+        partitionKey, ddoc, viewName, {type: 'view', stream: true}, qs
+      );
+    }
+
     var obj = nano._use(db);
+
     obj.geo = geo;
     obj.bulk_get = bulk_get; // eslint-disable-line camelcase
     obj.get_security = get_security; // eslint-disable-line camelcase
@@ -158,6 +244,16 @@ function Cloudant(options, callback) {
     obj.index = index;
     obj.index.del = index_del; // eslint-disable-line camelcase
     obj.find = find;
+
+    obj.partitionInfo = partitionInfo;
+    obj.partitionedFind = partitionedFind;
+    obj.partitionedFindAsStream = partitionedFindAsStream;
+    obj.partitionedList = partitionedList;
+    obj.partitionedListAsStream = partitionedListAsStream;
+    obj.partitionedSearch = partitionedSearch;
+    obj.partitionedSearchAsStream = partitionedSearchAsStream;
+    obj.partitionedView = partitionedView;
+    obj.partitionedViewAsStream = partitionedViewAsStream;
 
     return obj;
   };

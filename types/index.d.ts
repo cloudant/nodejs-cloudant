@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import * as nano from 'nano';
-import { CoreOptions } from 'request';
+import { CoreOptions, Request } from 'request';
 
 declare function cloudant(
     config: cloudant.Configuration | string,
@@ -48,6 +48,17 @@ declare namespace cloudant {
         enable_cors: boolean;
         allow_credentials: boolean;
         origins: string[];
+    }
+
+    interface DatabasePartitionInfo {
+        db_name: string;
+        sizes: {
+            active: number;
+            external: number;
+        };
+        partition: string;
+        doc_count: number;
+        doc_del_count: number;
     }
 
     interface GeoParams {
@@ -136,6 +147,69 @@ declare namespace cloudant {
 
         // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#modifying-permissions
         set_security(Security: Security, callback?: Callback<any>): Promise<any>;
+
+
+        // Partitioned Databases
+        // ---------------------
+
+        // https://cloud.ibm.com/docs/services/Cloudant/guides?topic=cloudant-database-partitioning
+
+        partitionInfo(
+            partitionKey: string,
+            callback?: Callback<DatabasePartitionInfo>
+        ): Promise<DatabasePartitionInfo>;
+
+        partitionedFind(
+            partitionKey: string,
+            selector: nano.MangoQuery,
+            callback?: Callback<nano.MangoResponse<D>>
+        ): Promise<nano.MangoResponse<D>>;
+
+        partitionedFindAsStream(
+            partitionKey: string,
+            selector: nano.MangoQuery
+        ): Request;
+
+        partitionedList(
+            partitionKey: string,
+            params: nano.DocumentFetchParams,
+            callback?: Callback<nano.DocumentListResponse<D>>
+        ): Promise<nano.DocumentListResponse<D>>;
+
+        partitionedListAsStream(
+            partitionKey: string,
+            params: nano.DocumentFetchParams
+        ): Request;
+
+        partitionedSearch<V>(
+            partitionKey: string,
+            designname: string,
+            searchname: string,
+            params: nano.DocumentSearchParams,
+            callback?: Callback<nano.DocumentSearchResponse<V>>
+        ): Promise<nano.DocumentSearchResponse<V>>;
+
+        partitionedSearchAsStream<V>(
+            partitionKey: string,
+            designname: string,
+            searchname: string,
+            params: nano.DocumentSearchParams
+        ): Request;
+
+        partitionedView<V>(
+            partitionKey: string,
+            designname: string,
+            viewname: string,
+            params: nano.DocumentViewParams,
+            callback?: Callback<nano.DocumentViewResponse<V,D>>
+        ): Promise<nano.DocumentViewResponse<V,D>>;
+
+        partitionedViewAsStream<V>(
+            partitionKey: string,
+            designname: string,
+            viewname: string,
+            params: nano.DocumentViewParams
+        ): Request;
     }
 }
 
