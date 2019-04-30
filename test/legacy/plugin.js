@@ -113,7 +113,7 @@ describe('retry-on-429 plugin #db', function() {
     setTimeout(done, 1000);
   });
 
-  it.only('should return a stream', function(done) {
+  it('should return a stream', function(done) {
     var mocks = nock(SERVER)
         .get('/_all_dbs').reply(200, ['_replicator','_users']);
     var cloudant = Cloudant({plugins: 'retry', url: SERVER, username: ME, password: PASSWORD});
