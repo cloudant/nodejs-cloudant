@@ -1,4 +1,4 @@
-// Copyright © 2015, 2018 IBM Corp. All rights reserved.
+// Copyright © 2015, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -406,7 +406,7 @@ describe('Cloudant Search #db', function() {
                     { id: '764de7aeca95c27fdd7fb6565dcfc727', rev: '1-86039ff130d36c08a71b3f293fd4ea7e' }])
       .post(`/${my_db}`)
       .reply(200, { ok: true, id: '_design/library', rev: '1-cdbb57f890d060055b7fb8cb07628068' })
-      .get(`/${my_db}/_design/library/_search/books`).query(true)
+      .post(`/${my_db}/_design/library/_search/books`, '{\"q\":\"author:dickens\"}')
       .reply(200, {total_rows: 2, rows: [{id: '764de7aeca95c27fdd7fb6565dcfc0fe'}, {id: '764de7aeca95c27fdd7fb6565dcfc727'}]})
       .delete(`/${my_db}`)
       .reply(200, {ok: true});
