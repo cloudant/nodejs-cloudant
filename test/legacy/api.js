@@ -1,4 +1,4 @@
-// Copyright © 2015, 2018 IBM Corp. All rights reserved.
+// Copyright © 2015, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -813,7 +813,7 @@ describe('#db Cloudant Search', function() {
 
   it('searches test data: author:charles', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + dbName + '/_design/library/_search/books?q=author%3Acharles')
+      .post('/' + dbName + '/_design/library/_search/books', '{\"q\":\"author:charles\"}')
       .reply(200, { total_rows: 1, bookmark: 'g2wAAAABaANkAB1kYmNvcmVAZGI2LnNsaW5nLmNsb3VkYW50Lm5ldGwAAAACbgQAAAAAgG4EAP___79qaAJGP8iMWIAAAABhAGo', rows: [ { id: 'a_tale', order: [Object], fields: {} } ] });
 
     mydb.search('library', 'books', {q: 'author:charles'}, function(er, d) {
@@ -833,7 +833,7 @@ describe('#db Cloudant Search', function() {
 
   it('searches test data: title:two', function(done) {
     var mocks = nock(SERVER)
-      .get('/' + dbName + '/_design/library/_search/books?q=title%3Atwo')
+      .post('/' + dbName + '/_design/library/_search/books', '{\"q\":\"title:two\"}')
       .reply(200, {total_rows: 2, bookmark: 'g1AAAACIeJzLYWBgYMpgTmGQTUlKzi9KdUhJMtcrzsnMS9dLzskvTUnMK9HLSy3JASlLcgCSSfX____PymBysz_RE9EAFEhkIFJ7HguQZGgAUkAT9oONOLy4igFsRBYAPRQqlQ', rows: [{id: 'towers', order: [Object], fields: {}}, {id: 'a_tale', order: [Object], fields: {}}]});
 
     mydb.search('library', 'books', {q: 'title:two'}, function(er, d) {
