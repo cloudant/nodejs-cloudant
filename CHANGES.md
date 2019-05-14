@@ -1,4 +1,4 @@
-# UNRELEASED
+# 4.1.0 (2019-05-14)
 - [NEW] Added partitioned database support.
 
 # 4.0.0 (2019-03-12)
