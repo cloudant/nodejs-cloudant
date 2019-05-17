@@ -23,6 +23,7 @@ This is the official Cloudant library for Node.js.
   * [Cloudant Geospatial](#cloudant-geospatial)
   * [TypeScript Support](#typescript-support)
   * [Advanced Features](#advanced-features)
+    * [Partitioned Databases](#partitioned-databases)
     * [Debugging](#debugging)
     * [Advanced Configuration](#advanced-configuration)
     * [TLS 1.2 Support](#tls-12-support)
@@ -875,6 +876,219 @@ in Node.js, or in any JavaScript engine that supports ECMAScript 3 (or newer).
 See [here](https://www.typescriptlang.org) for further details.
 
 ## Advanced Features
+
+### Partitioned Databases
+
+Partitioned databases introduce the ability for a user to create logical groups
+of documents called partitions by providing a partition key with each document.
+
+Ensure your Cloudant cluster has the partitions feature enabled. A full list of
+enabled features can be retrieved by calling the Cloudant `ping()` method.
+
+```js
+cloudant.ping().then((body) => { console.log(body.features_flags) })
+// [ 'partitioned' ]
+```
+
+**Creating a partitioned database**
+
+```js
+await cloudant.db.create('my-partitioned-db', { partitioned: true })
+// { ok: true }
+```
+
+**Handling documents**
+
+The document ID contains both the partition key and document key in the form
+`<partitionkey>:<documentkey>` where:
+
+- Partition Key *(string)*. Must be non-empty. Must not contain colons (as this
+  is the partition key delimiter) or begin with an underscore.
+- Document Key *(string)*. Must be non-empty. Must not begin with an underscore.
+
+Be aware that `_design` documents and `_local` documents must not contain a
+partition key as they are global definitions.
+
+*Create a document*
+
+```js
+// document to add
+const doc = { _id: 'canidae:dog', name: 'Dog', latin: 'Canis lupus familiaris' }
+
+// insert the document
+await db.insert(doc)
+// { "ok": true, "id": "canidae:dog", "rev": "1-3a4c4c5d65709bcb3ec675ec895d4051" }
+```
+
+*Get a document*
+
+```js
+// fetch a document by its ID
+await db.get('canidae:dog')
+// { _id: 'canidae:dog', _rev: '1-3a4c4c5d65709bcb3ec675ec895d4051', name: 'Dog', latin: 'Canis lupus familiaris' }
+```
+
+**Get partition information**
+
+To fetch the information about a single partition, use the `partitionInfo`
+function and pass a partition key:
+
+```js
+// get partition information from the 'canidae' partition
+await db.partitionInfo('canidae')
+// {"db_name":"myhost-bluemix/mypartitioneddb","sizes":{"active":392,"external":332},"partition":"canidae","doc_count":4,"doc_del_count":0}
+```
+
+**Get all documents from a partition**
+
+To fetch all of the documents from a partition, use the `partitionedList`
+function:
+
+```js
+// fetch all documents in the 'canidae' partition, returning document bodies too.
+await db.partitionedList('canidae', { include_docs: true })
+// { "total_rows": 4, "offset": 0, "rows": [ ... ] }
+```
+
+**Partitioned Cloudant Query**
+
+:exclamation: To run partitioned queries the database itself must be partitioned. :exclamation:
+
+*Create a partitioned index*
+
+To create an index that is partitioned, ensure that the `partitioned: true`
+field is set when calling the `insert` function, to instruct Cloudant to create
+a partitioned query, instead of a global one:
+
+```js
+// index definition
+const i = {
+  ddoc: 'partitioned-query',
+  index: { fields: ['name'] },
+  name: 'name-index',
+  partitioned: true,
+  type: 'json'
+}
+
+// instruct Cloudant to create the index
+await db.index(i)
+// { result: 'created', id: '_design/partitioned-query', name: 'name-index' }
+```
+
+*Find within a partition*
+
+To perform a Cloudant Query in a single partition, use the `partitionedFind` (or
+`partitionedFindAsStream`) function:
+
+```js
+// find document whose name is 'wolf' in the 'canidae' partition
+await db.partitionedFind('canidae', { 'selector' : { 'name': 'Wolf' }})
+// { "docs": [ ... ], "bookmark": "..." }
+```
+
+**Partitioned Search**
+
+:exclamation: To run partitioned searches the database itself must be partitioned. :exclamation:
+
+*Create a partitioned search index*
+
+To create a [Cloudant
+Search](https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-search)
+index that is partitioned, write a [design
+document](https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-design-documents)
+to the database containing the index definition. Use `options.partitioned =
+true` to specify that this is a partitioned index:
+
+```js
+// the search definition
+const func = function(doc) {
+  index('name', doc.name)
+  index('latin', doc.latin)
+}
+
+// the design document containing the search definition function
+const ddoc = {
+  _id: '_design/search-ddoc',
+  indexes: {
+    search-index: {
+      index: func.toString()
+    }
+  },
+  options: {
+    partitioned: true
+  }
+}
+
+await db.insert(ddoc)
+// { ok: true, id: '_design/search-ddoc', rev: '1-e7257e575d666ca062b4fe0bdeb6fba1' }
+```
+
+*Search within a partition*
+
+To perform a [Cloudant
+Search](https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-search)
+against a pre-existing Cloudant Search index, use the `partitionedSearch`
+function:
+
+```js
+const params = {
+  q: 'name:\'Wolf\''
+}
+await db.partitionedSearch('canidae', 'search-ddoc', 'search-index', params)
+// { total_rows: ... , bookmark: ..., rows: [ ...] }
+```
+
+**MapReduce Views**
+
+:exclamation: To run partitioned views the database itself must be partitioned. :exclamation:
+
+*Creating a partitioned MapReduce view*
+
+To create a MapReduce view, ensure the `options.partitioned` flag is set to
+`true` to indicate to Cloudant that this is a partitioned rather than a global
+view:
+
+```js
+const func = function(doc) {
+  emit(doc.family, doc.weight)
+}
+
+// Design Document
+const ddoc = {
+  _id: '_design/view-ddoc',
+  views: {
+    family-weight: {
+      map: func.toString(),
+      reduce: '_sum'
+    }
+  },
+  options: {
+    partitioned: true
+  }
+}
+
+// create design document
+await db.insert(ddoc)
+// { ok: true, id: '_design/view-ddoc', rev: '1-a062b4fe0bdeb6fbe7257e575d666ca1' }
+```
+
+*Querying a partitioned MapReduce view*
+
+To direct a query to a pre-existing partitioned MapReduce view, use the
+`partitionedView` (or `partitionedViewAsStream`) function:
+
+```js
+const params = {}
+await db.partitionedView('canidae', 'view-ddoc', 'family-weight', params)
+// { rows: [ { key: ... , value: [Object] } ] }
+```
+
+**Global indexes**
+
+A partitioned database may still have *global* Cloudant Query, Cloudant Search
+and MapReduce indexes. Create the indexes as normal but be sure to supply
+`false` as the `partitioned` flag, to indicate you need a global index. Then
+query your index as normal using `db.find`, `db.search` or `db.view`.
 
 ### Debugging
 
