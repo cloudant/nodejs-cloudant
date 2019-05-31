@@ -109,7 +109,7 @@ stage('Publish') {
         // 4. publish the build to NPM adding a snapshot tag if pre-release
         sh """
           ${isReleaseVersion ? '' : ('npm version --no-git-tag-version ' + version + '.' + env.BUILD_ID)}
-          npm install npm-cli-login
+          npm install --no-save npm-cli-login
           ./node_modules/.bin/npm-cli-login
           npm publish ${isReleaseVersion ? '' : '--tag snapshot'}
         """

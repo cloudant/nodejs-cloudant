@@ -1,4 +1,5 @@
 # UNRELEASED
+- [FIXED] Remove unnecessary `npm-cli-login` dependency.
 
 # 4.1.0 (2019-05-14)
 - [NEW] Added partitioned database support.
