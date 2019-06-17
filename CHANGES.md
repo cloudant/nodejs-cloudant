@@ -1,4 +1,4 @@
-# UNRELEASED
+# 4.1.1 (2019-06-17)
 - [FIXED] Remove unnecessary `npm-cli-login` dependency.
 
 # 4.1.0 (2019-05-14)
