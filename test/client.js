@@ -18,6 +18,7 @@
 const assert = require('assert');
 const Client = require('../lib/client.js');
 const nock = require('./nock.js');
+const path = require('path');
 const stream = require('stream');
 const testPlugin = require('./fixtures/testplugins.js');
 const uuidv4 = require('uuid/v4'); // random
@@ -86,6 +87,21 @@ describe('CloudantClient', function() {
   });
 
   describe('plugin support', function() {
+    it('get plugin path by name', function() {
+      var cloudantClient = new Client();
+      assert.equal(cloudantClient._buildPluginPath('dummy-plugin'), '../plugins/dummy-plugin');
+    });
+
+    it('get plugin path by relative path', function() {
+      var cloudantClient = new Client();
+      assert.equal(cloudantClient._buildPluginPath('./dummy-plugin'), path.join(process.cwd(), 'dummy-plugin'));
+    });
+
+    it('get plugin path by absolute path', function() {
+      var cloudantClient = new Client();
+      assert.equal(cloudantClient._buildPluginPath('/plugins/dummy-plugin'), '/plugins/dummy-plugin');
+    });
+
     it('adds cookie authentication plugin if no other plugins are specified', function() {
       var cloudantClient = new Client();
       assert.equal(cloudantClient._plugins.length, 1);
