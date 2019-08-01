@@ -102,6 +102,14 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._buildPluginPath('/plugins/dummy-plugin'), '/plugins/dummy-plugin');
     });
 
+    it('load plugin from custom path', function() {
+      let ownPlugin = 'test/fixtures/testplugin.js';
+      var cloudantClient = new Client({
+        plugins: [ ownPlugin ]
+      });
+      assert.equal(cloudantClient._plugins.length, 1);
+    });
+
     it('adds cookie authentication plugin if no other plugins are specified', function() {
       var cloudantClient = new Client();
       assert.equal(cloudantClient._plugins.length, 1);

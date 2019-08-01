@@ -1,5 +1,5 @@
 # 4.1.2 (2019-07-29)
-- [NEW] Plugins can now be loaded from outside of the 'plugins/' directory
+- [FIXED] Plugins can now be loaded from outside of the 'plugins/' directory
 
 # 4.1.1 (2019-06-17)
 - [FIXED] Remove unnecessary `npm-cli-login` dependency.
