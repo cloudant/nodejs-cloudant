@@ -353,6 +353,7 @@ describe('#db IAMAuth Plugin', function() {
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
+      .times(3)
       .reply(500, 'Internal Error 500\nThe server encountered an unexpected condition which prevented it from fulfilling the request.');
 
     var cloudantMocks = nock(SERVER)
@@ -418,10 +419,12 @@ describe('#db IAMAuth Plugin', function() {
         'response_type': 'cloud_iam',
         'apikey': IAM_API_KEY
       })
+      .times(3)
       .reply(200, MOCK_IAM_TOKEN_RESPONSE);
 
     var cloudantMocks = nock(SERVER)
       .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
+      .times(3)
       .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
       .get(DBNAME)
       .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});

@@ -1,5 +1,6 @@
-# 4.1.2 (2019-07-29)
-- [FIXED] Plugins can now be loaded from outside of the 'plugins/' directory
+# UNRELEASED
+- [FIXED] Allow plugins to be loaded from outside the 'plugins/' directory.
+- [FIXED] Retry bad IAM token requests.
 
 # 4.1.1 (2019-06-17)
 - [FIXED] Remove unnecessary `npm-cli-login` dependency.
