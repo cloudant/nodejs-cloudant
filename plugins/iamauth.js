@@ -153,8 +153,10 @@ class IAMPlugin extends BasePlugin {
                 callback(new Error('Invalid response from IAM token service'));
               }
             } else {
-              self.shouldApplyIAMAuth = false;
-              callback(new Error('Failed to access token'));
+              if (response.statusCode < 500 && response.statusCode !== 429) {
+                self.shouldApplyIAMAuth = false; // no retry
+              }
+              callback(new Error(`Failed to acquire access token. Status code: ${response.statusCode}`));
             }
           });
         },
@@ -175,8 +177,10 @@ class IAMPlugin extends BasePlugin {
               debug('Successfully renewed IAM session.');
               callback();
             } else {
-              self.shouldApplyIAMAuth = false;
-              callback(new Error('Failed to exchange IAM token with Cloudant'));
+              if (response.statusCode < 500) {
+                self.shouldApplyIAMAuth = false; // no retry
+              }
+              callback(new Error(`Failed to exchange IAM token with Cloudant. Status code: ${response.statusCode}`));
             }
           });
         }

@@ -1,3 +1,6 @@
+# UNRELEASED
+- [FIXED] Retry bad IAM token requests.
+
 # 4.1.1 (2019-06-17)
 - [FIXED] Remove unnecessary `npm-cli-login` dependency.
 
