@@ -355,7 +355,7 @@ All other configuration is plugin specific. It must be passed within an object
 to the `plugins` parameter in the client constructor. For example:
 
 ```js
-var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ 'iamauth', { retry: { retryDelayMultiplier: 4 } } ]);
+var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iamApiKey: 'abcxyz' } }, { retry: { retryDelayMultiplier: 4 } } ]);
 ```
 
 `maxAttempt` can _not_ be overridden by plugin specific configuration.

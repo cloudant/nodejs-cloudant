@@ -1,4 +1,4 @@
-// Copyright © 2018 IBM Corp. All rights reserved.
+// Copyright © 2018, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -260,10 +260,11 @@ describe('#db README Examples', function() {
       var cloudant = new Cloudant({
         url: `https://${ME}.cloudant.com`,
         maxAttempt: 5,
-        plugins: [ 'iamauth', { retry: { retryDelayMultiplier: 4 } } ]
+        plugins: [ { iamauth: { iamApiKey: 'abcxyz' } }, { retry: { retryDelayMultiplier: 4 } } ]
       });
       assert.equal(cloudant.cc._plugins.length, 2);
       assert.equal(cloudant.cc._plugins[0].constructor.name, 'IAMPlugin');
+      assert.equal(cloudant.cc._plugins[0]._cfg.iamApiKey, 'abcxyz');
       assert.equal(cloudant.cc._plugins[1].constructor.name, 'RetryPlugin');
       assert.equal(cloudant.cc._plugins[1]._cfg.retryDelayMultiplier, 4);
     });
