@@ -355,7 +355,7 @@ All other configuration is plugin specific. It must be passed within an object
 to the `plugins` parameter in the client constructor. For example:
 
 ```js
-var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ 'iamauth', { retry: { retryDelayMultiplier: 4 } } ]);
+var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iamApiKey: 'abcxyz' } }, { retry: { retryDelayMultiplier: 4 } } ]);
 ```
 
 `maxAttempt` can _not_ be overridden by plugin specific configuration.
@@ -397,9 +397,31 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ 'iamauth', {
    override this. To authenticate with the IAM token service set `iamClientId`
    and `iamClientSecret` in your plugin configuration.
 
+   The plugin will retry failed requests to the token service (specifically
+   `429` and `5xx` responses) until the number of retry requests reaches
+   `maxAttempt`. Be aware that retrying requests to the token service delays the
+   client request. It also increases the number of token exchange attempts and
+   therefore may result in rate limiting by the IAM token service.
+
+   The retry behavior can be configured using the following options:
+
+    - `retryDelayMultiplier`
+
+      The multiplication factor used for increasing the timeout after each
+      subsequent attempt _(default: 2)_.
+
+    - `retryInitialDelayMsecs`
+
+      The initial retry delay in milliseconds _(default: 500)_.
+
+   If the IAM token cannot be retrieved (either because the IAM token service is
+   down or the IAM API key is incorrect) then the request will continue without
+   IAM authentication allowing the database to return a `401` response to the
+   caller so that it may be handled appropriately.
+
    For example:
    ```js
-   var cloudant = new Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx' } } });
+   var cloudant = new Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx', retryDelayMultiplier: 4 } } });
    ```
 
    See [IBM Cloud Identity and Access Management](https://console.bluemix.net/docs/services/Cloudant/guides/iam.html#ibm-cloud-identity-and-access-management) for more information.

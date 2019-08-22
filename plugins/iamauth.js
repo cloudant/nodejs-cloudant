@@ -25,30 +25,28 @@ const BasePlugin = require('./base.js');
  */
 class IAMPlugin extends BasePlugin {
   constructor(client, cfg) {
+    if (typeof cfg.iamApiKey === 'undefined') {
+      throw new Error('Missing IAM API key from configuration');
+    }
+
+    // token service retry configuration
+    cfg = Object.assign({
+      retryDelayMultiplier: 2,
+      retryInitialDelayMsecs: 500
+    }, cfg);
+
     super(client, cfg);
 
-    var self = this;
-    self.iamApiKey = null;
-    self.baseUrl = cfg.baseUrl || null;
-    self.cookieJar = request.jar();
-    self.tokenUrl = cfg.iamTokenUrl || 'https://iam.cloud.ibm.com/identity/token';
-
-    // Specifies whether IAM authentication should be applied to the request being intercepted.
-    self.shouldApplyIAMAuth = true;
-    self.refreshRequired = true;
-
-    if (typeof cfg.iamApiKey === 'undefined') {
-      debug('Missing IAM API key. Skipping IAM authentication.');
-      self.shouldApplyIAMAuth = false;
-    }
+    this.iamApiKey = null;
+    this.baseUrl = cfg.baseUrl || null;
+    this.cookieJar = request.jar();
+    this.tokenUrl = cfg.iamTokenUrl || 'https://iam.cloud.ibm.com/identity/token';
+    this.shouldApplyIAMAuth = true;
+    this.refreshRequired = true;
   }
 
   onRequest(state, req, callback) {
     var self = this;
-
-    if (typeof self._cfg.iamApiKey === 'undefined') {
-      throw new Error('Missing IAM API key from configuration');
-    }
 
     if (self._cfg.iamApiKey !== self.iamApiKey) {
       debug('New credentials identified. Renewing session cookie...');
@@ -85,6 +83,13 @@ class IAMPlugin extends BasePlugin {
         debug(error.message);
         if (self.shouldApplyIAMAuth) {
           state.retry = true;
+          if (state.attempt === 1) {
+            state.retryDelayMsecs = self._cfg.retryInitialDelayMsecs;
+          } else {
+            state.retryDelayMsecs *= self._cfg.retryDelayMultiplier;
+          }
+        } else {
+          console.warn(`Disabling IAM authentication: ${error.message}`);
         }
       } else {
         req.jar = self.cookieJar; // add jar
