@@ -513,10 +513,10 @@ describe('#db IAMAuth Plugin', function() {
   });
 
   it('throws error for unspecified IAM API key', function() {
-    var cloudantClient = new Client({ plugins: 'iamauth' });
     assert.throws(
       () => {
-        cloudantClient.request({ url: SERVER + DBNAME });
+        /* eslint-disable no-new */
+        new Client({ plugins: 'iamauth' });
       },
       /Missing IAM API key from configuration/,
       'did not throw with expected message'
@@ -555,6 +555,53 @@ describe('#db IAMAuth Plugin', function() {
       done();
     }).catch(function(err) {
       assert.fail(`Unexpected reject: ${err}`);
+    });
+  });
+
+  it('successfully retries request on 500 IAM token service response and returns 200 response', function(done) {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
+
+    var iamMocks = nock(TOKEN_SERVER)
+      .post('/identity/token', {
+        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
+        'response_type': 'cloud_iam',
+        'apikey': IAM_API_KEY
+      })
+      .times(4)
+      .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+      .post('/identity/token', {
+        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
+        'response_type': 'cloud_iam',
+        'apikey': IAM_API_KEY
+      })
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
+
+    var cloudantMocks = nock(SERVER)
+      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
+      .reply(200, {ok: true}, MOCK_SET_IAM_SESSION_HEADER)
+      .get(DBNAME)
+      .reply(200, {doc_count: 0});
+
+    var cloudantClient = new Client({ maxAttempt: 5, plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var req = { url: SERVER + DBNAME, method: 'GET' };
+
+    var startTs = (new Date()).getTime();
+
+    cloudantClient.request(req, function(err, resp, data) {
+      assert.equal(err, null);
+      assert.equal(resp.request.headers.cookie, MOCK_IAM_SESSION);
+      assert.equal(resp.statusCode, 200);
+      assert.ok(data.indexOf('"doc_count":0') > -1);
+
+      // validate retry delay
+      var now = (new Date()).getTime();
+      assert.ok(now - startTs > (500 + 1000 + 2000 + 4000));
+
+      iamMocks.done();
+      cloudantMocks.done();
+      done();
     });
   });
 });
