@@ -604,4 +604,56 @@ describe('#db IAMAuth Plugin', function() {
       done();
     });
   });
+
+  it('returns an error if access token returns non-200 response', function(done) {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
+
+    var iamMocks = nock(TOKEN_SERVER)
+      .post('/identity/token', {
+        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
+        'response_type': 'cloud_iam',
+        'apikey': IAM_API_KEY
+      })
+      .times(3)
+      .reply(500, 'Internal Error 500\nThe server encountered an unexpected condition which prevented it from fulfilling the request.');
+
+    var cloudantClient = new Client({ plugins: { iamauth: { errorOnAuthFail: true, iamApiKey: IAM_API_KEY } } });
+    var req = { url: SERVER + DBNAME, method: 'GET' };
+    cloudantClient.request(req, function(err) {
+      assert.equal(err.message, 'Failed to acquire access token. Status code: 500');
+      iamMocks.done();
+      done();
+    });
+  });
+
+  it('returns an error if IAM cookie login returns non-200 response', function(done) {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
+
+    var iamMocks = nock(TOKEN_SERVER)
+      .post('/identity/token', {
+        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
+        'response_type': 'cloud_iam',
+        'apikey': IAM_API_KEY
+      })
+      .times(3)
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
+
+    var cloudantMocks = nock(SERVER)
+      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
+      .times(3)
+      .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
+
+    var cloudantClient = new Client({ plugins: { iamauth: { errorOnAuthFail: true, iamApiKey: IAM_API_KEY } } });
+    var req = { url: SERVER + DBNAME, method: 'GET' };
+    cloudantClient.request(req, function(err) {
+      assert.equal(err.message, 'Failed to exchange IAM token with Cloudant. Status code: 500');
+      iamMocks.done();
+      cloudantMocks.done();
+      done();
+    });
+  });
 });

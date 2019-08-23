@@ -28,7 +28,8 @@ class IAMPlugin extends BasePlugin {
     // token service retry configuration
     cfg = Object.assign({
       retryDelayMultiplier: 2,
-      retryInitialDelayMsecs: 500
+      retryInitialDelayMsecs: 500,
+      errorOnAuthFail: false
     }, cfg);
 
     super(client, cfg);
@@ -88,13 +89,17 @@ class IAMPlugin extends BasePlugin {
     self.refreshCookie(self._cfg, function(error) {
       if (error) {
         debug(error.message);
-        if (self.shouldApplyIAMAuth) {
+        if (state.attempt < state.maxAttempt && self.shouldApplyIAMAuth) {
+          // retry cookie refresh
           state.retry = true;
           if (state.attempt === 1) {
             state.retryDelayMsecs = self._cfg.retryInitialDelayMsecs;
           } else {
             state.retryDelayMsecs *= self._cfg.retryDelayMultiplier;
           }
+        } else if (self._cfg.errorOnAuthFail) {
+          // return error to client
+          state.abortWithResponse = [ error ];
         }
       } else {
         req.jar = self.cookieJar; // add jar

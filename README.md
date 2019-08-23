@@ -411,13 +411,20 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: {
 
       The initial retry delay in milliseconds _(default: 500)_.
 
-   If the IAM token cannot be retrieved (either because the IAM token service is
-   down or the IAM API key is incorrect) then the request will continue without
-   IAM authentication.
-
    For example:
    ```js
    var cloudant = new Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx', retryDelayMultiplier: 4 } } });
+   ```
+
+   If the IAM token cannot be retrieved (either because the IAM token service is
+   down or the IAM API key is incorrect) then, by default, the request will
+   continue without IAM authentication. You can set `errorOnAuthFail: true` to
+   change this default behavior. This will return an error to the calling client
+   if the user cannot be authenticated using IAM.
+
+   For example:
+   ```js
+   var cloudant = new Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { errorOnAuthFail: true, iamApiKey: 'xxxxxxxxxx' } } });
    ```
 
    See [IBM Cloud Identity and Access Management](https://console.bluemix.net/docs/services/Cloudant/guides/iam.html#ibm-cloud-identity-and-access-management) for more information.
