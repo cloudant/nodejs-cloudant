@@ -1,4 +1,4 @@
-# UNRELEASED
+# 4.2.0 (2019-08-27)
 - [NEW] Added option to set new IAM API key.
 - [FIXED] Allow plugins to be loaded from outside the 'plugins/' directory.
 - [FIXED] Retry bad IAM token requests.
