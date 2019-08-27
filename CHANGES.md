@@ -1,3 +1,11 @@
+# UNRELEASED
+- [FIXED] Stopped disabling the IAM auth plugin after failed IAM
+  authentications. Subsequent requests will re-request authorization,
+  potentially failing again if the original authentication failure was not
+  temporary.
+- [FIXED] Ensure IAM API key can be correctly changed.
+- [FIXED] Callback with an error when a user cannot be authenticated using IAM.
+
 # 4.2.1 (2019-08-29)
 - [FIXED] Include all built-in plugin modules in webpack bundle.
 

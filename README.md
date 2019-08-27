@@ -414,15 +414,14 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: {
 
       The initial retry delay in milliseconds _(default: 500)_.
 
-   If the IAM token cannot be retrieved (either because the IAM token service is
-   down or the IAM API key is incorrect) then the request will continue without
-   IAM authentication allowing the database to return a `401` response to the
-   caller so that it may be handled appropriately.
-
    For example:
    ```js
-   var cloudant = new Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx', retryDelayMultiplier: 4 } } });
+   var cloudant = new Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx', retryDelayMultiplier: 4, retryInitialDelayMsecs: 100 } } });
    ```
+
+   If the IAM token cannot be retrieved after the configured number of retries
+   (either because the IAM token service is down or the IAM API key is
+   incorrect) then an error is returned to the client.
 
    See [IBM Cloud Identity and Access Management](https://console.bluemix.net/docs/services/Cloudant/guides/iam.html#ibm-cloud-identity-and-access-management) for more information.
 
