@@ -37,9 +37,9 @@ class IAMPlugin extends BasePlugin {
 
     super(client, cfg);
 
-    this.iamApiKey = null;
+    this.currentIamApiKey = null;
     this.baseUrl = cfg.baseUrl || null;
-    this.cookieJar = request.jar();
+    this.cookieJar = null;
     this.tokenUrl = cfg.iamTokenUrl || 'https://iam.cloud.ibm.com/identity/token';
     this.shouldApplyIAMAuth = true;
     this.refreshRequired = true;
@@ -48,8 +48,10 @@ class IAMPlugin extends BasePlugin {
   onRequest(state, req, callback) {
     var self = this;
 
-    if (self._cfg.iamApiKey !== self.iamApiKey) {
-      debug('New credentials identified. Renewing session cookie...');
+    if (self._cfg.iamApiKey !== self.currentIamApiKey) {
+      debug('New IAM API key identified.');
+      this.cookieJar = request.jar(); // new jar
+      self.currentIamApiKey = self._cfg.iamApiKey;
       self.shouldApplyIAMAuth = self.refreshRequired = true;
     }
 
@@ -177,7 +179,6 @@ class IAMPlugin extends BasePlugin {
             if (error) {
               callback(error);
             } else if (response.statusCode === 200) {
-              self.iamApiKey = cfg.iamApiKey;
               self.refreshRequired = false;
               debug('Successfully renewed IAM session.');
               callback();
@@ -195,6 +196,11 @@ class IAMPlugin extends BasePlugin {
         callback(error);
       });
     });
+  }
+
+  setIamApiKey(iamApiKey) {
+    debug('Setting new IAM API key.');
+    this._cfg.iamApiKey = iamApiKey;
   }
 }
 
