@@ -25,33 +25,33 @@ const BasePlugin = require('./base.js');
  */
 class IAMPlugin extends BasePlugin {
   constructor(client, cfg) {
+    if (typeof cfg.iamApiKey === 'undefined') {
+      throw new Error('Missing IAM API key from configuration');
+    }
+
+    // token service retry configuration
+    cfg = Object.assign({
+      retryDelayMultiplier: 2,
+      retryInitialDelayMsecs: 500
+    }, cfg);
+
     super(client, cfg);
 
-    var self = this;
-    self.iamApiKey = null;
-    self.baseUrl = cfg.baseUrl || null;
-    self.cookieJar = request.jar();
-    self.tokenUrl = cfg.iamTokenUrl || 'https://iam.cloud.ibm.com/identity/token';
-
-    // Specifies whether IAM authentication should be applied to the request being intercepted.
-    self.shouldApplyIAMAuth = true;
-    self.refreshRequired = true;
-
-    if (typeof cfg.iamApiKey === 'undefined') {
-      debug('Missing IAM API key. Skipping IAM authentication.');
-      self.shouldApplyIAMAuth = false;
-    }
+    this.currentIamApiKey = null;
+    this.baseUrl = cfg.baseUrl || null;
+    this.cookieJar = null;
+    this.tokenUrl = cfg.iamTokenUrl || 'https://iam.cloud.ibm.com/identity/token';
+    this.shouldApplyIAMAuth = true;
+    this.refreshRequired = true;
   }
 
   onRequest(state, req, callback) {
     var self = this;
 
-    if (typeof self._cfg.iamApiKey === 'undefined') {
-      throw new Error('Missing IAM API key from configuration');
-    }
-
-    if (self._cfg.iamApiKey !== self.iamApiKey) {
-      debug('New credentials identified. Renewing session cookie...');
+    if (self._cfg.iamApiKey !== self.currentIamApiKey) {
+      debug('New IAM API key identified.');
+      this.cookieJar = request.jar(); // new jar
+      self.currentIamApiKey = self._cfg.iamApiKey;
       self.shouldApplyIAMAuth = self.refreshRequired = true;
     }
 
@@ -85,6 +85,13 @@ class IAMPlugin extends BasePlugin {
         debug(error.message);
         if (self.shouldApplyIAMAuth) {
           state.retry = true;
+          if (state.attempt === 1) {
+            state.retryDelayMsecs = self._cfg.retryInitialDelayMsecs;
+          } else {
+            state.retryDelayMsecs *= self._cfg.retryDelayMultiplier;
+          }
+        } else {
+          console.warn(`Disabling IAM authentication: ${error.message}`);
         }
       } else {
         req.jar = self.cookieJar; // add jar
@@ -153,8 +160,10 @@ class IAMPlugin extends BasePlugin {
                 callback(new Error('Invalid response from IAM token service'));
               }
             } else {
-              self.shouldApplyIAMAuth = false;
-              callback(new Error('Failed to access token'));
+              if (response.statusCode < 500 && response.statusCode !== 429) {
+                self.shouldApplyIAMAuth = false; // no retry
+              }
+              callback(new Error(`Failed to acquire access token. Status code: ${response.statusCode}`));
             }
           });
         },
@@ -170,13 +179,14 @@ class IAMPlugin extends BasePlugin {
             if (error) {
               callback(error);
             } else if (response.statusCode === 200) {
-              self.iamApiKey = cfg.iamApiKey;
               self.refreshRequired = false;
               debug('Successfully renewed IAM session.');
               callback();
             } else {
-              self.shouldApplyIAMAuth = false;
-              callback(new Error('Failed to exchange IAM token with Cloudant'));
+              if (response.statusCode < 500) {
+                self.shouldApplyIAMAuth = false; // no retry
+              }
+              callback(new Error(`Failed to exchange IAM token with Cloudant. Status code: ${response.statusCode}`));
             }
           });
         }
@@ -186,6 +196,11 @@ class IAMPlugin extends BasePlugin {
         callback(error);
       });
     });
+  }
+
+  setIamApiKey(iamApiKey) {
+    debug('Setting new IAM API key.');
+    this._cfg.iamApiKey = iamApiKey;
   }
 }
 
