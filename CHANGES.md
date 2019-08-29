@@ -1,4 +1,4 @@
-# UNRELEASED
+# 4.2.1 (2019-08-29)
 - [FIXED] Include all built-in plugin modules in webpack bundle.
 
 # 4.2.0 (2019-08-27)
