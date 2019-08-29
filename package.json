@@ -7,7 +7,7 @@
     "type": "git",
     "url": "git@github.com:cloudant/nodejs-cloudant.git"
   },
-  "version": "4.2.1",
+  "version": "4.2.2-SNAPSHOT",
   "author": {
     "name": "IBM Cloudant",
     "email": "support@cloudant.com"
