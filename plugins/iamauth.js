@@ -41,7 +41,6 @@ class IAMPlugin extends BasePlugin {
     this.baseUrl = cfg.baseUrl || null;
     this.cookieJar = null;
     this.tokenUrl = cfg.iamTokenUrl || 'https://iam.cloud.ibm.com/identity/token';
-    this.shouldApplyIAMAuth = true;
     this.refreshRequired = true;
   }
 
@@ -50,16 +49,9 @@ class IAMPlugin extends BasePlugin {
 
     if (self._cfg.iamApiKey !== self.currentIamApiKey) {
       debug('New IAM API key identified.');
-      this.cookieJar = request.jar(); // new jar
       self.currentIamApiKey = self._cfg.iamApiKey;
-      self.shouldApplyIAMAuth = self.refreshRequired = true;
-    }
-
-    if (!self.shouldApplyIAMAuth) {
-      return callback(state);
-    }
-
-    if (!self.refreshRequired) {
+      state.stash.newApiKey = true;
+    } else if (!self.refreshRequired) {
       if (self.baseUrl && self.cookieJar.getCookies(self.baseUrl, {expire: true}).length === 0) {
         debug('There are no valid session cookies in the jar. Requesting IAM session refresh...');
       } else {
@@ -80,10 +72,10 @@ class IAMPlugin extends BasePlugin {
       });
     }
 
-    self.refreshCookie(self._cfg, function(error) {
+    self.refreshCookie(self._cfg, state, function(error) {
       if (error) {
         debug(error.message);
-        if (self.shouldApplyIAMAuth) {
+        if (state.attempt < state.maxAttempt) {
           state.retry = true;
           if (state.attempt === 1) {
             state.retryDelayMsecs = self._cfg.retryInitialDelayMsecs;
@@ -91,7 +83,7 @@ class IAMPlugin extends BasePlugin {
             state.retryDelayMsecs *= self._cfg.retryDelayMultiplier;
           }
         } else {
-          console.warn(`Disabling IAM authentication: ${error.message}`);
+          state.abortWithResponse = [ error ]; // return error to client
         }
       } else {
         req.jar = self.cookieJar; // add jar
@@ -101,7 +93,7 @@ class IAMPlugin extends BasePlugin {
   }
 
   onResponse(state, response, callback) {
-    if (this.shouldApplyIAMAuth && response.statusCode === 401) {
+    if (response.statusCode === 401) {
       debug('Requesting IAM session refresh for 401 response.');
       this.refreshRequired = true;
       state.retry = true;
@@ -110,7 +102,7 @@ class IAMPlugin extends BasePlugin {
   }
 
   // Perform IAM session request.
-  refreshCookie(cfg, callback) {
+  refreshCookie(cfg, state, callback) {
     var self = this;
 
     if (self.baseUrl === null) {
@@ -121,10 +113,11 @@ class IAMPlugin extends BasePlugin {
       stale: cfg.iamLockStaleMsecs || 2500, // 2.5 secs
       wait: cfg.iamLockWaitMsecs || 2000 // 2 secs
     }, function(error, done) {
-      if (!self.shouldApplyIAMAuth) {
-        return callback(new Error('Skipping IAM session authentication'));
-      }
-      if (!self.refreshRequired) {
+      if (state.stash.newApiKey) {
+        debug('Refreshing session with new IAM API key.');
+        state.stash.newApiKey = false;
+        self.cookieJar = request.jar(); // new jar
+      } else if (!self.refreshRequired) {
         debug('Session refresh no longer required.');
         return callback();
       }
@@ -160,9 +153,6 @@ class IAMPlugin extends BasePlugin {
                 callback(new Error('Invalid response from IAM token service'));
               }
             } else {
-              if (response.statusCode < 500 && response.statusCode !== 429) {
-                self.shouldApplyIAMAuth = false; // no retry
-              }
               callback(new Error(`Failed to acquire access token. Status code: ${response.statusCode}`));
             }
           });
@@ -183,9 +173,6 @@ class IAMPlugin extends BasePlugin {
               debug('Successfully renewed IAM session.');
               callback();
             } else {
-              if (response.statusCode < 500) {
-                self.shouldApplyIAMAuth = false; // no retry
-              }
               callback(new Error(`Failed to exchange IAM token with Cloudant. Status code: ${response.statusCode}`));
             }
           });

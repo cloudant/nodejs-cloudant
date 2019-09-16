@@ -342,7 +342,7 @@ describe('#db IAMAuth Plugin', function() {
     });
   });
 
-  it('skips IAM authentication if access token returns non-200 response', function(done) {
+  it('returns an error if access token returns non-200 response', function(done) {
     if (process.env.NOCK_OFF) {
       this.skip();
     }
@@ -356,19 +356,11 @@ describe('#db IAMAuth Plugin', function() {
       .times(3)
       .reply(500, 'Internal Error 500\nThe server encountered an unexpected condition which prevented it from fulfilling the request.');
 
-    var cloudantMocks = nock(SERVER)
-      .get(DBNAME)
-      .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
-
     var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
-      assert.equal(err, null);
-      assert.equal(resp.request.headers.cookie, null);
-      assert.equal(resp.statusCode, 401);
-      assert.ok(data.indexOf('"error":"unauthorized"') > -1);
+      assert.equal(err.message, 'Failed to acquire access token. Status code: 500');
       iamMocks.done();
-      cloudantMocks.done();
       done();
     });
   });
@@ -408,7 +400,7 @@ describe('#db IAMAuth Plugin', function() {
     });
   });
 
-  it('skips IAM authentication if IAM cookie login returns non-200 response', function(done) {
+  it('returns an error if IAM cookie login returns non-200 response', function(done) {
     if (process.env.NOCK_OFF) {
       this.skip();
     }
@@ -425,17 +417,12 @@ describe('#db IAMAuth Plugin', function() {
     var cloudantMocks = nock(SERVER)
       .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
       .times(3)
-      .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-      .get(DBNAME)
-      .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
+      .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
     var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
-      assert.equal(err, null);
-      assert.equal(resp.request.headers.cookie, null);
-      assert.equal(resp.statusCode, 401);
-      assert.ok(data.indexOf('"error":"unauthorized"') > -1);
+      assert.equal(err.message, 'Failed to exchange IAM token with Cloudant. Status code: 500');
       iamMocks.done();
       cloudantMocks.done();
       done();
@@ -473,39 +460,6 @@ describe('#db IAMAuth Plugin', function() {
       assert.equal(resp.request.headers.cookie, MOCK_IAM_SESSION);
       assert.equal(resp.statusCode, 200);
       assert.ok(data.indexOf('"doc_count":0') > -1);
-      iamMocks.done();
-      cloudantMocks.done();
-      done();
-    });
-  });
-
-  it('skips authentication renewal on 401 response if previous attempts failed', function(done) {
-    if (process.env.NOCK_OFF) {
-      this.skip();
-    }
-
-    var iamMocks = nock(TOKEN_SERVER)
-      .post('/identity/token', {
-        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
-        'response_type': 'cloud_iam',
-        'apikey': IAM_API_KEY
-      })
-      .reply(400, {
-        errorCode: 'BXNIM0415E',
-        errorMessage: 'Provided API key could not be found'
-      });
-
-    var cloudantMocks = nock(SERVER)
-      .get(DBNAME)
-      .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
-
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
-    var req = { url: SERVER + DBNAME, method: 'GET' };
-    cloudantClient.request(req, function(err, resp, data) {
-      assert.equal(err, null);
-      assert.equal(resp.request.headers.cookie, null);
-      assert.equal(resp.statusCode, 401);
-      assert.ok(data.indexOf('"error":"unauthorized"') > -1);
       iamMocks.done();
       cloudantMocks.done();
       done();
@@ -616,6 +570,7 @@ describe('#db IAMAuth Plugin', function() {
         'response_type': 'cloud_iam',
         'apikey': 'bad_key'
       })
+      .times(3)
       .reply(400, {
         errorCode: 'BXNIM0415E',
         errorMessage: 'Provided API key could not be found'
@@ -628,8 +583,6 @@ describe('#db IAMAuth Plugin', function() {
       .reply(200, MOCK_IAM_TOKEN_RESPONSE);
 
     var cloudantMocks = nock(SERVER)
-      .get(DBNAME)
-      .reply(401, {error: 'unauthorized', reason: 'Unauthorized'})
       .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
       .reply(200, {ok: true}, MOCK_SET_IAM_SESSION_HEADER)
       .get(DBNAME)
@@ -638,10 +591,7 @@ describe('#db IAMAuth Plugin', function() {
     var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: 'bad_key' } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
-      assert.equal(err, null);
-      assert.equal(resp.request.headers.cookie, null);
-      assert.equal(resp.statusCode, 401);
-      assert.ok(data.indexOf('"error":"unauthorized"') > -1);
+      assert.equal(err.message, 'Failed to acquire access token. Status code: 400');
 
       // update IAM API key
       cloudantClient.getPlugin('iamauth').setIamApiKey(IAM_API_KEY);
