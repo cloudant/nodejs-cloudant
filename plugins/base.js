@@ -1,4 +1,4 @@
-// Copyright © 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,7 @@
 'use strict';
 
 const debug = require('debug')('cloudant:plugins:base');
-const lockFile = require('lockfile');
-const tmp = require('tmp');
+const Mutex = require('../lib/mutex');
 
 function noop() {}
 
@@ -29,7 +28,7 @@ class BasePlugin {
   constructor(client, cfg) {
     this._client = client;
     this._cfg = cfg;
-    this._lockFile = tmp.tmpNameSync({ postfix: '.lock' });
+    this._mutex = new Mutex();
   }
 
   get id() {
@@ -52,26 +51,17 @@ class BasePlugin {
 
   // Helpers
 
-  // Acquire a file lock on the specified path. Release the file lock on
-  // completion of the callback.
-  withLock(opts, callback) {
+  withLock(ttl, callback) {
     var self = this;
-    if (typeof opts === 'function') {
-      callback = opts;
-      opts = {};
-    }
-    debug('Acquiring lock...');
-    lockFile.lock(self._lockFile, opts, function(error) {
+    self._mutex.lock(ttl, function(error) {
       if (error) {
+        debug(`Failed to acquire lock: ${error}`);
         callback(error, noop);
       } else {
+        debug(`Acquired lock.`);
         callback(null, function() {
-          // Close and unlink the file lock.
-          lockFile.unlock(self._lockFile, function(error) {
-            if (error) {
-              debug(`Failed to release lock: ${error}`);
-            }
-          });
+          self._mutex.unlock();
+          debug(`Released lock.`);
         });
       }
     });

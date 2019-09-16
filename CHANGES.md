@@ -5,6 +5,7 @@
   temporary.
 - [FIXED] Ensure IAM API key can be correctly changed.
 - [FIXED] Callback with an error when a user cannot be authenticated using IAM.
+- [REMOVED] Remove dependency lockfile. Use internal Mutex class instead.
 
 # 4.2.1 (2019-08-29)
 - [FIXED] Include all built-in plugin modules in webpack bundle.
