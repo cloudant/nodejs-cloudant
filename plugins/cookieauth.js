@@ -145,7 +145,7 @@ class CookiePlugin extends BasePlugin {
   refreshCookie(state, callback) {
     var self = this;
 
-    self.withLock(self._cfg.cookieLockWaitMsecs || 1000, function(error, done) {
+    self.withLock(self._cfg.cookieLockWaitMsecs || 500, function(error, done) {
       if (error) {
         debug(`Failed to acquire lock: ${error}`); // refresh cookie without lock
       }

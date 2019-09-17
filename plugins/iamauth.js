@@ -109,7 +109,7 @@ class IAMPlugin extends BasePlugin {
       return callback(new Error('Unspecified base URL'));
     }
 
-    self.withLock(cfg.iamLockWaitMsecs || 2000, function(error, done) {
+    self.withLock(cfg.iamLockWaitMsecs || 500, function(error, done) {
       if (state.stash.newApiKey) {
         debug('Refreshing session with new IAM API key.');
         state.stash.newApiKey = false;
