@@ -355,7 +355,7 @@ All other configuration is plugin specific. It must be passed within an object
 to the `plugins` parameter in the client constructor. For example:
 
 ```js
-var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iamApiKey: 'abcxyz' } }, { retry: { retryDelayMultiplier: 4 } } ]);
+var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iamApiKey: 'abcxyz' } }, { retry: { retryDelayMultiplier: 4 } } ]);
 ```
 
 `maxAttempt` can _not_ be overridden by plugin specific configuration.
@@ -370,7 +370,7 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: {
 
    For example:
    ```js
-   var cloudant = new Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugins: 'cookieauth' });
+   var cloudant = Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugins: 'cookieauth' });
    ```
 
    The plugin will transparently call `POST /_session` to exchange your
@@ -416,7 +416,7 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: {
 
    For example:
    ```js
-   var cloudant = new Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx', retryDelayMultiplier: 4, retryInitialDelayMsecs: 100 } } });
+   var cloudant = Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx', retryDelayMultiplier: 4, retryInitialDelayMsecs: 100 } } });
    ```
 
    If the IAM token cannot be retrieved after the configured number of retries
@@ -435,7 +435,7 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: {
    these requests are suitably retried:
 
    ```js
-   var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429 ] } } });
+   var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429 ] } } });
    ```
 
    The plugin has the following configuration options:
@@ -463,7 +463,7 @@ var cloudant = new Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: {
 
 You can pass the plugins as an array, for example:
 ```js
-var cloudant = new Cloudant({ url: myurl, plugins: [ 'cookieauth', { retry: { retryDelayMultiplier: 4 } } ] });
+var cloudant = Cloudant({ url: myurl, plugins: [ 'cookieauth', { retry: { retryDelayMultiplier: 4 } } ] });
 ```
 
 The plugins are _always_ executed in the order they are specified. Remember that
