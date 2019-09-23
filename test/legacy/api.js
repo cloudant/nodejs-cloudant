@@ -25,6 +25,8 @@ var uuid = require('uuid/v4');
 var nock = require('../nock.js');
 var Cloudant = require('../../cloudant.js');
 
+const COOKIEAUTH_PLUGIN = [ { cookieauth: { autoRenew: false } } ];
+
 // These globals may potentially be parameterized.
 var ME = process.env.cloudant_username || 'nodejs';
 var PASSWORD = process.env.cloudant_password || 'sjedon';
@@ -46,7 +48,7 @@ describe('Cloudant API', function() {
 describe('#db Initialization', function() {
   it('runs synchronously with one argument', function() {
     (function() {
-      var db = Cloudant({account: ME});
+      var db = Cloudant({account: ME, plugins: []});
     }).should.not.throw();
   });
 
@@ -55,7 +57,7 @@ describe('#db Initialization', function() {
       .post('/_session').reply(200, {ok: true})
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2'});
 
-    Cloudant({url: SERVER, username: ME, password: PASSWORD}, function(er, cloudant, body) {
+    Cloudant({url: SERVER, username: ME, password: PASSWORD, plugins: COOKIEAUTH_PLUGIN}, function(er, cloudant, body) {
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
       body.should.be.an.Object;
@@ -76,7 +78,7 @@ describe('#db Initialization', function() {
       .times(3)
       .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
 
-    Cloudant({username: ME, password: PASSWORD, url: SERVER}, function(er, cloudant, body) {
+    Cloudant({username: ME, password: PASSWORD, url: SERVER, plugins: COOKIEAUTH_PLUGIN}, function(er, cloudant, body) {
       er.should.be.an.Object;
       mocks.done();
       done();
@@ -88,7 +90,7 @@ describe('#db Initialization', function() {
       .post('/_session').reply(200, {ok: true, userCtx: {name: ME, roles: []}})
       .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2'});
 
-    Cloudant({url: SERVER, username: ME, password: PASSWORD}, function(er, cloudant, welcome) {
+    Cloudant({url: SERVER, username: ME, password: PASSWORD, plugins: COOKIEAUTH_PLUGIN}, function(er, cloudant, welcome) {
       should(er).equal(null, 'No problem pinging Cloudant');
       cloudant.should.be.an.Object;
 
@@ -98,7 +100,7 @@ describe('#db Initialization', function() {
   });
 
   it('supports instantiation without a callback', function(done) {
-    var c = Cloudant({account: ME});
+    var c = Cloudant({account: ME, plugins: []});
     // check we get a Nano object back
     c.should.be.an.Object;
     c.should.have.property('use');

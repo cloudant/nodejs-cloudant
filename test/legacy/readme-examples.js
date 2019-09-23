@@ -33,6 +33,7 @@ const uuid = require('uuid/v4');
 var ME = process.env.cloudant_username || 'nodejs';
 var PASSWORD = process.env.cloudant_password || 'sjedon';
 var SERVER = process.env.SERVER_URL || 'https://' + ME + '.cloudant.com';
+const COOKIEAUTH_PLUGIN = [ { cookieauth: { autoRenew: false } } ];
 
 const MOCK_COOKIE = 'AuthSession=Y2xbZWr0bQlpcc19ZQN8OeU4OWFCNYcZOxgdhy-QRDp4i6JQrfkForX5OU5P';
 const MOCK_SET_COOKIE_HEADER = { 'set-cookie': `${MOCK_COOKIE}; Version=1; Max-Age=86400; Path=/; HttpOnly` };
@@ -176,7 +177,7 @@ if (SERVER.endsWith('.cloudant.com')) {
     it('Example 1', function(done) {
       var Cloudant = require('@cloudant/cloudant');
 
-      Cloudant({account: ME, password: PASSWORD}, function(er, cloudant, reply) {
+      Cloudant({account: ME, password: PASSWORD, plugins: COOKIEAUTH_PLUGIN}, function(er, cloudant, reply) {
         if (er) {
           throw er;
         }
@@ -557,7 +558,7 @@ if (SERVER.endsWith('.cloudant.com')) {
         cookies[username] = headers['set-cookie'];
 
         console.log('headers %j', headers);
-        headers.should.have.a.property('set-cookie').which.is.a.Array;
+        headers.should.have.a.property('set-cookie')
         done();
       });
     });

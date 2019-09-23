@@ -33,7 +33,7 @@ describe('#db Retry Plugin', function() {
         .put(DBNAME)
         .reply(201, {ok: true});
 
-    var cloudantClient = new Client();
+    var cloudantClient = new Client({ plugins: [] });
 
     var req = {
       url: SERVER + DBNAME,
@@ -53,7 +53,7 @@ describe('#db Retry Plugin', function() {
         .delete(DBNAME)
         .reply(200, {ok: true});
 
-    var cloudantClient = new Client();
+    var cloudantClient = new Client({ plugins: [] });
 
     var req = {
       url: SERVER + DBNAME,
