@@ -73,9 +73,8 @@ describe('#db Initialization', function() {
 
     var mocks = nock(SERVER)
       .post('/_session')
+      .times(3)
       .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
-      .get('/')
-      .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
     Cloudant({username: ME, password: PASSWORD, url: SERVER}, function(er, cloudant, body) {
       er.should.be.an.Object;

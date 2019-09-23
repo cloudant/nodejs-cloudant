@@ -37,7 +37,7 @@ if (SERVER.endsWith('.cloudant.com')) {
         .query({ partitioned: true })
         .reply(201, { ok: true });
 
-      const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+      const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
       return cloudant.db.create(DBNAME, { partitioned: true }).then((body) => {
         assert.ok(body.ok);
         mocks.done();
@@ -49,7 +49,7 @@ if (SERVER.endsWith('.cloudant.com')) {
         .delete(`/${DBNAME}`)
         .reply(200, { ok: true });
 
-      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
       return cloudant.db.destroy(DBNAME).then((body) => {
         assert.ok(body.ok);
         mocks.done();
@@ -61,7 +61,7 @@ if (SERVER.endsWith('.cloudant.com')) {
         .get(`/${DBNAME}`)
         .reply(200, { props: { partitioned: true } });
 
-      const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+      const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
       return cloudant.db.get(DBNAME).then((body) => {
         assert.ok(body.props.partitioned);
         mocks.done();
@@ -72,7 +72,7 @@ if (SERVER.endsWith('.cloudant.com')) {
       if (!process.env.NOCK_OFF) {
         this.skip();
       }
-      const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+      const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
       const db = cloudant.db.use(DBNAME);
 
       var q = async.queue(function(task, callback) {
@@ -96,7 +96,7 @@ if (SERVER.endsWith('.cloudant.com')) {
         .get(`/${DBNAME}/_partition/${pKey}`)
         .reply(200, { partition: pKey, doc_count: 10 });
 
-      const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+      const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
       const db = cloudant.db.use(DBNAME);
       return db.partitionInfo(pKey).then((body) => {
         assert.equal(body.partition, pKey);
@@ -112,7 +112,7 @@ if (SERVER.endsWith('.cloudant.com')) {
         .get(`/${DBNAME}/_partition/${pKey}/_all_docs`)
         .reply(200, { rows: new Array(10) });
 
-      const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+      const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
       const db = cloudant.db.use(DBNAME);
       return db.partitionedList(pKey).then((body) => {
         assert.equal(body.rows.length, 10);
@@ -125,7 +125,7 @@ if (SERVER.endsWith('.cloudant.com')) {
         if (!process.env.NOCK_OFF) {
           return;
         }
-        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
         const db = cloudant.db.use(DBNAME);
         return db.createIndex({ index: { fields: ['foo'] } }).then((body) => {
           assert.equal(body.result, 'created');
@@ -140,7 +140,7 @@ if (SERVER.endsWith('.cloudant.com')) {
           .post(`/${DBNAME}/_partition/${pKey}/_find`, selector)
           .reply(200, { docs: new Array(10) });
 
-        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
         const db = cloudant.db.use(DBNAME);
         return db.partitionedFind(pKey, selector).then((body) => {
           assert(body.docs.length, 10);
@@ -154,7 +154,7 @@ if (SERVER.endsWith('.cloudant.com')) {
         if (!process.env.NOCK_OFF) {
           return;
         }
-        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
         const db = cloudant.db.use(DBNAME);
         return db.insert({
           _id: '_design/mysearch',
@@ -177,7 +177,7 @@ if (SERVER.endsWith('.cloudant.com')) {
                 { q: '*:*' })
           .reply(200, { rows: new Array(10) });
 
-        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
         const db = cloudant.db.use(DBNAME);
         return db.partitionedSearch(pKey, 'mysearch', 'search1', { q: '*:*' }).then((body) => {
           assert(body.rows.length, 10);
@@ -191,7 +191,7 @@ if (SERVER.endsWith('.cloudant.com')) {
         if (!process.env.NOCK_OFF) {
           return;
         }
-        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
         const db = cloudant.db.use(DBNAME);
         return db.insert({
           _id: '_design/myview',
@@ -209,7 +209,7 @@ if (SERVER.endsWith('.cloudant.com')) {
           .get(`/${DBNAME}/_partition/${pKey}/_design/myview/_view/view1`)
           .reply(200, { rows: new Array(10) });
 
-        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+        const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });
         const db = cloudant.db.use(DBNAME);
         return db.partitionedView(pKey, 'myview', 'view1').then((body) => {
           assert(body.rows.length, 10);
