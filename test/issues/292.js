@@ -26,6 +26,8 @@ const PASSWORD = process.env.cloudant_password || 'sjedon';
 const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 const DBNAME = `nodejs-cloudant-${uuidv4()}`;
 
+const COOKIEAUTH_PLUGIN = [ { cookieauth: { autoRenew: false } } ];
+
 describe('#db Issue #292', function() {
   before(function(done) {
     var mocks = nock(SERVER)
@@ -69,10 +71,12 @@ describe('#db Issue #292', function() {
 
   it('lists all query indices', function(done) {
     var mocks = nock(SERVER)
+      .post('/_session')
+      .reply(200, { ok: true })
       .get(`/${DBNAME}/_index`)
       .reply(200, { total_rows: 1, indexes: [ { name: '_all_docs' } ] });
 
-    var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+    var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: COOKIEAUTH_PLUGIN });
     var db = cloudant.db.use(DBNAME);
 
     db.index().then((d) => {
@@ -91,10 +95,12 @@ describe('#db Issue #292', function() {
     };
 
     var mocks = nock(SERVER)
+      .post('/_session')
+      .reply(200, { ok: true })
       .post(`/${DBNAME}/_index`, definition)
       .reply(200, { result: 'created' });
 
-    var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+    var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: COOKIEAUTH_PLUGIN });
     var db = cloudant.db.use(DBNAME);
 
     db.index(definition).then((d) => {
