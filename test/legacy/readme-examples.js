@@ -34,6 +34,9 @@ var ME = process.env.cloudant_username || 'nodejs';
 var PASSWORD = process.env.cloudant_password || 'sjedon';
 var SERVER = process.env.SERVER_URL || 'https://' + ME + '.cloudant.com';
 
+const MOCK_COOKIE = 'AuthSession=Y2xbZWr0bQlpcc19ZQN8OeU4OWFCNYcZOxgdhy-QRDp4i6JQrfkForX5OU5P';
+const MOCK_SET_COOKIE_HEADER = { 'set-cookie': `${MOCK_COOKIE}; Version=1; Max-Age=86400; Path=/; HttpOnly` };
+
 var real_require = require;
 require = function(module) {
   return (module == '@cloudant/cloudant')
@@ -129,7 +132,7 @@ if (SERVER.endsWith('.cloudant.com')) {
     });
     before(function() {
       mocks = nock(SERVER)
-        .post('/_session').reply(200, {XXXXX: 'YYYYYYYYYY', ok: true, userCtx: {name: 'jhs', roles: []}})
+        .post('/_session').reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
         .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2', cloudant_build: '2488'})
         .get('/animaldb/dog').reply(404, {error: 'not_found', reason: 'missing'});
     });
@@ -166,8 +169,8 @@ if (SERVER.endsWith('.cloudant.com')) {
         this.skip();
       }
       mocks = nock(SERVER)
-        .post('/_session').reply(200, {ok:true})
-        .get('/').reply(200, {couchdb: 'Welcome!!!!!', version: '1.0.2', cloudant_build: '2488'});
+        .post('/_session').reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
+        .get('/').reply(200, {couchdb: 'Welcome', version: '1.0.2', cloudant_build: '2488'});
     });
 
     it('Example 1', function(done) {
@@ -515,7 +518,7 @@ if (SERVER.endsWith('.cloudant.com')) {
     });
     before(function(done) {
       mocks = nock(SERVER)
-        .post('/_session').reply(200, { ok: true, name: ME, roles: [] }, {'set-cookie': ['AuthSession=bm9kZWpzOjU1RTA1NDdEOsUsoq9lykQCEBhwTpIyEbgmYpvX; Version=1; Expires=Sat, 29 Aug 2015 12:30:53 GMT; Max-Age=86400; Path=/; HttpOnly; Secure']})
+        .post('/_session').reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
         .put(`/${alice}`).reply(200, { ok: true })
         .post(`/${alice}`).reply(200, { ok: true, id: '72e0367f3e195340e239948164bbb7e7', rev: '1-feb5539029f4fc50dc3f827b164a2088' })
         .get('/_session').reply(200, {ok: true, userCtx: {name: ME, roles: ['_admin', '_reader', '_writer']}})
