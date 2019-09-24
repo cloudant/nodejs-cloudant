@@ -73,11 +73,10 @@ describe('#db Initialization', function() {
 
     var mocks = nock(SERVER)
       .post('/_session')
+      .times(3)
       .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
-      .get('/')
-      .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-    Cloudant({account: ME, username: ME, password: PASSWORD}, function(er, cloudant, body) {
+    Cloudant({username: ME, password: PASSWORD, url: SERVER}, function(er, cloudant, body) {
       er.should.be.an.Object;
       mocks.done();
       done();
@@ -405,9 +404,9 @@ describe('#db Changes query', function() {
       body.should.have.a.property('results').which.is.instanceOf(Object);
       body.results.should.have.a.length(2);
       body.results[0].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
-      body.results[0].should.be.an.Object.and.have.a.property('seq').and.match(/^1-/);
+      body.results[0].should.be.an.Object.and.have.a.property('seq').and.match(/^(1-)?[^-]+/);
       body.results[1].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
-      body.results[1].should.be.an.Object.and.have.a.property('seq').and.match(/^2-/);
+      body.results[1].should.be.an.Object.and.have.a.property('seq').and.match(/^(2-)?[^-]+/);
 
       firstChange = body.results[0];
 
@@ -425,7 +424,7 @@ describe('#db Changes query', function() {
       should(er).equal(null);
       body.results.should.have.a.length(1);
       body.results[0].should.be.an.Object.and.have.a.property('id').and.match(/^doc[12]$/);
-      body.results[0].should.be.an.Object.and.have.a.property('seq').and.match(/^2-/);
+      body.results[0].should.be.an.Object.and.have.a.property('seq').and.match(/^(2-)?[^-]+/);
 
       mocks.done();
       done();
@@ -527,7 +526,7 @@ describe('#db Changes follower', function() {
       change.should.have.a.property('id').and.match(/^doc[12]$/);
 
       // First change should match "1-...", second should match "2-...".
-      change.should.have.a.property('seq').and.match(new RegExp('^' + iterations + '-'));
+      change.should.have.a.property('seq').and.match(new RegExp('^(' + iterations + '-)?[^-]+'));
 
       if (iterations == 1) {
         firstChange = change;
@@ -552,7 +551,7 @@ describe('#db Changes follower', function() {
       should(er).equal(null);
       change.should.be.an.Object;
       change.should.have.a.property('id').and.match(/^doc[12]$/);
-      change.should.have.a.property('seq').and.match(/^2-/);
+      change.should.have.a.property('seq').and.match(/^(2-)?[^-]+/);
       feed.stop();
 
       mocks.done();
@@ -579,7 +578,7 @@ describe('#db Changes follower', function() {
     function on_change(er, change) {
       should(er).equal(null);
       change.should.have.a.property('id').and.equal(docId);
-      change.should.have.a.property('seq').and.match(/^3-/);
+      change.should.have.a.property('seq').and.match(/^(3-)?[^-]+/);
       feed.stop();
 
       mocks.done();

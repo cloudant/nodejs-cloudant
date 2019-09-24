@@ -19,6 +19,7 @@ const assert = require('assert');
 const Client = require('../lib/client.js');
 const Cloudant = require('../cloudant.js');
 const nock = require('./nock.js');
+const u = require('url');
 const uuidv4 = require('uuid/v4'); // random
 
 const ME = process.env.cloudant_username || 'nodejs';
@@ -53,7 +54,7 @@ describe('#db README Examples', function() {
         .put(`/${DBNAME}`)
         .reply(201, { ok: true });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       cloudant.db.create(DBNAME).then(() => {
         mocks.done();
         done();
@@ -67,7 +68,7 @@ describe('#db README Examples', function() {
         .put(`/${DBNAME}/rabbit`, { happy: true })
         .reply(200, { ok: true, _id: 'rabbit' });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
 
       async function asyncCall() {
         await cloudant.db.create(DBNAME);
@@ -88,7 +89,7 @@ describe('#db README Examples', function() {
         .put(`/${DBNAME}/rabbit`, { happy: true })
         .reply(200, { ok: true, _id: 'rabbit' });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
 
       cloudant.db.create(DBNAME).then(() => {
         cloudant.use(DBNAME).insert({ happy: true }, 'rabbit').then((data) => {
@@ -106,7 +107,7 @@ describe('#db README Examples', function() {
         .put(`/${DBNAME}/rabbit`, { happy: true })
         .reply(200, { ok: true, _id: 'rabbit' });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
 
       cloudant.db.create(DBNAME, (err) => {
         assert.ifError(err);
@@ -126,7 +127,7 @@ describe('#db README Examples', function() {
         .get('/_session')
         .reply(200, { userCtx: { name: null } });
 
-      var cloudant = Cloudant(`https://${ME}.cloudant.com`);
+      var cloudant = Cloudant(SERVER);
       cloudant.session().then((session) => {
         assert.equal(session.userCtx.name, null);
         mocks.done();
@@ -139,10 +140,13 @@ describe('#db README Examples', function() {
         .get('/_session')
         .reply(200, { userCtx: { name: ME } });
 
-      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: `https://${ME}.cloudant.com` });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       cloudant.session().then((session) => {
         assert.equal(session.userCtx.name, ME);
-        assert.equal(cloudant.config.url, `https://${ME}:${PASSWORD}@${ME}.cloudant.com`);
+        let actual = new u.URL(cloudant.config.url);
+        assert.equal(actual.username, ME);
+        assert.equal(actual.password, PASSWORD);
+        assert.equal(actual.origin, SERVER);
         mocks.done();
         done();
       }).catch(done);
@@ -153,10 +157,13 @@ describe('#db README Examples', function() {
           .get('/_session')
           .reply(200, { userCtx: { name: ME } });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       cloudant.session().then((session) => {
         assert.equal(session.userCtx.name, ME);
-        assert.equal(cloudant.config.url, `https://${ME}:${PASSWORD}@${ME}.cloudant.com`);
+        let actual = new u.URL(cloudant.config.url);
+        assert.equal(actual.username, ME);
+        assert.equal(actual.password, PASSWORD);
+        assert.equal(actual.origin, SERVER);
         mocks.done();
         done();
       }).catch(done);
@@ -193,7 +200,7 @@ describe('#db README Examples', function() {
         .get('/_all_dbs')
         .reply(200, [ 'animaldb' ]);
 
-      Cloudant({ account: ME, password: PASSWORD }, function(err, cloudant, pong) {
+      Cloudant({ username: ME, password: PASSWORD, url: SERVER }, function(err, cloudant, pong) {
         assert.ifError(err);
         assert.equal(pong.couchdb, 'Welcome');
 
@@ -212,7 +219,7 @@ describe('#db README Examples', function() {
         .get('/animaldb/non-existent-doc')
         .reply(404, { error: 'not_found', reason: 'missing' });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       var db = cloudant.db.use('animaldb');
       db.get('non-existent-doc', function(err, data) {
         assert.equal(err.name, 'Error');
@@ -229,7 +236,7 @@ describe('#db README Examples', function() {
         .get('/animaldb/panda')
         .reply(200, { _id: 'panda', 'max_weight': 115 });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       var db = cloudant.db.use('animaldb');
       db.get('panda', function(err, data) {
         assert.ifError(err);
@@ -244,7 +251,7 @@ describe('#db README Examples', function() {
         .get('/animaldb/panda')
         .reply(200, { _id: 'panda' });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       var db = cloudant.db.use('animaldb');
       db.get('panda', function(err, data, headers) {
         assert.ifError(err);
@@ -329,7 +336,7 @@ describe('#db README Examples', function() {
         .get('/_api/v2/db/animaldb/_security')
         .reply(200, { ok: true });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       cloudant.generate_api_key(function(err, api) {
         assert.ifError(err);
         assert.equal(api.key, 'foo');
@@ -368,7 +375,7 @@ describe('#db README Examples', function() {
         })
         .reply(200, { ok: true });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       cloudant.set_cors({
         enable_cors: true,
         allow_credentials: true,
@@ -393,7 +400,7 @@ describe('#db README Examples', function() {
         })
         .reply(200, { ok: true });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       cloudant.set_cors({
         enable_cors: true,
         allow_credentials: true,
@@ -416,7 +423,7 @@ describe('#db README Examples', function() {
         })
         .reply(200, { ok: true });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       cloudant.set_cors({
         enable_cors: true,
         origins: []
@@ -440,7 +447,7 @@ describe('#db README Examples', function() {
           origins: [ 'https://example.com' ]
         });
 
-      var cloudant = Cloudant({ account: ME, password: PASSWORD });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
       cloudant.get_cors().then((data) => {
         assert.ok(data.enable_cors);
         assert.ok(data.allow_credentials);

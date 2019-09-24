@@ -1,4 +1,4 @@
-// Copyright © 2017, 2018 IBM Corp. All rights reserved.
+// Copyright © 2017, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -227,7 +227,7 @@ describe('CloudantClient', function() {
 
   describe('Error Handling', function() {
     it('Propagate request error: Invalid protocol.', function(done) {
-      var cloudantClient = new Client();
+      var cloudantClient = new Client({ plugins: [] });
       cloudantClient.request('abc://localhost:5984', function(err) {
         assert.equal(err.message, 'Invalid protocol: abc:');
         done();
@@ -235,7 +235,7 @@ describe('CloudantClient', function() {
     });
 
     it('Propagate request error: Base URL must be type string.', function(done) {
-      var cloudantClient = new Client();
+      var cloudantClient = new Client({ plugins: [] });
       cloudantClient.request({ baseUrl: 123, url: '/_all_dbs' }, function(err) {
         assert.equal(err.message, 'options.baseUrl must be a string');
         done();
@@ -243,7 +243,7 @@ describe('CloudantClient', function() {
     });
 
     it('Propagate request error: `unix://` URL scheme is no longer supported.', function(done) {
-      var cloudantClient = new Client();
+      var cloudantClient = new Client({ plugins: [] });
       cloudantClient.request('unix://abc', function(err) {
         assert.equal(
           err.message,
@@ -294,8 +294,8 @@ describe('CloudantClient', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 1});
 
-      var cloudantClient = new Client();
-      assert.equal(cloudantClient._plugins.length, 1);
+      var cloudantClient = new Client({ plugins: [] });
+      assert.equal(cloudantClient._plugins.length, 0);
 
       var options = {
         url: SERVER + DBNAME,

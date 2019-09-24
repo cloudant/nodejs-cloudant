@@ -79,7 +79,7 @@ describe('#db IAMAuth Plugin', function() {
       .put(DBNAME)
       .reply(201, {ok: true});
 
-    var cloudantClient = new Client();
+    var cloudantClient = new Client({ plugins: [] });
 
     var req = {
       url: SERVER_WITH_CREDS + DBNAME,
@@ -99,7 +99,7 @@ describe('#db IAMAuth Plugin', function() {
       .delete(DBNAME)
       .reply(200, {ok: true});
 
-    var cloudantClient = new Client();
+    var cloudantClient = new Client({ plugins: [] });
 
     var req = {
       url: SERVER_WITH_CREDS + DBNAME,
@@ -115,6 +115,10 @@ describe('#db IAMAuth Plugin', function() {
   });
 
   it('performs request and returns 200 response', function(done) {
+    if (!process.env.NOCK_OFF || !process.env.cloudant_iam_api_key) {
+      this.skip();
+    }
+
     // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
     var iamMocks = nock(TOKEN_SERVER)
       .post('/identity/token', {
@@ -185,6 +189,10 @@ describe('#db IAMAuth Plugin', function() {
   });
 
   it('performs multiple requests that return 200 responses with only a single session request', function(done) {
+    if (!process.env.NOCK_OFF || !process.env.cloudant_iam_api_key) {
+      this.skip();
+    }
+
     // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
     var iamMocks = nock(TOKEN_SERVER)
       .post('/identity/token', {
@@ -478,6 +486,10 @@ describe('#db IAMAuth Plugin', function() {
   });
 
   it('supports using vcap with the promise plugin', function(done) {
+    if (!process.env.NOCK_OFF || !process.env.cloudant_iam_api_key) {
+      this.skip();
+    }
+
     // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
     var iamMocks = nock(TOKEN_SERVER)
       .post('/identity/token', {
