@@ -115,7 +115,7 @@ describe('#db IAMAuth Plugin', function() {
   });
 
   it('performs request and returns 200 response', function(done) {
-    if (!process.env.NOCK_OFF || !process.env.cloudant_iam_api_key) {
+    if (process.env.NOCK_OFF && !process.env.cloudant_iam_api_key) {
       this.skip();
     }
 
@@ -134,7 +134,7 @@ describe('#db IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -169,11 +169,13 @@ describe('#db IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ plugins: { iamauth: {
-      iamApiKey: IAM_API_KEY,
-      iamClientId: MOCK_TOKEN_SERVER_USER,
-      iamClientSecret: MOCK_TOKEN_SERVER_PASS
-    }}});
+    var cloudantClient = new Client({ creds: { outUrl: SERVER },
+      plugins: { iamauth: {
+        autoRenew: false,
+        iamApiKey: IAM_API_KEY,
+        iamClientId: MOCK_TOKEN_SERVER_USER,
+        iamClientSecret: MOCK_TOKEN_SERVER_PASS
+      }}});
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -189,7 +191,7 @@ describe('#db IAMAuth Plugin', function() {
   });
 
   it('performs multiple requests that return 200 responses with only a single session request', function(done) {
-    if (!process.env.NOCK_OFF || !process.env.cloudant_iam_api_key) {
+    if (process.env.NOCK_OFF && !process.env.cloudant_iam_api_key) {
       this.skip();
     }
 
@@ -215,7 +217,7 @@ describe('#db IAMAuth Plugin', function() {
     var end1 = false;
     var end2 = false;
 
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -269,7 +271,7 @@ describe('#db IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -301,7 +303,7 @@ describe('#db IAMAuth Plugin', function() {
       .get(DBNAME)
       .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err.code, 'ECONNRESET');
@@ -337,7 +339,7 @@ describe('#db IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -364,7 +366,7 @@ describe('#db IAMAuth Plugin', function() {
       .times(3)
       .reply(500, 'Internal Error 500\nThe server encountered an unexpected condition which prevented it from fulfilling the request.');
 
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err.message, 'Failed to acquire access token. Status code: 500');
@@ -395,7 +397,7 @@ describe('#db IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -427,7 +429,7 @@ describe('#db IAMAuth Plugin', function() {
       .times(3)
       .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err.message, 'Failed to exchange IAM token with Cloudant. Status code: 500');
@@ -461,7 +463,7 @@ describe('#db IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -478,7 +480,7 @@ describe('#db IAMAuth Plugin', function() {
     assert.throws(
       () => {
         /* eslint-disable no-new */
-        new Client({ plugins: 'iamauth' });
+        new Client({ creds: { outUrl: SERVER }, plugins: 'iamauth' });
       },
       /Missing IAM API key from configuration/,
       'did not throw with expected message'
@@ -486,7 +488,7 @@ describe('#db IAMAuth Plugin', function() {
   });
 
   it('supports using vcap with the promise plugin', function(done) {
-    if (!process.env.NOCK_OFF || !process.env.cloudant_iam_api_key) {
+    if (process.env.NOCK_OFF && !process.env.cloudant_iam_api_key) {
       this.skip();
     }
 
@@ -550,7 +552,7 @@ describe('#db IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ maxAttempt: 3, plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, maxAttempt: 3, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
 
     var startTs = (new Date()).getTime();
@@ -600,7 +602,7 @@ describe('#db IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ plugins: { iamauth: { iamApiKey: 'bad_key' } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: 'bad_key' } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err.message, 'Failed to acquire access token. Status code: 400');
