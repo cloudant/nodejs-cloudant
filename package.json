@@ -26,6 +26,7 @@
     "@types/request": "^2.47.0",
     "async": "2.1.2",
     "concat-stream": "^1.6.0",
+    "cookie": "^0.4.0",
     "debug": "^3.1.0",
     "lockfile": "1.0.3",
     "nano": "^8.1.0",
