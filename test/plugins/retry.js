@@ -1,4 +1,4 @@
-// Copyright © 2018 IBM Corp. All rights reserved.
+// Copyright © 2018, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ const PASSWORD = process.env.cloudant_password || 'sjedon';
 const SERVER = process.env.SERVER_URL || 'https://' + ME + '.cloudant.com';
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 
-describe('#db Retry Plugin', function() {
+describe('Retry Plugin', function() {
   before(function(done) {
     var mocks = nock(SERVER)
         .put(DBNAME)
