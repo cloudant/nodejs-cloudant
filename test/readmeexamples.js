@@ -51,6 +51,8 @@ describe('#db README Examples', function() {
 
     it('Initialization', function(done) {
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .put(`/${DBNAME}`)
         .reply(201, { ok: true });
 
@@ -63,6 +65,8 @@ describe('#db README Examples', function() {
 
     it('Simple Example: Using Async/Await', function(done) {
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .put(`/${DBNAME}`)
         .reply(201, { ok: true })
         .put(`/${DBNAME}/rabbit`, { happy: true })
@@ -84,6 +88,8 @@ describe('#db README Examples', function() {
 
     it('Simple Example: Using Promises', function(done) {
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .put(`/${DBNAME}`)
         .reply(201, { ok: true })
         .put(`/${DBNAME}/rabbit`, { happy: true })
@@ -102,6 +108,8 @@ describe('#db README Examples', function() {
 
     it('Simple Example: Using Callbacks', function(done) {
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .put(`/${DBNAME}`)
         .reply(201, { ok: true })
         .put(`/${DBNAME}/rabbit`, { happy: true })
@@ -127,7 +135,7 @@ describe('#db README Examples', function() {
         .get('/_session')
         .reply(200, { userCtx: { name: null } });
 
-      var cloudant = Cloudant(SERVER);
+      var cloudant = Cloudant({url: SERVER, plugins: []});
       cloudant.session().then((session) => {
         assert.equal(session.userCtx.name, null);
         mocks.done();
@@ -140,7 +148,7 @@ describe('#db README Examples', function() {
         .get('/_session')
         .reply(200, { userCtx: { name: ME } });
 
-      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER, plugins: [] });
       cloudant.session().then((session) => {
         assert.equal(session.userCtx.name, ME);
         let actual = new u.URL(cloudant.config.url);
@@ -157,7 +165,7 @@ describe('#db README Examples', function() {
           .get('/_session')
           .reply(200, { userCtx: { name: ME } });
 
-      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER });
+      var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER, plugins: [] });
       cloudant.session().then((session) => {
         assert.equal(session.userCtx.name, ME);
         let actual = new u.URL(cloudant.config.url);
@@ -176,7 +184,8 @@ describe('#db README Examples', function() {
       var cloudant = Cloudant({
         account: ME,
         username: 'otherUsername',
-        password: 'otherPassword'
+        password: 'otherPassword',
+        plugins: []
       });
       assert.equal(cloudant.config.url, `https://otherUsername:otherPassword@${ME}.cloudant.com`);
     });
@@ -188,19 +197,23 @@ describe('#db README Examples', function() {
       var cloudant = Cloudant({
         url: 'https://company.cloudant.local',
         username: 'somebody',
-        password: 'secret'
+        password: 'secret',
+        plugins: []
       });
       assert.equal(cloudant.config.url, `https://somebody:secret@company.cloudant.local`);
     });
 
     it('With callback', function(done) {
       var mocks = nock(SERVER)
+        .post('/_session', { name: ME, password: PASSWORD })
+        .reply(200, { ok: true })
         .get('/')
         .reply(200, { couchdb: 'Welcome' })
         .get('/_all_dbs')
         .reply(200, [ 'animaldb' ]);
 
-      Cloudant({ username: ME, password: PASSWORD, url: SERVER }, function(err, cloudant, pong) {
+      let cookieauth = [ { cookieauth: { autoRenew: false } } ];
+      Cloudant({ username: ME, password: PASSWORD, url: SERVER, plugins: cookieauth }, function(err, cloudant, pong) {
         assert.ifError(err);
         assert.equal(pong.couchdb, 'Welcome');
 
@@ -216,6 +229,8 @@ describe('#db README Examples', function() {
   describe('Callback Signature', function() {
     it('Error', function(done) {
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .get('/animaldb/non-existent-doc')
         .reply(404, { error: 'not_found', reason: 'missing' });
 
@@ -233,6 +248,8 @@ describe('#db README Examples', function() {
 
     it('Body', function(done) {
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .get('/animaldb/panda')
         .reply(200, { _id: 'panda', 'max_weight': 115 });
 
@@ -248,6 +265,8 @@ describe('#db README Examples', function() {
 
     it('Headers', function(done) {
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .get('/animaldb/panda')
         .reply(200, { _id: 'panda' });
 
@@ -278,7 +297,8 @@ describe('#db README Examples', function() {
 
     it('Cookie Authentication', function() {
       var cloudant = new Cloudant({
-        url: `https://${ME}.cloudant.com`,
+        account: ME,
+        password: PASSWORD,
         plugins: 'cookieauth'
       });
       assert.equal(cloudant.cc._plugins.length, 1);
@@ -308,7 +328,8 @@ describe('#db README Examples', function() {
 
     it('Using Multiple Plugins', function() {
       var cloudant = new Cloudant({
-        url: `https://${ME}.cloudant.com`,
+        account: ME,
+        password: PASSWORD,
         plugins: [ 'cookieauth', { retry: { retryDelayMultiplier: 4 } } ]
       });
       assert.equal(cloudant.cc._plugins.length, 2);
@@ -325,6 +346,8 @@ describe('#db README Examples', function() {
       }
 
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .post('/_api/v2/api_keys')
         .reply(200, { key: 'foo', password: 'bar' })
         .put('/_api/v2/db/animaldb/_security', { cloudant: {
@@ -370,6 +393,8 @@ describe('#db README Examples', function() {
       }
 
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .put('/_api/v2/user/config/cors', {
           enable_cors: true, allow_credentials: true, origins: ['*']
         })
@@ -395,6 +420,8 @@ describe('#db README Examples', function() {
       var myOrigins = [ 'https://example.com', 'https://www.example.com' ];
 
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .put('/_api/v2/user/config/cors', {
           enable_cors: true, allow_credentials: true, origins: myOrigins
         })
@@ -418,6 +445,8 @@ describe('#db README Examples', function() {
       }
 
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .put('/_api/v2/user/config/cors', {
           enable_cors: true, origins: []
         })
@@ -440,6 +469,8 @@ describe('#db README Examples', function() {
       }
 
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .get('/_api/v2/user/config/cors')
         .reply(200, {
           enable_cors: true,

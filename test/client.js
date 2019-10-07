@@ -26,6 +26,8 @@ const uuidv4 = require('uuid/v4'); // random
 const ME = process.env.cloudant_username || 'nodejs';
 const PASSWORD = process.env.cloudant_password || 'sjedon';
 const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
+const SERVER_NO_PROTOCOL = SERVER.replace(/^https?:\/\//, '');
+const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${SERVER_NO_PROTOCOL}`;
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 const DOCID = 'doc1';
 
@@ -88,17 +90,17 @@ describe('CloudantClient', function() {
 
   describe('plugin support', function() {
     it('get plugin path by name', function() {
-      var cloudantClient = new Client();
+      var cloudantClient = new Client({ plugins: [] });
       assert.equal(cloudantClient._buildPluginPath('dummy-plugin'), '../plugins/dummy-plugin');
     });
 
     it('get plugin path by relative path', function() {
-      var cloudantClient = new Client();
+      var cloudantClient = new Client({ plugins: [] });
       assert.equal(cloudantClient._buildPluginPath('./dummy-plugin'), path.join(process.cwd(), 'dummy-plugin'));
     });
 
     it('get plugin path by absolute path', function() {
-      var cloudantClient = new Client();
+      var cloudantClient = new Client({ plugins: [] });
       assert.equal(cloudantClient._buildPluginPath('/plugins/dummy-plugin'), '/plugins/dummy-plugin');
     });
 
@@ -111,7 +113,7 @@ describe('CloudantClient', function() {
     });
 
     it('adds cookie authentication plugin if no other plugins are specified', function() {
-      var cloudantClient = new Client();
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS } });
       assert.equal(cloudantClient._plugins.length, 1);
       assert.equal(cloudantClient._plugins[0].id, 'cookieauth');
     });
@@ -147,12 +149,12 @@ describe('CloudantClient', function() {
     });
 
     it('allows a single plugin to be added via "plugins" options', function() {
-      var cloudantClient = new Client({ plugins: ['cookieauth'] });
+      var cloudantClient = new Client({ plugins: ['retry'] });
       assert.equal(cloudantClient._plugins.length, 1);
     });
 
     it('allows an array of plugins to be added via "plugins" options', function() {
-      var cloudantClient = new Client({
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS },
         plugins: [
           'retry', // plugin 1
           'cookieauth', // plugin 2
