@@ -1,5 +1,5 @@
 #!groovy
-// Copyright © 2017 IBM Corp. All rights reserved.
+// Copyright © 2017, 2019 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -101,16 +101,14 @@ stage('Publish') {
 
       // Upload using the NPM creds
       withCredentials([string(credentialsId: 'npm-mail', variable: 'NPM_EMAIL'),
-                       usernamePassword(credentialsId: 'npm-creds', passwordVariable: 'NPM_PASS', usernameVariable: 'NPM_USER')]) {
+                       usernamePassword(credentialsId: 'npm-creds', passwordVariable: 'NPM_TOKEN', usernameVariable: 'NPM_USER')]) {
         // Actions:
-        // 1. add the build ID to any snapshot version for uniqueness
-        // 2. install login helper
-        // 3. login to npm, using environment variables specified above
-        // 4. publish the build to NPM adding a snapshot tag if pre-release
+        // 1. create .npmrc file for publishing
+        // 2. add the build ID to any snapshot version for uniqueness
+        // 3. publish the build to NPM adding a snapshot tag if pre-release
         sh """
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
           ${isReleaseVersion ? '' : ('npm version --no-git-tag-version ' + version + '.' + env.BUILD_ID)}
-          npm install --no-save npm-cli-login
-          ./node_modules/.bin/npm-cli-login
           npm publish ${isReleaseVersion ? '' : '--tag snapshot'}
         """
       }
