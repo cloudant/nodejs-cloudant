@@ -43,8 +43,8 @@ describe('Client Utilities', function() {
 
     it('calls back without error if retry', function(done) {
       nock(SERVER)
-          .get('/')
-          .reply(200, {couchdb: 'Welcome'});
+        .get('/')
+        .reply(200, {couchdb: 'Welcome'});
 
       var r = { response: request.get(SERVER) };
       r.state = {
@@ -92,8 +92,8 @@ describe('Client Utilities', function() {
 
     it('calls back with error if too many retries', function(done) {
       nock(SERVER)
-          .get('/')
-          .reply(200, {couchdb: 'Welcome'});
+        .get('/')
+        .reply(200, {couchdb: 'Welcome'});
 
       var r = { abort: false, clientStream: { destinations: [] }, response: request.get(SERVER) };
       r.state = {
@@ -111,8 +111,8 @@ describe('Client Utilities', function() {
 
     it('calls back with error if no retry', function(done) {
       nock(SERVER)
-          .get('/')
-          .reply(200, {couchdb: 'Welcome'});
+        .get('/')
+        .reply(200, {couchdb: 'Welcome'});
 
       var r = { abort: false, clientStream: { destinations: [] }, response: request.get(SERVER) };
       r.state = {
@@ -130,8 +130,8 @@ describe('Client Utilities', function() {
 
     it('calls back without error if retry and sending false', function(done) {
       nock(SERVER)
-          .get('/')
-          .reply(200, {couchdb: 'Welcome'});
+        .get('/')
+        .reply(200, {couchdb: 'Welcome'});
 
       var r = { response: request.get(SERVER) };
       r.state = {
@@ -149,8 +149,8 @@ describe('Client Utilities', function() {
 
     it('calls back without error if no retry and sending false', function(done) {
       nock(SERVER)
-          .get('/')
-          .reply(200, {couchdb: 'Welcome'});
+        .get('/')
+        .reply(200, {couchdb: 'Welcome'});
 
       var r = { clientStream: {}, response: request.get(SERVER) };
       r.state = {
@@ -168,8 +168,8 @@ describe('Client Utilities', function() {
 
     it('calls back without error if too many retries and sending false', function(done) {
       nock(SERVER)
-          .get('/')
-          .reply(200, {couchdb: 'Welcome'});
+        .get('/')
+        .reply(200, {couchdb: 'Welcome'});
 
       var r = { clientStream: {}, response: request.get(SERVER) };
       r.state = {
@@ -233,8 +233,8 @@ describe('Client Utilities', function() {
 
     it('skips error hooks and executes client callback', function(done) {
       nock(SERVER)
-          .get('/')
-          .reply(200, {couchdb: 'Welcome'});
+        .get('/')
+        .reply(200, {couchdb: 'Welcome'});
 
       var plugin = new testPlugin.NoopPlugin(null, {});
       var cb = function(e, r, d) {
@@ -271,8 +271,8 @@ describe('Client Utilities', function() {
       }
 
       nock(SERVER)
-          .get('/')
-          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+        .get('/')
+        .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
       var plugin = new testPlugin.NoopPlugin(null, {});
       var cb = function(e, r, d) {
@@ -301,8 +301,8 @@ describe('Client Utilities', function() {
       }
 
       nock(SERVER)
-          .get('/')
-          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+        .get('/')
+        .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
       var plugin = new testPlugin.NoopPlugin(null, {});
       var cb = function(e, r, d) {

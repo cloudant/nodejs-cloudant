@@ -39,8 +39,8 @@ const MOCK_SET_COOKIE_HEADER_2 = { 'set-cookie': `${MOCK_COOKIE_2}; Version=1; M
 describe('#db CookieAuth Plugin', function() {
   before(function(done) {
     var mocks = nock(SERVER)
-        .put(DBNAME)
-        .reply(201, {ok: true});
+      .put(DBNAME)
+      .reply(201, {ok: true});
 
     var cloudantClient = new Client({ plugins: [] });
 
@@ -59,8 +59,8 @@ describe('#db CookieAuth Plugin', function() {
 
   after(function(done) {
     var mocks = nock(SERVER)
-        .delete(DBNAME)
-        .reply(200, {ok: true});
+      .delete(DBNAME)
+      .reply(200, {ok: true});
 
     var cloudantClient = new Client({ plugins: [] });
 
@@ -81,10 +81,10 @@ describe('#db CookieAuth Plugin', function() {
     it('performs request and returns 200 response', function(done) {
       // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
       var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get(DBNAME)
-          .reply(200, {doc_count: 0});
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
+        .get(DBNAME)
+        .reply(200, {doc_count: 0});
 
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
@@ -157,10 +157,10 @@ describe('#db CookieAuth Plugin', function() {
       }
 
       var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get(DBNAME)
-          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
+        .get(DBNAME)
+        .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
@@ -180,10 +180,10 @@ describe('#db CookieAuth Plugin', function() {
       }
 
       var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get(DBNAME)
-          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
+        .get(DBNAME)
+        .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
@@ -201,12 +201,12 @@ describe('#db CookieAuth Plugin', function() {
       }
 
       var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get(DBNAME)
-          .reply(200, {doc_count: 0});
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
+        .get(DBNAME)
+        .reply(200, {doc_count: 0});
 
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
@@ -229,12 +229,12 @@ describe('#db CookieAuth Plugin', function() {
       }
 
       var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get(DBNAME)
-          .reply(200, {doc_count: 0});
+        .post('/_session', {name: ME, password: PASSWORD})
+        .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
+        .get(DBNAME)
+        .reply(200, {doc_count: 0});
 
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
@@ -257,9 +257,9 @@ describe('#db CookieAuth Plugin', function() {
       }
 
       var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .times(3)
-          .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
+        .post('/_session', {name: ME, password: PASSWORD})
+        .times(3)
+        .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
 
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
@@ -276,13 +276,13 @@ describe('#db CookieAuth Plugin', function() {
       }
 
       var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .times(2)
-          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get(DBNAME)
-          .reply(200, {doc_count: 0});
+        .post('/_session', {name: ME, password: PASSWORD})
+        .times(2)
+        .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
+        .get(DBNAME)
+        .reply(200, {doc_count: 0});
 
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
@@ -303,14 +303,14 @@ describe('#db CookieAuth Plugin', function() {
       }
 
       var mocks = nock(SERVER)
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
-          .get(DBNAME)
-          .reply(401, {error: 'unauthorized', reason: 'Unauthorized'})
-          .post('/_session', {name: ME, password: PASSWORD})
-          .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER_2)
-          .get(DBNAME)
-          .reply(200, {doc_count: 0});
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
+        .get(DBNAME)
+        .reply(401, {error: 'unauthorized', reason: 'Unauthorized'})
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER_2)
+        .get(DBNAME)
+        .reply(200, {doc_count: 0});
 
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
