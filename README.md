@@ -392,6 +392,11 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
    This plugin will automatically exchange your IAM API key for a token. It will
    handle the authentication and ensure that the token is refreshed as required.
 
+   For example:
+   ```js
+   var cloudant = Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx' } } });
+   ```
+
    The production IAM token service at https://iam.cloud.ibm.com/identity/token is
    used by default. You can set `iamTokenUrl` in your plugin configuration to
    override this. To authenticate with the IAM token service set `iamClientId`
@@ -402,22 +407,6 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
    `maxAttempt`. Be aware that retrying requests to the token service delays the
    client request. It also increases the number of token exchange attempts and
    therefore may result in rate limiting by the IAM token service.
-
-   The retry behavior can be configured using the following options:
-
-    - `retryDelayMultiplier`
-
-      The multiplication factor used for increasing the timeout after each
-      subsequent attempt _(default: 2)_.
-
-    - `retryInitialDelayMsecs`
-
-      The initial retry delay in milliseconds _(default: 500)_.
-
-   For example:
-   ```js
-   var cloudant = Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx', retryDelayMultiplier: 4, retryInitialDelayMsecs: 100 } } });
-   ```
 
    If the IAM token cannot be retrieved after the configured number of retries
    (either because the IAM token service is down or the IAM API key is

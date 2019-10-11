@@ -5,6 +5,8 @@
   temporary.
 - [FIXED] Ensure IAM API key can be correctly changed.
 - [FIXED] Callback with an error when a user cannot be authenticated using IAM.
+- [FIXED] Ensure authorization tokens are not unnecessarily requested.
+- [IMPROVED] Preemptively renew authorization tokens that are due to expire.
 
 # 4.2.1 (2019-08-29)
 - [FIXED] Include all built-in plugin modules in webpack bundle.

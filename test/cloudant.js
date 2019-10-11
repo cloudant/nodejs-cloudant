@@ -26,6 +26,8 @@ const PASSWORD = process.env.cloudant_password || 'sjedon';
 const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 const DBNAME = `nodejs-cloudant-${uuidv4()}`;
 
+const COOKIEAUTH_PLUGIN = [ { cookieauth: { autoRenew: false } } ];
+
 describe('Cloudant #db', function() {
   before(function(done) {
     var mocks = nock(SERVER)
@@ -72,12 +74,14 @@ describe('Cloudant #db', function() {
       var security = { cloudant: { nobody: [ '_reader' ] } };
 
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .put(`/_api/v2/db/${DBNAME}/_security`, security)
         .reply(200, { ok: true })
         .get(`/_api/v2/db/${DBNAME}/_security`)
         .reply(200, security);
 
-      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: COOKIEAUTH_PLUGIN });
       var db = cloudant.db.use(DBNAME);
 
       db.set_security(security, function(err, result) {
@@ -98,12 +102,14 @@ describe('Cloudant #db', function() {
       var security = { cloudant: role };
 
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .put(`/_api/v2/db/${DBNAME}/_security`, security)
         .reply(200, { ok: true })
         .get(`/_api/v2/db/${DBNAME}/_security`)
         .reply(200, security);
 
-      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: COOKIEAUTH_PLUGIN });
       var db = cloudant.db.use(DBNAME);
 
       db.set_security(role, function(err, result) {
@@ -133,12 +139,14 @@ describe('Cloudant #db', function() {
       };
 
       var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true })
         .put(`/${DBNAME}/_security`, security)
         .reply(200, { ok: true })
         .get(`/_api/v2/db/${DBNAME}/_security`)
         .reply(200, security);
 
-      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD });
+      var cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: COOKIEAUTH_PLUGIN });
       var db = cloudant.db.use(DBNAME);
 
       db.set_security(security, function(err, result) {

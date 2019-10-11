@@ -32,6 +32,11 @@ var PassThroughDuplex = require('../../lib/passthroughduplex.js');
 var ME = process.env.cloudant_username || 'nodejs';
 var PASSWORD = process.env.cloudant_password || 'sjedon';
 var SERVER = process.env.SERVER_URL || 'https://' + ME + '.cloudant.com';
+var SERVER_NO_PROTOCOL = SERVER.replace(/^https?:\/\//, '');
+var SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${SERVER_NO_PROTOCOL}`;
+
+const COOKIEAUTH_PLUGIN = [ { cookieauth: { autoRenew: false } } ];
+
 var dbName;
 var mydb = null;
 var cc = null;
@@ -143,7 +148,7 @@ describe('promises #db', function() {
   it('should return a promise', function(done) {
     var mocks = nock(SERVER)
         .get('/' + dbName).reply(200, { ok: true });
-    var cloudant = Cloudant({url: SERVER, username: ME, password: PASSWORD});
+    var cloudant = Cloudant({url: SERVER, username: ME, password: PASSWORD, plugins: []});
     var db = cloudant.db.use(dbName);
     var p = db.info().then(function(data) {
       data.should.be.an.Object;
@@ -155,7 +160,7 @@ describe('promises #db', function() {
   it('should return an error status code', function(done) {
     var mocks = nock(SERVER)
         .get('/somedbthatdoesntexist').reply(404, { ok: false });
-    var cloudant = Cloudant({url: SERVER, username: ME, password: PASSWORD});
+    var cloudant = Cloudant({url: SERVER, username: ME, password: PASSWORD, plugins: []});
     var db = cloudant.db.use('somedbthatdoesntexist');
     var p = db.info().then(function(data) {
       assert(false);
@@ -213,7 +218,13 @@ describe('custom plugin #db', function() {
       .get('/')
       .reply(200, { couchdb: 'Welcome' });
 
-    Cloudant({ plugins: defaultPlugin, url: SERVER, username: ME, password: PASSWORD }, function(err, nano, pong) {
+    Cloudant({
+      creds: { outUrl: SERVER_WITH_CREDS },
+      plugins: defaultPlugin,
+      url: SERVER,
+      username: ME,
+      password: PASSWORD
+    }, function(err, nano, pong) {
       assert.equal(err, null);
       assert.notEqual(nano, null);
       assert.equal(pong.couchdb, 'Welcome');
@@ -231,7 +242,7 @@ describe('cookieauth plugin #db', function() {
     var mocks = nock(SERVER)
         .post('/_session').reply(200, { ok: true })
         .get('/' + dbName).reply(200, { ok: true });
-    var cloudant = Cloudant({plugins: 'cookieauth', url: SERVER, username: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: COOKIEAUTH_PLUGIN, url: SERVER, username: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
     var p = db.info().then(function(data) {
       data.should.be.an.Object;
@@ -246,7 +257,7 @@ describe('cookieauth plugin #db', function() {
     var mocks = nock(SERVER)
         .post('/_session', {name: ME, password: PASSWORD}).reply(200, { ok: true, info: {}, userCtx: { name: ME, roles: ['_admin'] } })
         .get('/' + dbName + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true });
-    var cloudant = Cloudant({plugins: 'cookieauth', url: SERVER, username: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: COOKIEAUTH_PLUGIN, url: SERVER, username: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
     var p = db.get('mydoc', function(err, data) {
       assert.equal(err, null);
@@ -266,7 +277,7 @@ describe('cookieauth plugin #db', function() {
         .post('/_session', {name: ME, password: PASSWORD}).reply(200, { ok: true, info: {}, userCtx: { name: ME, roles: ['_admin'] } }, { 'Set-Cookie': 'AuthSession=xyz; Version=1; Path=/; HttpOnly' })
         .get('/' + dbName + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true })
         .get('/' + dbName + '/mydoc').reply(200, { _id: 'mydoc', _rev: '1-123', ok: true });
-    var cloudant = Cloudant({plugins: 'cookieauth', url: SERVER, username: ME, password: PASSWORD});
+    var cloudant = Cloudant({plugins: COOKIEAUTH_PLUGIN, url: SERVER, username: ME, password: PASSWORD});
     var db = cloudant.db.use(dbName);
     var p = db.get('mydoc', function(err, data) {
       assert.equal(err, null);

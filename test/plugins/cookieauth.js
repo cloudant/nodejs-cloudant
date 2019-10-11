@@ -26,6 +26,7 @@ const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 const SERVER_NO_PROTOCOL = SERVER.replace(/^https?:\/\//, '');
 const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${SERVER_NO_PROTOCOL}`;
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
+const COOKIEAUTH_PLUGIN = [ { cookieauth: { autoRenew: false } } ];
 
 // mock cookies
 
@@ -85,7 +86,7 @@ describe('#db CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugins: 'cookieauth' });
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -115,7 +116,7 @@ describe('#db CookieAuth Plugin', function() {
       var end1 = false;
       var end2 = false;
 
-      var cloudantClient = new Client({ plugins: 'cookieauth' });
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -161,7 +162,7 @@ describe('#db CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
-      var cloudantClient = new Client({ plugins: 'cookieauth' });
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -184,7 +185,7 @@ describe('#db CookieAuth Plugin', function() {
           .get(DBNAME)
           .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
-      var cloudantClient = new Client({ plugins: 'cookieauth' });
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err.code, 'ECONNRESET');
@@ -207,7 +208,7 @@ describe('#db CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugins: 'cookieauth' });
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -235,7 +236,7 @@ describe('#db CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugins: 'cookieauth' });
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -260,10 +261,10 @@ describe('#db CookieAuth Plugin', function() {
           .times(3)
           .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
 
-      var cloudantClient = new Client({ plugins: 'cookieauth' });
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
-        assert.equal(err.message, 'Failed to acquire session cookie. Status code: 401');
+        assert.equal(err.message, 'Failed to get cookie. Status code: 401');
         mocks.done();
         done();
       });
@@ -283,7 +284,7 @@ describe('#db CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugins: 'cookieauth' });
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
@@ -311,7 +312,7 @@ describe('#db CookieAuth Plugin', function() {
           .get(DBNAME)
           .reply(200, {doc_count: 0});
 
-      var cloudantClient = new Client({ plugins: 'cookieauth' });
+      var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: COOKIEAUTH_PLUGIN });
       var req = { url: SERVER_WITH_CREDS + DBNAME, method: 'GET' };
       cloudantClient.request(req, function(err, resp, data) {
         assert.equal(err, null);
