@@ -30,7 +30,7 @@ class RetryPlugin extends BasePlugin {
         501, // 501 Not Implemented
         502, // 502 Bad Gateway
         503, // 503 Service Unavailable
-        504  // 504 Gateway Timeout
+        504 // 504 Gateway Timeout
       ]
     }, cfg);
     super(client, cfg);

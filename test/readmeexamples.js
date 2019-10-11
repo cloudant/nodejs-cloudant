@@ -162,8 +162,8 @@ describe('#db README Examples', function() {
 
     it('Using account credentials', function(done) {
       var mocks = nock(SERVER)
-          .get('/_session')
-          .reply(200, { userCtx: { name: ME } });
+        .get('/_session')
+        .reply(200, { userCtx: { name: ME } });
 
       var cloudant = Cloudant({ username: ME, password: PASSWORD, url: SERVER, plugins: [] });
       cloudant.session().then((session) => {

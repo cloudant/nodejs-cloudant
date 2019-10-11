@@ -80,7 +80,7 @@ function Cloudant(options, callback) {
   debug('Creating Nano instance with options: %j', nanoOptions);
   var nano = Nano(nanoOptions);
 
-  nano.cc = cloudantClient;  // expose Cloudant client
+  nano.cc = cloudantClient; // expose Cloudant client
   nano.basePlugin = require('./plugins/base.js'); // expose base plugin
 
   // ===========================
@@ -109,7 +109,7 @@ function Cloudant(options, callback) {
       return nano.request({ path: path }, callback);
     };
 
-   // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#modifying-permissions
+    // https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#modifying-permissions
     var set_security = function(permissions, callback) { // eslint-disable-line camelcase
       var body = permissions;
       var prefix = '_api/v2/db/'; // use `/_api/v2/<db>/_security` endpoint

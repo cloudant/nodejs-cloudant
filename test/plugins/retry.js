@@ -30,8 +30,8 @@ const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 describe('Retry Plugin', function() {
   before(function(done) {
     var mocks = nock(SERVER)
-        .put(DBNAME)
-        .reply(201, {ok: true});
+      .put(DBNAME)
+      .reply(201, {ok: true});
 
     var cloudantClient = new Client({ plugins: [] });
 
@@ -50,8 +50,8 @@ describe('Retry Plugin', function() {
 
   after(function(done) {
     var mocks = nock(SERVER)
-        .delete(DBNAME)
-        .reply(200, {ok: true});
+      .delete(DBNAME)
+      .reply(200, {ok: true});
 
     var cloudantClient = new Client({ plugins: [] });
 
@@ -73,8 +73,8 @@ describe('Retry Plugin', function() {
       it('performs request and returns response', function(done) {
         // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -97,8 +97,8 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -120,12 +120,12 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(2)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-            .get(DBNAME).times(2)
-            .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME).times(2)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .get(DBNAME).times(2)
+          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
 
@@ -156,12 +156,12 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(2)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-            .get(DBNAME).times(2)
-            .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME).times(2)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .get(DBNAME).times(2)
+          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -190,8 +190,8 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(5)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
+          .get(DBNAME).times(5)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 500 ] } } });
         var req = {
@@ -221,16 +221,16 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .post(DBNAME + '/_all_docs', function(body) {
-              assert.deepEqual(body, { keys: [ 'doc1' ] });
-              return true;
-            }).times(4)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-            .post(DBNAME + '/_all_docs', function(body) {
-              assert.deepEqual(body, { keys: [ 'doc1' ] });
-              return true;
-            })
-            .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          }).times(4)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          })
+          .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 500 ] } } });
 
@@ -265,8 +265,8 @@ describe('Retry Plugin', function() {
       it('performs request and returns response', function(done) {
         // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -314,8 +314,8 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -345,12 +345,12 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(2)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-            .get(DBNAME).times(2)
-            .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME).times(2)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .get(DBNAME).times(2)
+          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -403,12 +403,12 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(2)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-            .get(DBNAME).times(2)
-            .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME).times(2)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .get(DBNAME).times(2)
+          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -444,8 +444,8 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(5)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
+          .get(DBNAME).times(5)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 500 ] } } });
         var req = {
@@ -489,16 +489,16 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .post(DBNAME + '/_all_docs', function(body) {
-              assert.deepEqual(body, { keys: [ 'doc1' ] });
-              return true;
-            }).times(4)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-            .post(DBNAME + '/_all_docs', function(body) {
-              assert.deepEqual(body, { keys: [ 'doc1' ] });
-              return true;
-            })
-            .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          }).times(4)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          })
+          .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 500 ] } } });
         var req = {
@@ -556,8 +556,8 @@ describe('Retry Plugin', function() {
       it('performs request and returns response', function(done) {
         // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -609,8 +609,8 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -643,12 +643,12 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(2)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-            .get(DBNAME).times(2)
-            .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME).times(2)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .get(DBNAME).times(2)
+          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -705,12 +705,12 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(2)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-            .get(DBNAME).times(2)
-            .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME).times(2)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .get(DBNAME).times(2)
+          .reply(429, {error: 'too_many_requests', reason: 'Too Many Requests'})
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 429, 500 ] } } });
         var req = {
@@ -749,8 +749,8 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(5)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
+          .get(DBNAME).times(5)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 500 ] } } });
         var req = {
@@ -798,16 +798,16 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .post(DBNAME + '/_all_docs', function(body) {
-              assert.deepEqual(body, { keys: [ 'doc1' ] });
-              return true;
-            }).times(4)
-            .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
-            .post(DBNAME + '/_all_docs', function(body) {
-              assert.deepEqual(body, { keys: [ 'doc1' ] });
-              return true;
-            })
-            .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          }).times(4)
+          .reply(500, {error: 'internal_server_error', reason: 'Internal Server Error'})
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          })
+          .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryErrors: false, retryStatusCodes: [ 500 ] } } });
         var req = {
@@ -871,8 +871,8 @@ describe('Retry Plugin', function() {
       it('performs request and returns response', function(done) {
         // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ plugins: { retry: { retryStatusCodes: [] } } });
         var req = {
@@ -895,10 +895,10 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(4)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME).times(4)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryStatusCodes: [] } } });
 
@@ -929,8 +929,8 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(5)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME).times(5)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryStatusCodes: [] } } });
         var req = {
@@ -958,8 +958,8 @@ describe('Retry Plugin', function() {
       it('performs request and returns response', function(done) {
         // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ plugins: { retry: { retryStatusCodes: [] } } });
         var req = {
@@ -1007,10 +1007,10 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(4)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME).times(4)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryStatusCodes: [] } } });
         var req = {
@@ -1063,8 +1063,8 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(5)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME).times(5)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryStatusCodes: [] } } });
         var req = {
@@ -1099,8 +1099,8 @@ describe('Retry Plugin', function() {
       it('performs request and returns response', function(done) {
         // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ plugins: { retry: { retryStatusCodes: [] } } });
         var req = {
@@ -1152,10 +1152,10 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(4)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
-            .get(DBNAME)
-            .reply(200, {doc_count: 0});
+          .get(DBNAME).times(4)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
+          .get(DBNAME)
+          .reply(200, {doc_count: 0});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryStatusCodes: [] } } });
         var req = {
@@ -1212,8 +1212,8 @@ describe('Retry Plugin', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME).times(5)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME).times(5)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 5, plugins: { retry: { retryStatusCodes: [] } } });
         var req = {

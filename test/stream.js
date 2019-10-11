@@ -31,8 +31,8 @@ const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 describe('#db Stream', function() {
   before(function(done) {
     var mocks = nock(SERVER)
-        .put(DBNAME)
-        .reply(201, {ok: true});
+      .put(DBNAME)
+      .reply(201, {ok: true});
 
     var cloudantClient = new Client({ plugins: 'retry' });
 
@@ -51,8 +51,8 @@ describe('#db Stream', function() {
 
   after(function(done) {
     var mocks = nock(SERVER)
-        .delete(DBNAME)
-        .reply(200, {ok: true});
+      .delete(DBNAME)
+      .reply(200, {ok: true});
 
     var cloudantClient = new Client({ plugins: 'retry' });
 

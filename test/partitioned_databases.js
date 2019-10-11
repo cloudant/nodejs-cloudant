@@ -29,7 +29,7 @@ const DBNAME = `nodejs-cloudant-${uuidv4()}`;
 if (SERVER.endsWith('.cloudant.com')) {
   describe('Partitioned Databases #db', () => {
     const partitionKeys = Array.apply(null, {length: 10})
-          .map(() => { return uuidv4(); });
+      .map(() => { return uuidv4(); });
 
     before(() => {
       var mocks = nock(SERVER)
@@ -174,7 +174,7 @@ if (SERVER.endsWith('.cloudant.com')) {
 
         var mocks = nock(SERVER)
           .post(`/${DBNAME}/_partition/${pKey}/_design/mysearch/_search/search1`,
-                { q: '*:*' })
+            { q: '*:*' })
           .reply(200, { rows: new Array(10) });
 
         const cloudant = Cloudant({ url: SERVER, username: ME, password: PASSWORD, plugins: [] });

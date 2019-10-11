@@ -34,10 +34,10 @@ const DOCID = 'doc1';
 describe('CloudantClient', function() {
   before(function(done) {
     var mocks = nock(SERVER)
-        .put(DBNAME) // create database
-        .reply(201, {ok: true})
-        .post(DBNAME) // create document
-        .reply(201, {ok: true, id: DOCID, rev: '1-xxxxxxxx'});
+      .put(DBNAME) // create database
+      .reply(201, {ok: true})
+      .post(DBNAME) // create document
+      .reply(201, {ok: true, id: DOCID, rev: '1-xxxxxxxx'});
 
     var cloudantClient = new Client({ plugins: 'retry' });
 
@@ -70,8 +70,8 @@ describe('CloudantClient', function() {
 
   after(function(done) {
     var mocks = nock(SERVER)
-        .delete(DBNAME)
-        .reply(200, {ok: true});
+      .delete(DBNAME)
+      .reply(200, {ok: true});
 
     var cloudantClient = new Client({ plugins: 'retry' });
 
@@ -263,9 +263,9 @@ describe('CloudantClient', function() {
       }
 
       var mocks = nock(SERVER)
-          .get(DBNAME)
-          .times(4)
-          .reply(200, {doc_count: 1});
+        .get(DBNAME)
+        .times(4)
+        .reply(200, {doc_count: 1});
 
       var cloudantClient = new Client({
         maxAttempt: 5,
@@ -293,8 +293,8 @@ describe('CloudantClient', function() {
 
     it('after plugin execution phase #db', function(done) {
       var mocks = nock(SERVER)
-          .get(DBNAME)
-          .reply(200, {doc_count: 1});
+        .get(DBNAME)
+        .reply(200, {doc_count: 1});
 
       var cloudantClient = new Client({ plugins: [] });
       assert.equal(cloudantClient._plugins.length, 0);
@@ -320,8 +320,8 @@ describe('CloudantClient', function() {
     describe('with no plugins', function() {
       it('performs request and returns response', function(done) {
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 1});
+          .get(DBNAME)
+          .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         assert.equal(cloudantClient._plugins.length, 0);
@@ -346,8 +346,8 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: [] });
         assert.equal(cloudantClient._plugins.length, 0);
@@ -367,11 +367,11 @@ describe('CloudantClient', function() {
 
       it('performs request with piped payload and returns response', function(done) {
         var mocks = nock(SERVER)
-            .post(DBNAME + '/_all_docs', function(body) {
-              assert.deepEqual(body, { keys: [ 'doc1' ] });
-              return true;
-            })
-            .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          })
+          .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
         var cloudantClient = new Client({ plugins: [] });
         assert.equal(cloudantClient._plugins.length, 0);
@@ -399,8 +399,8 @@ describe('CloudantClient', function() {
     describe('with single Noop plugin', function() {
       it('performs request and calls request and response hooks only', function(done) {
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 1});
+          .get(DBNAME)
+          .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient._addPlugins(testPlugin.NoopPlugin);
@@ -427,11 +427,11 @@ describe('CloudantClient', function() {
 
       it('performs request with piped payload and returns response', function(done) {
         var mocks = nock(SERVER)
-            .post(DBNAME + '/_all_docs', function(body) {
-              assert.deepEqual(body, { keys: [ 'doc1' ] });
-              return true;
-            })
-            .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          })
+          .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient._addPlugins(testPlugin.NoopPlugin);
@@ -462,8 +462,8 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient._addPlugins(testPlugin.NoopPlugin);
@@ -490,8 +490,8 @@ describe('CloudantClient', function() {
     describe('with multiple Noop plugins', function() {
       it('performs request and calls request and response hooks only', function(done) {
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 1});
+          .get(DBNAME)
+          .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
@@ -522,11 +522,11 @@ describe('CloudantClient', function() {
 
       it('performs request with piped payload and returns response', function(done) {
         var mocks = nock(SERVER)
-            .post(DBNAME + '/_all_docs', function(body) {
-              assert.deepEqual(body, { keys: [ 'doc1' ] });
-              return true;
-            })
-            .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
+          .post(DBNAME + '/_all_docs', function(body) {
+            assert.deepEqual(body, { keys: [ 'doc1' ] });
+            return true;
+          })
+          .reply(200, { rows: [{ key: 'doc1', value: { rev: '1-xxxxxxxx' } }] });
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
@@ -559,8 +559,8 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
@@ -637,8 +637,8 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .put(DBNAME).times(10)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .put(DBNAME).times(10)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
         cloudantClient._addPlugins(testPlugin.ComplexPlugin1);
@@ -707,10 +707,10 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
-            .get('/bar')
-            .reply(200, {ok: true});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
+          .get('/bar')
+          .reply(200, {ok: true});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
         cloudantClient._addPlugins(testPlugin.ComplexPlugin2);
@@ -779,8 +779,8 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
         cloudantClient._addPlugins(testPlugin.ComplexPlugin3);
@@ -872,8 +872,8 @@ describe('CloudantClient', function() {
     describe('with no plugins', function() {
       it('performs request and returns response', function(done) {
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 1});
+          .get(DBNAME)
+          .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         assert.equal(cloudantClient._plugins.length, 0);
@@ -905,8 +905,8 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: [] });
         assert.equal(cloudantClient._plugins.length, 0);
@@ -929,8 +929,8 @@ describe('CloudantClient', function() {
     describe('with single Noop plugin', function() {
       it('performs request and calls request and response hooks only', function(done) {
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 1});
+          .get(DBNAME)
+          .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient._addPlugins(testPlugin.NoopPlugin);
@@ -966,8 +966,8 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient._addPlugins(testPlugin.NoopPlugin);
@@ -995,8 +995,8 @@ describe('CloudantClient', function() {
     describe('with multiple Noop plugins', function() {
       it('performs request and calls request and response hooks only', function(done) {
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .reply(200, {doc_count: 1});
+          .get(DBNAME)
+          .reply(200, {doc_count: 1});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
@@ -1034,8 +1034,8 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ plugins: [] });
         cloudantClient._addPlugins(testPlugin.NoopPlugin1); // plugin 1
@@ -1119,8 +1119,8 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .put(DBNAME).times(10)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .put(DBNAME).times(10)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
         cloudantClient._addPlugins(testPlugin.ComplexPlugin1);
@@ -1196,10 +1196,10 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
-            .get('/bar')
-            .reply(200, {ok: true});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
+          .get('/bar')
+          .reply(200, {ok: true});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
         cloudantClient._addPlugins(testPlugin.ComplexPlugin2);
@@ -1278,8 +1278,8 @@ describe('CloudantClient', function() {
         }
 
         var mocks = nock(SERVER)
-            .get(DBNAME)
-            .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+          .get(DBNAME)
+          .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
 
         var cloudantClient = new Client({ maxAttempt: 10, plugins: [] });
         cloudantClient._addPlugins(testPlugin.ComplexPlugin3);

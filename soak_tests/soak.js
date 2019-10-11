@@ -184,7 +184,7 @@ var runTests = function(done) {
                   assert(r.statusCode, 201, done);
                 })
                 .on('end', cb)
-              );
+            );
           },
           (cb) => {
             let db = c2.db.use(DBNAME);

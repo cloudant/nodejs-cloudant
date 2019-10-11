@@ -84,7 +84,7 @@ describe('#db Issue #292', function() {
       mocks.done();
       done();
     })
-    .catch((err) => { assert.fail(`Unexpected error: ${err}`); });
+      .catch((err) => { assert.fail(`Unexpected error: ${err}`); });
   });
 
   it('creates new query index', function(done) {
@@ -108,6 +108,6 @@ describe('#db Issue #292', function() {
       mocks.done();
       done();
     })
-    .catch((err) => { assert.fail(`Unexpected error: ${err}`); });
+      .catch((err) => { assert.fail(`Unexpected error: ${err}`); });
   });
 });
