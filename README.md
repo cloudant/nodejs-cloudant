@@ -266,7 +266,7 @@ mydb.get('non-existent-doc', function(err, data) {
 });
 ```
 
-```
+```js
 { Error: deleted
     at Object.clientCallback (/usr/src/app/node_modules/nano/lib/nano.js:248:15)
     at Request._callback (/usr/src/app/node_modules/@cloudant/cloudant/lib/clientutils.js:154:11)
@@ -719,7 +719,7 @@ var db = cloudant.db.use('my_db')
 
 In this example, we will begin with some data to search: a collection of books.
 
-~~~
+~~~ js
 var books = [
   { author:"Charles Dickens", title:"David Copperfield" },
   { author:"David Copperfield", title:"Tales of the Impossible" },
