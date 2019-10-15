@@ -151,6 +151,40 @@ describe('#db CookieAuth Plugin', function() {
       });
     });
 
+    it('disables cookie authentication for missing credentials when using default cookieauth plugin', function(done) {
+      var mocks = nock(SERVER)
+        .get(DBNAME)
+        .reply(401, { error: 'unauthorized' });
+
+      // 'cookieauth' plugin is added by default with `errorOnNoCreds: false`
+      var cloudantClient = new Client({ creds: { outUrl: SERVER } });
+      var req = { url: SERVER + DBNAME, method: 'GET' };
+
+      cloudantClient.request(req, function(err, resp, data) {
+        assert.equal(err, null);
+        assert.equal(resp.request.uri.auth, null);
+        assert.equal(resp.statusCode, 401);
+        assert.ok(data.indexOf('unauthorized') > -1);
+
+        // assert 'cookieauth' plugin has been disabled
+        assert.ok(cloudantClient.getPlugin('cookieauth').disabled);
+
+        mocks.done();
+        done();
+      });
+    });
+
+    it('throws error for missing credentials when cookieauth plugin is specified', function() {
+      assert.throws(
+        () => {
+          /* eslint-disable no-new */
+          new Client({ creds: { outUrl: SERVER }, plugins: COOKIEAUTH_PLUGIN });
+        },
+        /Credentials are required for cookie authentication/,
+        'did not throw with expected message'
+      );
+    });
+
     it('performs request and returns 500 response', function(done) {
       if (process.env.NOCK_OFF) {
         this.skip();

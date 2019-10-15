@@ -29,11 +29,21 @@ class BasePlugin {
   constructor(client, cfg) {
     this._client = client;
     this._cfg = cfg;
+    this._disabled = false;
     this._lockFile = tmp.tmpNameSync({ postfix: '.lock' });
   }
 
   get id() {
     return this.constructor.id;
+  }
+
+  get disabled() {
+    return this._disabled;
+  }
+
+  // Disable a plugin to prevent all hooks from being executed.
+  set disabled(disabled) {
+    this._disabled = disabled;
   }
 
   // NOOP Base Hooks
