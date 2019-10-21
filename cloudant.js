@@ -294,7 +294,7 @@ function Cloudant(options, callback) {
   nano.generate_api_key = generate_api_key; // eslint-disable-line camelcase
 
   if (callback) {
-    nano.cc._addPlugins('cookieauth');
+    nano.cc._addPlugins({ cookieauth: { errorOnNoCreds: false } });
     nano.ping(function(error, pong) {
       if (error) {
         callback(error);

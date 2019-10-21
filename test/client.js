@@ -316,6 +316,77 @@ describe('CloudantClient', function() {
     });
   });
 
+  describe('disables a plugin', function() {
+    it('skips all plugin hooks on good response', function(done) {
+      var mocks = nock(SERVER)
+        .get(DBNAME)
+        .reply(200, {doc_count: 1});
+
+      var cloudantClient = new Client({ plugins: [] });
+      cloudantClient._addPlugins(testPlugin.NoopPlugin);
+      assert.equal(cloudantClient._plugins.length, 1);
+
+      var options = {
+        url: SERVER + DBNAME,
+        auth: { username: ME, password: PASSWORD },
+        method: 'GET'
+      };
+
+      // disable the plugin
+      cloudantClient.getPlugin('noop').disabled = true;
+
+      cloudantClient.request(options, function(err, resp, data) {
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 200);
+        assert.ok(data.indexOf('"doc_count":1') > -1);
+
+        // assert hooks are _not_ executed
+        assert.equal(cloudantClient._plugins[0].onRequestCallCount, 0);
+        assert.equal(cloudantClient._plugins[0].onErrorCallCount, 0);
+        assert.equal(cloudantClient._plugins[0].onResponseCallCount, 0);
+
+        mocks.done();
+        done();
+      });
+    });
+
+    it('skips all plugin hooks on error response', function(done) {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
+      var mocks = nock(SERVER)
+        .get(DBNAME)
+        .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+
+      var cloudantClient = new Client({ plugins: [] });
+      cloudantClient._addPlugins(testPlugin.NoopPlugin);
+      assert.equal(cloudantClient._plugins.length, 1);
+
+      var options = {
+        url: SERVER + DBNAME,
+        auth: { username: ME, password: PASSWORD },
+        method: 'GET'
+      };
+
+      // disable the plugin
+      cloudantClient.getPlugin('noop').disabled = true;
+
+      cloudantClient.request(options, function(err, resp, data) {
+        assert.equal(err.code, 'ECONNRESET');
+        assert.equal(err.message, 'socket hang up');
+
+        // assert hooks are _not_ executed
+        assert.equal(cloudantClient._plugins[0].onRequestCallCount, 0);
+        assert.equal(cloudantClient._plugins[0].onErrorCallCount, 0);
+        assert.equal(cloudantClient._plugins[0].onResponseCallCount, 0);
+
+        mocks.done();
+        done();
+      });
+    });
+  });
+
   describe('#db using callbacks', function() {
     describe('with no plugins', function() {
       it('performs request and returns response', function(done) {

@@ -25,14 +25,22 @@ const CookieTokenManager = require('../lib/tokens/CookieTokenManager');
  */
 class CookiePlugin extends BasePlugin {
   constructor(client, cfg) {
-    cfg = Object.assign({ autoRenew: true }, cfg);
+    cfg = Object.assign({
+      autoRenew: true,
+      errorOnNoCreds: true
+    }, cfg);
 
     super(client, cfg);
 
     let sessionUrl = new u.URL(cfg.serverUrl);
     sessionUrl.pathname = '/_session';
     if (!sessionUrl.username || !sessionUrl.password) {
-      throw new Error('Credentials are required for cookie authentication.');
+      if (cfg.errorOnNoCreds) {
+        throw new Error('Credentials are required for cookie authentication.');
+      }
+      debug('Missing credentials for cookie authentication. Permanently disabling plugin.');
+      this.disabled = true;
+      return;
     }
 
     this._jar = request.jar();
