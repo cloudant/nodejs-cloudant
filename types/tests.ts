@@ -18,14 +18,14 @@ import nano = require('nano');
 
 const { BasePlugin } = cloudant;
 
-interface CustomPluginConfig extends cloudant.PluginConfig {
+interface ICustomPluginConfig extends cloudant.PluginConfig {
   customLoggingEnabled?: boolean;
 }
 
 class CustomPlugin extends BasePlugin {
   public static id = 'custom';
 
-  constructor(client: nano.DocumentScope<{}>, configuration: CustomPluginConfig) {
+  constructor(client: nano.DocumentScope<{}>, configuration: ICustomPluginConfig) {
     const cfg = Object.assign({
       customLoggingEnabled: true
     }, configuration);
@@ -35,7 +35,7 @@ class CustomPlugin extends BasePlugin {
 
   // tslint:disable-next-line:max-line-length
   public onRequest(state: cloudant.PluginState, request: cloudant.PluginRequest, callback: cloudant.PluginCallbackFunction) {
-    const { customLoggingEnabled } = this._cfg as CustomPluginConfig;
+    const { customLoggingEnabled } = this._cfg as ICustomPluginConfig;
 
     if (customLoggingEnabled) {
       // tslint:disable-next-line:no-console
