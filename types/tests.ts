@@ -16,6 +16,60 @@
 import cloudant = require('@cloudant/cloudant');
 import nano = require('nano');
 
+const { BasePlugin } = cloudant;
+
+interface CustomPluginConfig extends cloudant.PluginConfig {
+  customLoggingEnabled?: boolean;
+}
+
+class CustomPlugin extends BasePlugin {
+  public static id = 'custom';
+
+  constructor(client: nano.DocumentScope<{}>, configuration: CustomPluginConfig) {
+    const cfg = Object.assign({
+      customLoggingEnabled: true
+    }, configuration);
+
+    super(client, cfg);
+  }
+
+  // tslint:disable-next-line:max-line-length
+  public onRequest(state: cloudant.PluginState, request: cloudant.PluginRequest, callback: cloudant.PluginCallbackFunction) {
+    const { customLoggingEnabled } = this._cfg as CustomPluginConfig;
+
+    if (customLoggingEnabled) {
+      // tslint:disable-next-line:no-console
+      console.log('%s request made to %s with headers %o', request.method, request.uri, request.headers);
+    }
+
+    callback(state);
+  }
+
+  // tslint:disable-next-line:max-line-length
+  public onResponse(state: cloudant.PluginState, response: cloudant.PluginResponse, callback: cloudant.PluginCallbackFunction) {
+    const { customLoggingEnabled } = this._cfg as CustomPluginConfig;
+
+    if (customLoggingEnabled) {
+      // tslint:disable-next-line
+      console.log('%d response for %s request made to %s', response.statusCode, response.request.method, response.request.uri);
+    }
+
+    callback(state);
+  }
+
+  // tslint:disable-next-line:max-line-length
+  public onError(state: cloudant.PluginState, error: Error, callback: cloudant.PluginCallbackFunction) {
+    const { customLoggingEnabled } = this._cfg as CustomPluginConfig;
+
+    if (customLoggingEnabled) {
+      // tslint:disable-next-line:no-console
+      console.error(error);
+    }
+
+    callback(state);
+  }
+}
+
 /*
  * Instantiate with configuration object
  */
@@ -23,7 +77,7 @@ const config: cloudant.Configuration = {
   account: 'my-cloudant-account',
   maxAttempt: 3,
   password: 'my-password',
-  plugins: 'retry'
+  plugins: [CustomPlugin, 'retry']
 };
 
 const cfgInstance = cloudant(config);

@@ -211,6 +211,43 @@ declare namespace cloudant {
             params: nano.DocumentViewParams
         ): Request;
     }
+
+    // types for plugins
+
+    interface PluginConfig {}
+    interface PluginState {
+        maxAttempt: number;
+    }
+
+    type PluginCallbackFunction = (state: PluginState) => void;
+
+    interface PluginRequest {
+        method: 'get' | 'post' | 'options';
+        headers: {},
+        uri: string;
+    }
+
+    interface PluginPostRequest extends PluginRequest {
+        method: 'post';
+        body?: string | {};
+    }
+
+    interface PluginResponse {
+        request: PluginRequest;
+        headers: {};
+        statusCode: number;
+    }
+
+    export class BasePlugin {
+        public static pluginVersion: number; 
+        public static id: string
+        public disabled: boolean;
+        public _cfg: PluginConfig;
+        public constructor(client: nano.DocumentScope<{}>, config?: PluginConfig)
+        public onRequest(state: PluginState, request: PluginRequest, callback: PluginCallbackFunction): void
+        public onResponse(state: PluginState, response: PluginResponse, callback: PluginCallbackFunction): void
+        public onError(state: PluginState, error: Error, callback: PluginCallbackFunction): void
+    }
 }
 
 export = cloudant;
