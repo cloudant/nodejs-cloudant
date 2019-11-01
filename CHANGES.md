@@ -1,3 +1,6 @@
+# 4.2.3
+- [FIXED] Expose BasePlugin.
+
 # 4.2.2 (2019-10-23)
 - [FIXED] Stopped disabling the IAM auth plugin after failed IAM
   authentications. Subsequent requests will re-request authorization,
