@@ -47,7 +47,7 @@ class CustomPlugin extends BasePlugin {
 
   // tslint:disable-next-line:max-line-length
   public onResponse(state: cloudant.PluginState, response: cloudant.PluginResponse, callback: cloudant.PluginCallbackFunction) {
-    const { customLoggingEnabled } = this._cfg as CustomPluginConfig;
+    const { customLoggingEnabled } = this._cfg as ICustomPluginConfig;
 
     if (customLoggingEnabled) {
       // tslint:disable-next-line
@@ -59,7 +59,7 @@ class CustomPlugin extends BasePlugin {
 
   // tslint:disable-next-line:max-line-length
   public onError(state: cloudant.PluginState, error: Error, callback: cloudant.PluginCallbackFunction) {
-    const { customLoggingEnabled } = this._cfg as CustomPluginConfig;
+    const { customLoggingEnabled } = this._cfg as ICustomPluginConfig;
 
     if (customLoggingEnabled) {
       // tslint:disable-next-line:no-console
