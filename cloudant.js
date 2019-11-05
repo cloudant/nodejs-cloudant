@@ -20,6 +20,9 @@ var debug = require('debug')('cloudant:cloudant');
 var nanodebug = require('debug')('nano');
 
 const Client = require('./lib/client.js');
+const BasePlugin = require('./plugins/base.js');
+
+Cloudant.BasePlugin = BasePlugin; // expose base plugin
 
 // Parse an object (i.e. { account: "myaccount", password: "mypassword" }) and
 // return a URL.
@@ -81,7 +84,7 @@ function Cloudant(options, callback) {
   var nano = Nano(nanoOptions);
 
   nano.cc = cloudantClient; // expose Cloudant client
-  nano.basePlugin = require('./plugins/base.js'); // expose base plugin
+  nano.basePlugin = BasePlugin; // expose base plugin on nano
 
   // ===========================
   // Cloudant Database Functions
