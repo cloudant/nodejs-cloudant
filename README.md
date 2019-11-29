@@ -249,6 +249,25 @@ Cloudant({ account: me, password: password }, function(err, cloudant, pong) {
 });
 ~~~
 
+**Note:** For legacy compatibility with older versions of the library using the
+initialization callback will always add the `cookieauth` plugin to the list of
+configured plugins. If you do not want to use `cookieauth` then you should not
+use this initialization callback, instead initalize the client without a
+callback and then call the [ping function](https://console.bluemix.net/docs/services/Cloudant/api/account.html#ping)
+e.g.:
+
+```js
+const c = new Cloudant({
+  url: 'http://localhost:5984',
+  username: 'somebody',
+  password: 'something',
+  plugins: [] // disable cookieauth
+});
+c.ping()
+  .then(/* do something with response */ console.log)
+  .catch(/* handle error */ console.log);
+```
+
 ### Callback Signature
 
 Callback functions receive three arguments:
