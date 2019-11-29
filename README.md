@@ -224,7 +224,7 @@ Note, if you only have a single Cloudant service then specifying the
 
 You can optionally provide a callback to the Cloudant initialization
 function. This will make the library automatically
-[ping](https://console.bluemix.net/docs/services/Cloudant/api/account.html#ping)
+[ping](https://cloud.ibm.com/docs/services/Cloudant/api?topic=cloudant-account#ping)
 Cloudant to confirm the connection and that your credentials work.
 
 Here is a simple example of initializing asynchronously, using its optional
@@ -253,7 +253,7 @@ Cloudant({ account: me, password: password }, function(err, cloudant, pong) {
 initialization callback will always add the `cookieauth` plugin to the list of
 configured plugins. If you do not want to use `cookieauth` then you should not
 use this initialization callback, instead initalize the client without a
-callback and then call the [ping function](https://console.bluemix.net/docs/services/Cloudant/api/account.html#ping)
+callback and then call the [ping function](https://cloud.ibm.com/docs/services/Cloudant/api?topic=cloudant-account#ping)
 e.g.:
 
 ```js
@@ -406,7 +406,7 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
 
    IBM Cloud Identity & Access Management enables you to securely authenticate
    users and control access to all cloud resources consistently in the IBM
-   Bluemix Cloud Platform.
+   Cloud Platform.
 
    This plugin will automatically exchange your IAM API key for a token. It will
    handle the authentication and ensure that the token is refreshed as required.
@@ -431,7 +431,7 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
    (either because the IAM token service is down or the IAM API key is
    incorrect) then an error is returned to the client.
 
-   See [IBM Cloud Identity and Access Management](https://console.bluemix.net/docs/services/Cloudant/guides/iam.html#ibm-cloud-identity-and-access-management) for more information.
+   See [IBM Cloud Identity and Access Management](https://cloud.ibm.com/docs/services/Cloudant/guides?topic=cloudant-ibm-cloud-identity-and-access-management-iam-) for more information.
 
 3. `retry`
 
@@ -512,7 +512,7 @@ This library adds documentation for the following:
 
 Cloudant API keys are part of the legacy access controls. They are different from
 the access control mechanisms offered by IBM Cloud IAM. See
-[here](https://console.bluemix.net/docs/services/Cloudant/guides/iam.html#ibm-cloud-identity-and-access-management-iam-)
+[here](https://cloud.ibm.com/docs/services/Cloudant/guides?topic=cloudant-ibm-cloud-identity-and-access-management-iam-)
 for more details.
 
 This feature interfaces with the Cloudant [authorization API][Authorization].
@@ -1304,13 +1304,13 @@ specific language governing permissions and limitations under the License.
 * [Issues]
 * [Nano Library]
 
-[Authentication]: https://console.bluemix.net/docs/services/Cloudant/api/authentication.html
-[Authorization]: https://console.bluemix.net/docs/services/Cloudant/api/authorization.html#authorization
-[CORS]: https://console.bluemix.net/docs/services/Cloudant/api/cors.html#cors
-[Cloudant Documentation]: https://console.bluemix.net/docs/services/Cloudant/cloudant.html#overview
-[Cloudant Geospatial]: https://console.bluemix.net/docs/services/Cloudant/api/cloudant-geo.html#cloudant-geospatial
-[Cloudant Query]: https://console.bluemix.net/docs/services/Cloudant/api/cloudant_query.html#query
-[Cloudant Search]: https://console.bluemix.net/docs/services/Cloudant/api/search.html
+[Authentication]: https://cloud.ibm.com/docs/services/Cloudant/api?topic=cloudant-authentication
+[Authorization]: https://cloud.ibm.com/docs/services/Cloudant/api?topic=cloudant-authorization
+[CORS]: https://cloud.ibm.com/docs/services/Cloudant/api?topic=cloudant-cors
+[Cloudant Documentation]: https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-overview
+[Cloudant Geospatial]: https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-cloudant-nosql-db-geospatial
+[Cloudant Query]: https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-query
+[Cloudant Search]: https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-search
 [Follow library]: https://github.com/cloudant-labs/cloudant-follow
 [Issues]: https://github.com/cloudant/nodejs-cloudant/issues
 [Nano Library]: https://github.com/apache/couchdb-nano
