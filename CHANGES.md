@@ -1,5 +1,7 @@
 # UNRELEASED
 - [FIXED] Expose BasePlugin.
+- [IMPROVED] Documented the legacy compatibility behaviour that always adds the
+  `cookieauth` plugin when using the initialization callback functionality.
 
 # 4.2.2 (2019-10-23)
 - [FIXED] Stopped disabling the IAM auth plugin after failed IAM
