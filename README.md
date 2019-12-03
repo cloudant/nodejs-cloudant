@@ -156,6 +156,13 @@ var Cloudant = require('@cloudant/cloudant');
 var cloudant = Cloudant("http://MYUSERNAME:MYPASSWORD@localhost:5984");
 ~~~
 
+**Note**: If you pass credentials in the user information subcomponent of the URL
+then they must be [percent encoded](https://tools.ietf.org/html/rfc3986#section-3.2.1).
+Specifically the characters `: / ? # [ ] @ %` _MUST_ be precent-encoded, other
+characters _MAY_ be percent encoded.
+Credentials must not be percent encoded when passing them via other configuration
+options besides `url`.
+
 **Note**: If you pass in a `username`, `password`, and `url` that contains
 credentials, the `username` and `password` will supercede the credentials within
 the `url`.  For example, `myusername` and `mypassword` will be used in the code

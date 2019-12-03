@@ -49,8 +49,9 @@ class CookiePlugin extends BasePlugin {
       client,
       this._jar,
       u.format(sessionUrl, {auth: false}),
-      sessionUrl.username,
-      sessionUrl.password
+      // Extract creds from URL and decode
+      decodeURIComponent(sessionUrl.username),
+      decodeURIComponent(sessionUrl.password)
     );
 
     if (cfg.autoRenew) {
