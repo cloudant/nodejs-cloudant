@@ -1,4 +1,4 @@
-# UNRELEASED
+# 4.2.3 (2019-12-05)
 - [FIXED] Expose BasePlugin.
 - [FIXED] Prevent double encoding of credentials passed in URL user information
   when using the `cookieauth` plugin.
