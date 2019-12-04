@@ -21,10 +21,10 @@ const nock = require('../nock.js');
 const uuidv4 = require('uuid/v4'); // random
 
 const ME = process.env.cloudant_username || 'nodejs';
-const PASSWORD = process.env.cloudant_password || 'sjedon';
+const PASSWORD = process.env.cloudant_password || 'sjedon!@#"£$%^&*()';
 const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 const SERVER_NO_PROTOCOL = SERVER.replace(/^https?:\/\//, '');
-const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${SERVER_NO_PROTOCOL}`;
+const SERVER_WITH_CREDS = `https://${ME}:${encodeURIComponent(PASSWORD)}@${SERVER_NO_PROTOCOL}`;
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 const COOKIEAUTH_PLUGIN = [ { cookieauth: { autoRenew: false } } ];
 

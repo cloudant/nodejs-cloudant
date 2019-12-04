@@ -1,5 +1,9 @@
 # UNRELEASED
 - [FIXED] Expose BasePlugin.
+- [FIXED] Prevent double encoding of credentials passed in URL user information
+  when using the `cookieauth` plugin.
+- [IMPROVED] Documented the characters that are required to be encoded in URL
+  user information.
 - [IMPROVED] Documented the legacy compatibility behaviour that always adds the
   `cookieauth` plugin when using the initialization callback functionality.
 
