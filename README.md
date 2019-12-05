@@ -160,7 +160,7 @@ var cloudant = Cloudant("http://MYUSERNAME:MYPASSWORD@localhost:5984");
 `password` configuration options rather than as part of the URL. However, if you
 choose to pass credentials in the user information subcomponent of the URL then
 they must be [percent encoded](https://tools.ietf.org/html/rfc3986#section-3.2.1).
-Specifically within either the username or passowrd the characters `: / ? # [ ] @ %`
+Specifically within either the username or password the characters `: / ? # [ ] @ %`
 _MUST_ be precent-encoded, other characters _MAY_ be percent encoded.
 For example for the username `user123` and password `colon:at@321`:
 ```
