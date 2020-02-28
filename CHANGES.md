@@ -1,3 +1,7 @@
+# Unreleased
+- [FIXED] Pinned Nano to version 8.1 to resolve issue with extending upstream
+  TypeScript changes in Nano version 8.2.0.
+
 # 4.2.3 (2019-12-05)
 - [FIXED] Expose BasePlugin.
 - [FIXED] Prevent double encoding of credentials passed in URL user information
