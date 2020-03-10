@@ -66,27 +66,46 @@ class IAMPlugin extends BasePlugin {
     delete req.url;
     req.uri = u.format(new u.URL(req.uri), {auth: false});
 
-    self._tokenManager.renewIfRequired().then(() => {
-      callback(state);
-    }).catch((error) => {
-      debug(error);
-      if (state.attempt < state.maxAttempt) {
-        state.retry = true;
-        let iamResponse = error.response;
-        let retryAfterSecs;
-        if (iamResponse && iamResponse.headers) {
-          retryAfterSecs = iamResponse.headers['Retry-After'];
-        }
-        if (retryAfterSecs) {
-          state.retryDelayMsecs = retryAfterSecs * 1000;
-        } else {
-          state.retryDelayMsecs = self._cfg.retryDelayMsecs;
-        }
-      } else {
-        state.abortWithResponse = [ error ]; // return error to client
-      }
-      callback(state);
+    let boundedErrorCb = this.errorCallback.bind({
+      state: state,
+      cfg: self._cfg,
+      cb: callback
     });
+
+    if (!self._cfg.autoRenew) {
+      self._tokenManager.renewIfRequired().then(() => {
+        callback(state);
+      }).catch(boundedErrorCb);
+    } else {
+      if (self._tokenManager._isTokenRenewing) {
+        debug('Auto token refreshment is ongoing');
+        self._tokenManager.waitForToken().then(() => {
+          callback(state);
+        }).catch(boundedErrorCb);
+      } else {
+        callback(state);
+      }
+    }
+  }
+
+  errorCallback(error) {
+    debug(error);
+    if (this.state.attempt < this.state.maxAttempt) {
+      this.state.retry = true;
+      let iamResponse = error.response;
+      let retryAfterSecs;
+      if (iamResponse && iamResponse.headers) {
+        retryAfterSecs = iamResponse.headers['Retry-After'];
+      }
+      if (retryAfterSecs) {
+        this.state.retryDelayMsecs = retryAfterSecs * 1000;
+      } else {
+        this.state.retryDelayMsecs = this.cfg.retryDelayMsecs;
+      }
+    } else {
+      this.state.abortWithResponse = [ error ]; // return error to client
+    }
+    this.cb(this.state);
   }
 
   onResponse(state, response, callback) {

@@ -68,16 +68,33 @@ class CookiePlugin extends BasePlugin {
     delete req.url;
     req.uri = u.format(new u.URL(req.uri), {auth: false});
 
-    self._tokenManager.renewIfRequired().then(() => {
-      callback(state);
-    }).catch((error) => {
-      if (state.attempt < state.maxAttempt) {
-        state.retry = true;
+    if (!self._cfg.autoRenew) {
+      self._tokenManager.renewRequired().then(() => {
+        callback(state);
+      }).catch((error) => {
+        if (state.attempt < state.maxAttempt) {
+          state.retry = true;
+        } else {
+          state.abortWithResponse = [ error ]; // return error to client
+        }
+        callback(state);
+      });
+    } else {
+      if (self._tokenManager._isTokenRenewing) {
+        self._tokenManager.waitForToken().then(() => {
+          callback(state);
+        }).catch((error) => {
+          if (state.attempt < state.maxAttempt) {
+            state.retry = true;
+          } else {
+            state.abortWithResponse = [ error ]; // return error to client
+          }
+          callback(state);
+        });
       } else {
-        state.abortWithResponse = [ error ]; // return error to client
+        callback(state);
       }
-      callback(state);
-    });
+    }
   }
 
   onResponse(state, response, callback) {
