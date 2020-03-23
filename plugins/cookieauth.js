@@ -69,7 +69,7 @@ class CookiePlugin extends BasePlugin {
     req.uri = u.format(new u.URL(req.uri), {auth: false});
 
     if (!self._cfg.autoRenew) {
-      self._tokenManager.renewRequired().then(() => {
+      self._tokenManager.renewIfRequired().then(() => {
         callback(state);
       }).catch((error) => {
         if (state.attempt < state.maxAttempt) {
