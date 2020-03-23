@@ -68,33 +68,33 @@ class CookiePlugin extends BasePlugin {
     delete req.url;
     req.uri = u.format(new u.URL(req.uri), {auth: false});
 
-    if (!self._cfg.autoRenew) {
-      self._tokenManager.renewIfRequired().then(() => {
-        callback(state);
-      }).catch((error) => {
-        if (state.attempt < state.maxAttempt) {
-          state.retry = true;
-        } else {
-          state.abortWithResponse = [ error ]; // return error to client
-        }
-        callback(state);
-      });
-    } else {
+    let boundedErrorHandler = this.errorHandler.bind({
+      state: state,
+      callback: callback
+    });
+
+    if (self._cfg.autoRenew) {
       if (self._tokenManager._isTokenRenewing) {
         self._tokenManager.waitForToken().then(() => {
           callback(state);
-        }).catch((error) => {
-          if (state.attempt < state.maxAttempt) {
-            state.retry = true;
-          } else {
-            state.abortWithResponse = [ error ]; // return error to client
-          }
-          callback(state);
-        });
+        }).catch(boundedErrorHandler);
       } else {
         callback(state);
       }
+    } else {
+      self._tokenManager.renewIfRequired().then(() => {
+        callback(state);
+      }).catch(boundedErrorHandler);
     }
+  }
+
+  errorHandler(error) {
+    if (this.state.attempt < this.state.maxAttempt) {
+      this.state.retry = true;
+    } else {
+      this.state.abortWithResponse = [ error ]; // return error to client
+    }
+    this.callback(this.state);
   }
 
   onResponse(state, response, callback) {

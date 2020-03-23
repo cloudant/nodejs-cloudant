@@ -72,11 +72,7 @@ class IAMPlugin extends BasePlugin {
       cb: callback
     });
 
-    if (!self._cfg.autoRenew) {
-      self._tokenManager.renewIfRequired().then(() => {
-        callback(state);
-      }).catch(boundedErrorCb);
-    } else {
+    if (self._cfg.autoRenew) {
       if (self._tokenManager._isTokenRenewing) {
         debug('Auto token refreshment is ongoing');
         self._tokenManager.waitForToken().then(() => {
@@ -85,6 +81,10 @@ class IAMPlugin extends BasePlugin {
       } else {
         callback(state);
       }
+    } else {
+      self._tokenManager.renewIfRequired().then(() => {
+        callback(state);
+      }).catch(boundedErrorCb);
     }
   }
 
