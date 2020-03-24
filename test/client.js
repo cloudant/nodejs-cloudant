@@ -112,10 +112,14 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._plugins.length, 1);
     });
 
-    it('adds cookie authentication plugin if no other plugins are specified', function() {
+    it('adds cookie authentication plugin if no other plugins are specified', function(done) {
+      var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true }, { 'set-cookie': ['AuthSession=token; Max-Age=86400'] });
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS } });
       assert.equal(cloudantClient._plugins.length, 1);
       assert.equal(cloudantClient._plugins[0].id, 'cookieauth');
+      done();
     });
 
     it('allows plugins to be added separately', function() {
