@@ -112,7 +112,7 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._plugins.length, 1);
     });
 
-    it.('adds cookie authentication plugin if no other plugins are specified', function() {
+    it('adds cookie authentication plugin if no other plugins are specified', function() {
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS } });
       assert.equal(cloudantClient._plugins.length, 1);
       assert.equal(cloudantClient._plugins[0].id, 'cookieauth');
