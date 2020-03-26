@@ -125,8 +125,8 @@ describe('Token Manger', (done) => {
         t.renewIfRequired().then(() => {
           assert.equal(t.getTokenCallCount, 2);
           done();
-        });
-      });
+        }).catch(done);
+      }).catch(done);
     }).catch(done);
     assert.ok(t.isTokenRenewing);
   });
