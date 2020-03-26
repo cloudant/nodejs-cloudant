@@ -290,12 +290,7 @@ function Cloudant(options, callback) {
       body: configuration }, callback);
   };
 
-  var close = function() {
-    nano.cc.stopTokenRefresh();
-  };
-
   // add top-level Cloudant-specific functions
-  nano.close = close;
   nano.ping = ping;
   nano.get_cors = get_cors; // eslint-disable-line camelcase
   nano.set_cors = set_cors; // eslint-disable-line camelcase
