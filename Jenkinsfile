@@ -53,7 +53,7 @@ def setupNodeAndTest(version, testSuite='test') {
             nvm install ${version}
             nvm use ${version}
             npm install mocha-jenkins-reporter --save-dev
-            ./node_modules/mocha/bin/mocha --timeout $MOCHA_TIMEOUT --reporter mocha-jenkins-reporter --reporter-options junit_report_path=./${testSuite}/test-results.xml,junit_report_stack=true,junit_report_name=${testSuite} ${testSuite} --grep 'Virtual Hosts' --invert --exit
+            ./node_modules/mocha/bin/mocha --timeout $MOCHA_TIMEOUT --reporter mocha-jenkins-reporter --reporter-options junit_report_path=./${testSuite}/test-results.xml,junit_report_stack=true,junit_report_name=${testSuite} ${testSuite} --grep 'Virtual Hosts' --invert
           """
         } finally {
           junit '**/test-results.xml'
