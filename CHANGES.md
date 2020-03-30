@@ -1,5 +1,5 @@
 # 4.2.5 (2020-03-30)
-- [FIXED] Reduce the memory usage of automatical token/cookie refreshment
+- [IMPROVED] Reduce the memory usage of automatical token/cookie refreshment
 
 # 4.2.4 (2020-03-02)
 - [FIXED] Pinned Nano to version 8.1 to resolve issue with extending upstream
