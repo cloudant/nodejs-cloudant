@@ -145,6 +145,11 @@ style is that `Cloudant` (upper-case) is the **package** you load; whereas
 `cloudant` (lower-case) is your **connection** to your database (i.e. the result of
 calling `Cloudant()`).
 
+If auto token refreshment is used (as default it is activated, see more details
+[here](#plugin-configuration)) then it is important to define one connection **only
+once** during the application lifetime. The package do not supply connection
+shutdown functinality.
+
 You can initialize your client in _one_ of the following ways:
 
 #### 1. Using a URL:
@@ -396,7 +401,9 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
 
 1. `cookieauth`
 
-   This plugin will automatically exchange your Cloudant credentials for a
+   If there is no plugin specified this will be the default plugin.
+
+   It will automatically exchange your Cloudant credentials for a
    cookie. It will handle the authentication and ensure that the cookie is
    refreshed as required.
 
@@ -414,6 +421,11 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
 
    If you don't specify a username and password during the client construction
    then cookie authentication is disabled.
+
+   You can turn off automatically refreshing cookie with the following configuration:
+   ```js
+   var cloudant = Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugins: [ { cookieauth: { autoRenew: false } } ] });
+   ```
 
 2. `iamauth`
 
@@ -445,6 +457,11 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
    incorrect) then an error is returned to the client.
 
    See [IBM Cloud Identity and Access Management](https://cloud.ibm.com/docs/services/Cloudant/guides?topic=cloudant-ibm-cloud-identity-and-access-management-iam-) for more information.
+
+   You can turn off automatically refreshing token with the following configuration:
+   ```js
+   var cloudant = Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugins: [ { iamauth: { iamApiKey: 'xxxxxxxxxx', autoRenew: false } } ] });
+   ```
 
 3. `retry`
 
