@@ -145,10 +145,8 @@ style is that `Cloudant` (upper-case) is the **package** you load; whereas
 `cloudant` (lower-case) is your **connection** to your database (i.e. the result of
 calling `Cloudant()`).
 
-If auto token refreshment is used (as default it is activated, see more details
-[here](#plugin-configuration)) then it is important to define one connection **only
-once** during the application lifetime. The package do not supply connection
-shutdown functinality.
+ It is important to define one _connection_ **only once** during the application lifetime.
+ The package do not support closing server connection.
 
 You can initialize your client in _one_ of the following ways:
 
@@ -403,7 +401,7 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
 
    If there is no plugin specified this will be the default plugin.
 
-   It will automatically exchange your Cloudant credentials for a
+   This plugin will automatically exchange your Cloudant credentials for a
    cookie. It will handle the authentication and ensure that the cookie is
    refreshed as required.
 
