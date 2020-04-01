@@ -142,11 +142,16 @@ promises and callback styles. The library supports them all.
 
 To use Cloudant, add `require('@cloudant/cloudant')` in your code. The common
 style is that `Cloudant` (upper-case) is the **package** you load; whereas
-`cloudant` (lower-case) is your **connection** to your database (i.e. the result of
-calling `Cloudant()`).
+`cloudant` (lower-case) is your **connection** to your database (i.e. the result
+of calling `Cloudant()`).
 
- It is important to define one _connection_ **only once** during the application lifetime.
- The package do not support closing server connection.
+The \`cloudant\` client connection utilizes an agent with a configurable [HTTP
+connection pool](#pool-size-and-open-sockets). As such the performance of the
+client is improved when re-using the \`cloudant\` client connection throughout
+an application instead of repeatedly re-instantiating. It is important to
+instantiate the `cloudant` _connection_ **only once** during the application
+lifetime to reduce the overheads of memory usage and other resources such as
+unused connections.
 
 You can initialize your client in _one_ of the following ways:
 
