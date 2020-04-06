@@ -145,9 +145,9 @@ style is that `Cloudant` (upper-case) is the **package** you load; whereas
 `cloudant` (lower-case) is your **connection** to your database (i.e. the result
 of calling `Cloudant()`).
 
-The \`cloudant\` client connection utilizes an agent with a configurable [HTTP
+The `cloudant` client connection utilizes an agent with a configurable [HTTP
 connection pool](#pool-size-and-open-sockets). As such the performance of the
-client is improved when re-using the \`cloudant\` client connection throughout
+client is improved when re-using the `cloudant` client connection throughout
 an application instead of repeatedly re-instantiating. It is important to
 instantiate the `cloudant` _connection_ **only once** during the application
 lifetime to reduce the overheads of memory usage and other resources such as
