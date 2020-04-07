@@ -18,10 +18,12 @@
 const assert = require('assert');
 
 const TokenManager = require('../../lib/tokens/TokenManager');
+const client = require('request');
+const tokenUrl = 'https://token-test.example';
 
 class TokenManagerRenewSuccess extends TokenManager {
   constructor() {
-    super();
+    super(client, null, tokenUrl);
     this._getTokenCallCount = 0;
   }
 
@@ -40,7 +42,7 @@ class TokenManagerRenewSuccess extends TokenManager {
 
 class TokenManagerRenewFailure extends TokenManager {
   constructor() {
-    super();
+    super(client, null, tokenUrl);
     this._getTokenCallCount = 0;
   }
 
