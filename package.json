@@ -46,7 +46,7 @@
     "eslint-plugin-react": "^7.0.0",
     "eslint-plugin-standard": "^3.0.1",
     "md5-file": "^3.2.3",
-    "mocha": "^5.1.1",
+    "mocha": "^7.1.2",
     "nock": "^9.2.5",
     "should": "6.0.3",
     "typescript": "^2.8.3",
