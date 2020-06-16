@@ -275,7 +275,6 @@ describe('Retry Plugin', function() {
           method: 'GET'
         };
 
-        var dataCount = 0;
         var responseCount = 0;
 
         var dataFile = fs.createWriteStream('data.json');
@@ -291,13 +290,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
           })
           .pipe(dataFile)
           .on('finish', function() {
@@ -361,8 +358,6 @@ describe('Retry Plugin', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
-
-        var dataCount = 0;
         var responseCount = 0;
 
         var dataFile = fs.createWriteStream('data.json');
@@ -379,13 +374,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
 
             // validate retry delay
             var now = (new Date()).getTime();
@@ -459,8 +452,6 @@ describe('Retry Plugin', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
-
-        var dataCount = 0;
         var responseCount = 0;
 
         var startTs = (new Date()).getTime();
@@ -475,13 +466,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 500);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"error":"internal_server_error"') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
 
             // validate retry delay
             var now = (new Date()).getTime();
@@ -516,8 +505,6 @@ describe('Retry Plugin', function() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         };
-
-        var dataCount = 0;
         var responseCount = 0;
 
         var dataFile = fs.createWriteStream('data.json');
@@ -538,13 +525,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"key":"doc1","value":{"rev":"1') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
 
             // validate retry delay
             var now = (new Date()).getTime();
@@ -578,7 +563,6 @@ describe('Retry Plugin', function() {
           method: 'GET'
         };
 
-        var dataCount = 0;
         var responseCount = 0;
 
         var dataFile = fs.createWriteStream('data.json');
@@ -597,13 +581,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
           })
           .pipe(dataFile)
           .on('finish', function() {
@@ -670,8 +652,6 @@ describe('Retry Plugin', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
-
-        var dataCount = 0;
         var responseCount = 0;
 
         var dataFile = fs.createWriteStream('data.json');
@@ -692,13 +672,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
 
             // validate retry delay
             var now = (new Date()).getTime();
@@ -775,8 +753,6 @@ describe('Retry Plugin', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
-
-        var dataCount = 0;
         var responseCount = 0;
 
         var startTs = (new Date()).getTime();
@@ -795,13 +771,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 500);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"error":"internal_server_error"') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
 
             // validate retry delay
             var now = (new Date()).getTime();
@@ -836,8 +810,6 @@ describe('Retry Plugin', function() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         };
-
-        var dataCount = 0;
         var responseCount = 0;
 
         var dataFile = fs.createWriteStream('data.json');
@@ -862,13 +834,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"key":"doc1","value":{"rev":"1') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
 
             // validate retry delay
             var now = (new Date()).getTime();
@@ -991,7 +961,6 @@ describe('Retry Plugin', function() {
           method: 'GET'
         };
 
-        var dataCount = 0;
         var responseCount = 0;
 
         var dataFile = fs.createWriteStream('data.json');
@@ -1006,13 +975,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
           })
           .pipe(dataFile)
           .on('finish', function() {
@@ -1043,8 +1010,6 @@ describe('Retry Plugin', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
-
-        var dataCount = 0;
         var responseCount = 0;
 
         var dataFile = fs.createWriteStream('data.json');
@@ -1061,13 +1026,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
 
             // validate retry delay
             var now = (new Date()).getTime();
@@ -1137,7 +1100,6 @@ describe('Retry Plugin', function() {
           method: 'GET'
         };
 
-        var dataCount = 0;
         var responseCount = 0;
 
         var dataFile = fs.createWriteStream('data.json');
@@ -1156,13 +1118,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
           })
           .pipe(dataFile)
           .on('finish', function() {
@@ -1194,7 +1154,6 @@ describe('Retry Plugin', function() {
           method: 'GET'
         };
 
-        var dataCount = 0;
         var responseCount = 0;
 
         var dataFile = fs.createWriteStream('data.json');
@@ -1215,13 +1174,11 @@ describe('Retry Plugin', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            dataCount++;
             responseString += data;
           })
           .on('end', function() {
             assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
-            assert.equal(dataCount, 1);
 
             // validate retry delay
             var now = (new Date()).getTime();
