@@ -280,6 +280,8 @@ describe('Retry Plugin', function() {
 
         var dataFile = fs.createWriteStream('data.json');
 
+        var responseString = '';
+
         cloudantClient.request(req)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -290,9 +292,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
           })
@@ -365,6 +368,8 @@ describe('Retry Plugin', function() {
         var dataFile = fs.createWriteStream('data.json');
 
         var startTs = (new Date()).getTime();
+
+        var responseString = '';
         cloudantClient.request(req)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -375,9 +380,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
 
@@ -458,6 +464,8 @@ describe('Retry Plugin', function() {
         var responseCount = 0;
 
         var startTs = (new Date()).getTime();
+
+        var responseString = '';
         cloudantClient.request(req)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -468,9 +476,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"error":"internal_server_error"') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"error":"internal_server_error"') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
 
@@ -518,6 +527,8 @@ describe('Retry Plugin', function() {
         readable.push(null);
 
         var startTs = (new Date()).getTime();
+
+        var responseString = '';
         readable.pipe(cloudantClient.request(req))
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -528,9 +539,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.indexOf('"key":"doc1","value":{"rev":"1') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"key":"doc1","value":{"rev":"1') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
 
@@ -571,6 +583,7 @@ describe('Retry Plugin', function() {
 
         var dataFile = fs.createWriteStream('data.json');
 
+        var responseString = '';
         cloudantClient.request(req, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(resp.statusCode, 200);
@@ -585,9 +598,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
           })
@@ -663,6 +677,8 @@ describe('Retry Plugin', function() {
         var dataFile = fs.createWriteStream('data.json');
 
         var startTs = (new Date()).getTime();
+
+        var responseString = '';
         cloudantClient.request(req, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(resp.statusCode, 200);
@@ -677,9 +693,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
 
@@ -763,6 +780,8 @@ describe('Retry Plugin', function() {
         var responseCount = 0;
 
         var startTs = (new Date()).getTime();
+
+        var responseString = '';
         cloudantClient.request(req, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(resp.statusCode, 500);
@@ -777,9 +796,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"error":"internal_server_error"') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"error":"internal_server_error"') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
 
@@ -827,6 +847,8 @@ describe('Retry Plugin', function() {
         readable.push(null);
 
         var startTs = (new Date()).getTime();
+
+        var responseString = '';
         readable.pipe(cloudantClient.request(req, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(resp.statusCode, 200);
@@ -841,9 +863,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.indexOf('"key":"doc1","value":{"rev":"1') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"key":"doc1","value":{"rev":"1') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
 
@@ -973,6 +996,7 @@ describe('Retry Plugin', function() {
 
         var dataFile = fs.createWriteStream('data.json');
 
+        var responseString = '';
         cloudantClient.request(req)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -983,9 +1007,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
           })
@@ -1025,6 +1050,8 @@ describe('Retry Plugin', function() {
         var dataFile = fs.createWriteStream('data.json');
 
         var startTs = (new Date()).getTime();
+
+        var responseString = '';
         cloudantClient.request(req)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -1035,9 +1062,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
 
@@ -1114,6 +1142,7 @@ describe('Retry Plugin', function() {
 
         var dataFile = fs.createWriteStream('data.json');
 
+        var responseString = '';
         cloudantClient.request(req, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(resp.statusCode, 200);
@@ -1128,9 +1157,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
           })
@@ -1170,6 +1200,8 @@ describe('Retry Plugin', function() {
         var dataFile = fs.createWriteStream('data.json');
 
         var startTs = (new Date()).getTime();
+
+        var responseString = '';
         cloudantClient.request(req, function(err, resp, data) {
           assert.equal(err, null);
           assert.equal(resp.statusCode, 200);
@@ -1184,9 +1216,10 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             dataCount++;
-            assert.ok(data.toString('utf8').indexOf('"doc_count":0') > -1);
+            responseString += data;
           })
           .on('end', function() {
+            assert.ok(responseString.toString('utf8').indexOf('"doc_count":0') > -1);
             assert.equal(responseCount, 1);
             assert.equal(dataCount, 1);
 
