@@ -954,6 +954,8 @@ describe('CloudantClient', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
+
+        var responseData = '';
         cloudantClient.request(options)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -962,9 +964,10 @@ describe('CloudantClient', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"doc_count":1') > -1);
+            responseData += data;
           })
           .on('end', function() {
+            assert.ok(responseData.toString('utf8').indexOf('"doc_count":1') > -1);
             mocks.done();
             done();
           });
@@ -1012,6 +1015,7 @@ describe('CloudantClient', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
+        var responseData = '';
         cloudantClient.request(options)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -1020,9 +1024,10 @@ describe('CloudantClient', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"doc_count":1') > -1);
+            responseData += data;
           })
           .on('end', function() {
+            assert.ok(responseData.toString('utf8').indexOf('"doc_count":1') > -1);
             assert.equal(cloudantClient._plugins[0].onRequestCallCount, 1);
             assert.equal(cloudantClient._plugins[0].onErrorCallCount, 0);
             assert.equal(cloudantClient._plugins[0].onResponseCallCount, 1);
@@ -1080,6 +1085,7 @@ describe('CloudantClient', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
+        var responseData = '';
         cloudantClient.request(options)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -1088,9 +1094,10 @@ describe('CloudantClient', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"doc_count":1') > -1);
+            responseData += data;
           })
           .on('end', function() {
+            assert.ok(responseData.toString('utf8').indexOf('"doc_count":1') > -1);
             assert.equal(cloudantClient._plugins[0].onRequestCallCount, 1);
             assert.equal(cloudantClient._plugins[0].onErrorCallCount, 0);
             assert.equal(cloudantClient._plugins[0].onResponseCallCount, 1);
@@ -1158,6 +1165,7 @@ describe('CloudantClient', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'HEAD' // ComplexPlugin1 will set method to 'PUT'
         };
+        var responseData = '';
         var startTs = (new Date()).getTime();
         cloudantClient.request(options)
           .on('error', function(err) {
@@ -1168,9 +1176,10 @@ describe('CloudantClient', function() {
             assert.equal(resp.request.headers.ComplexPlugin1, 'foo');
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"error":"file_exists"') > -1);
+            responseData += data;
           })
           .on('end', function() {
+            assert.ok(responseData.toString('utf8').indexOf('"error":"file_exists"') > -1);
             assert.equal(cloudantClient._plugins[0].onRequestCallCount, 10);
             assert.equal(cloudantClient._plugins[0].onErrorCallCount, 0);
             assert.equal(cloudantClient._plugins[0].onResponseCallCount, 10);
@@ -1240,6 +1249,7 @@ describe('CloudantClient', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'POST' // ComplexPlugin2 will set method to 'GET'
         };
+        var responseData = '';
         cloudantClient.request(options)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -1249,9 +1259,10 @@ describe('CloudantClient', function() {
             assert.equal(resp.request.headers.ComplexPlugin2, 'bar');
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"error":"unauthorized"') > -1);
+            responseData += data;
           })
           .on('end', function() {
+            assert.ok(responseData.toString('utf8').indexOf('"error":"unauthorized"') > -1);
             assert.equal(cloudantClient._plugins[0].onRequestCallCount, 2);
             assert.equal(cloudantClient._plugins[0].onErrorCallCount, 0);
             assert.equal(cloudantClient._plugins[0].onResponseCallCount, 2);
@@ -1281,6 +1292,7 @@ describe('CloudantClient', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'DELETE' // ComplexPlugin2 will set method to 'GET'
         };
+        var responseData = '';
         cloudantClient.request(options)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -1289,9 +1301,10 @@ describe('CloudantClient', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"ok":true') > -1);
+            responseData += data;
           })
           .on('end', function() {
+            assert.ok(responseData.toString('utf8').indexOf('"ok":true') > -1);
             assert.equal(cloudantClient._plugins[0].onRequestCallCount, 1);
             assert.equal(cloudantClient._plugins[0].onErrorCallCount, 1);
             assert.equal(cloudantClient._plugins[0].onResponseCallCount, 0);
@@ -1326,6 +1339,7 @@ describe('CloudantClient', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
+        var responseData = '';
         cloudantClient.request(options)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -1334,9 +1348,10 @@ describe('CloudantClient', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"ok":true') > -1);
+            responseData += data;
           })
           .on('end', function() {
+            assert.ok(responseData.toString('utf8').indexOf('"ok":true') > -1);
             assert.equal(cloudantClient._plugins[0].onResponseCallCount, 2);
             mocks.done();
             done();
@@ -1396,6 +1411,7 @@ describe('CloudantClient', function() {
           auth: { username: ME, password: PASSWORD },
           method: 'GET'
         };
+        var responseData = '';
         cloudantClient.request(options)
           .on('error', function(err) {
             assert.fail(`Unexpected error: ${err}`);
@@ -1404,9 +1420,10 @@ describe('CloudantClient', function() {
             assert.equal(resp.statusCode, 200);
           })
           .on('data', function(data) {
-            assert.ok(data.toString('utf8').indexOf('"doc_count":1') > -1);
+            responseData += data;
           })
           .on('end', function() {
+            assert.ok(responseData.toString('utf8').indexOf('"doc_count":1') > -1);
             mocks.done();
             done();
           });
