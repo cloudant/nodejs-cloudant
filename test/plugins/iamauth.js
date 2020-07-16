@@ -1,4 +1,4 @@
-// Copyright © 2017, 2019 IBM Corp. All rights reserved.
+// Copyright © 2017, 2020 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -618,6 +618,81 @@ describe('#db IAMAuth Plugin', function() {
 
         iamMocks.done();
         cloudantMocks.done();
+        done();
+      });
+    });
+  });
+
+  it('supports an IAM token cache', function(done) {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
+
+    var cache = {
+      inMemoryCache: {},
+
+      set: (key, value, ttl) => {
+        return new Promise((resolve) => {
+          const ttlms = (ttl * 1000);
+          const keyObject = { value: value, expires: Date.now() + ttlms };
+          cache.inMemoryCache[key] = keyObject;
+          resolve(keyObject);
+        });
+      },
+
+      get: (key) => {
+        return new Promise((resolve) => {
+          if (cache.inMemoryCache[key]) {
+            const expires = cache.inMemoryCache[key].expires;
+            const value = cache.inMemoryCache[key].value;
+            if (Date.now() > expires) { // cached entry is expired resolve with null.
+              resolve(null);
+            } else {
+              resolve(value);
+            }
+          }
+          resolve(null);
+        });
+      }
+    };
+    var iamMocks = nock(TOKEN_SERVER)
+      .post('/identity/token', {
+        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
+        'response_type': 'cloud_iam',
+        'apikey': IAM_API_KEY
+      })
+      .times(1)
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
+
+    var cloudantMocksBatchOne = nock(SERVER)
+      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
+      .reply(200, {ok: true}, MOCK_SET_IAM_SESSION_HEADER)
+      .get(DBNAME)
+      .reply(200, {doc_count: 0});
+
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY, cache: cache, cacheOffsetInSecs: 5 * 60 } } });
+    var req = { url: SERVER + DBNAME, method: 'GET' };
+
+    // perform a successful request to get an access token and cache it.
+    cloudantClient.request(req, function(err, resp, data) {
+      assert.equal(err, null, 'No error was returned');
+      assert.equal(resp.statusCode, 200);
+      iamMocks.done();
+      cloudantMocksBatchOne.done();
+
+      var cloudantMocksBatchTwo = nock(SERVER)
+        .get(DBNAME)
+        .reply(401, {}) // mock a 401 response to ensure a token renewal is triggered
+        .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
+        .reply(200, {ok: true}, MOCK_SET_IAM_SESSION_HEADER)
+        .get(DBNAME)
+        .reply(200, {doc_count: 0});
+
+      // do not mock IAM this time as we will retrieve the cached token
+      cloudantClient.request(req, function(err, resp, data) {
+        assert.equal(err, null, 'No error was returned');
+        assert.equal(resp.statusCode, 200);
+        cloudantMocksBatchTwo.done();
         done();
       });
     });

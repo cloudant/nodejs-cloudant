@@ -1,3 +1,9 @@
+# 4.3.0 (2020-07-16)
+- [NEW] Added support for a cache to be optionally used in conjunction with the
+  iamauth plugin, in order to store and retrieve an IAM auth token and lower 
+  the number of IAM token exchanges.
+- [UPGRADED] Upgraded lodash to 4.17.19
+
 # 4.2.4 (2020-03-02)
 - [FIXED] Pinned Nano to version 8.1 to resolve issue with extending upstream
   TypeScript changes in Nano version 8.2.0.
