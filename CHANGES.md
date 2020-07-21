@@ -1,3 +1,7 @@
+# Unreleased
+- [FIXED] Stopped constant token auto renewal in the absence of a cookie
+  header Max-Age
+
 # 4.2.4 (2020-03-02)
 - [FIXED] Pinned Nano to version 8.1 to resolve issue with extending upstream
   TypeScript changes in Nano version 8.2.0.
