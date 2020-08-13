@@ -1,3 +1,7 @@
+# UNRELEASED
+- [UPGRADED] Upgrade package: @types/request@^2.48.4.
+- [UPGRADED] Upgrade package: nano@~8.2.2.
+
 # 4.2.4 (2020-03-02)
 - [FIXED] Pinned Nano to version 8.1 to resolve issue with extending upstream
   TypeScript changes in Nano version 8.2.0.
