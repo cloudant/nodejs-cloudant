@@ -23,18 +23,27 @@ class TokenManagerRenewSuccess extends TokenManager {
   constructor() {
     super();
     this._getTokenCallCount = 0;
+    this._cookieHeader = 'Max-Age=1';
   }
 
   _getToken(callback) {
     this._getTokenCallCount += 1;
     setTimeout(() => {
-      callback(null, { headers: { 'set-cookie': [ 'Max-Age=1' ] } });
+      callback(null, { headers: { 'set-cookie': [ this._cookieHeader ] } });
     }, 100);
   }
 
   // mock successful token renewal
   get getTokenCallCount() {
     return this._getTokenCallCount;
+  }
+
+  get cookieHeader() {
+    return this._cookieHeader;
+  }
+
+  set cookieHeader(cookieHeader) {
+    this._cookieHeader = cookieHeader;
   }
 }
 
@@ -86,6 +95,17 @@ describe('Token Manger', (done) => {
     setTimeout(() => {
       // one renew every 0.5 seconds
       assert.equal(t.getTokenCallCount, 4);
+      done();
+    }, 2000);
+  });
+
+  it('correctly auto renews token in the absence of a cookie Max-Age', (done) => {
+    let t = new TokenManagerRenewSuccess();
+    t.cookieHeader = '';
+    t.startAutoRenew(2);
+    setTimeout(() => {
+      // one renew every 1 seconds
+      assert.equal(t.getTokenCallCount, 2);
       done();
     }, 2000);
   });
