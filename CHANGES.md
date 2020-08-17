@@ -1,4 +1,4 @@
-# UNRELEASED
+# 4.3.0 (2020-08-17)
 - [FIXED] Stopped constant token auto renewal in the absence of a cookie
   header Max-Age.
 - [UPGRADED] Upgrade package: @types/request@^2.48.4.
