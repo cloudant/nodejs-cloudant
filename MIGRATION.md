@@ -40,7 +40,8 @@ The table below contains a list of `nodejs-cloudant` functions and the `cloudant
 **Note:** There are many API operations included in the new `cloudant-node-sdk` that are not available in the `nodejs-cloudant` library. The [API documentation](https://cloud.ibm.com/apidocs/cloudant?code=node) contains the full list of operations.
 
 |nodejs-cloudant function | cloudant-node-sdk function reference |
-|`ping()`|[getServerInformation](https://cloud.ibm.com/apidocs/cloudant?code=node#getserverinformation)|
+|-------------------------|--------------------------------------|
+|`ping()`|[getServerInformation ](https://cloud.ibm.com/apidocs/cloudant?code=node#getserverinformation)|
 |`listDbs()/listDbsAsStream()`|[getAllDbs](https://cloud.ibm.com/apidocs/cloudant?code=node#getalldbs)|
 |`updates()/followUpdates()`|[getDbUpdates](https://cloud.ibm.com/apidocs/cloudant?code=node#getdbupdates)|
 |`replicate()/replicateDb()/enableReplication()`|[postReplicate](https://cloud.ibm.com/apidocs/cloudant?code=node#postreplicate)|
