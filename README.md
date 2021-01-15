@@ -34,6 +34,7 @@ This is the official Cloudant library for Node.js.
     * [Local Development](#local-development)
     * [Test Suite](#test-suite)
     * [Using in Other Projects](#using-in-other-projects)
+  * [Migrating to `cloudant-node-sdk` library](#migrating-to-cloudant-node-sdk-library)
   * [License](#license)
   * [Reference](#reference)
 
@@ -1308,6 +1309,10 @@ We use NPM to handle running the test suite. To run the comprehensive test
 suite, just run `npm test`.
 
 You can also run the tests with verbose output using `npm test-verbose`
+
+## Migrating to `cloudant-node-sdk` library
+We have a newly supported Cloudant Python SDK named [cloudant-node-sdk](https://github.com/IBM/cloudant-node-sdk).
+For advice on migrating from this module see [MIGRATION.md](MIGRATION.md).
 
 ## License
 
