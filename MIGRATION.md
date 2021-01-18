@@ -1,5 +1,5 @@
 # Migrating to the `cloudant-node-sdk` library
-This document is to assist in migrating from the `nodejs-cloudant` (module: `cloudant`) to the newly supported [`cloudant-node-sdk`](https://github.com/IBM/cloudant-node-sdk) (package: `@ibm-cloud/cloudant`). Compatible with Javascript and TypeScript.
+This document is to assist in migrating from the `nodejs-cloudant` (package: `@cloudant/cloudant`) to the newly supported [`cloudant-node-sdk`](https://github.com/IBM/cloudant-node-sdk) (package: `@ibm-cloud/cloudant`) that is compatible with Javascript and TypeScript.
 
 ## Initializing the client connection
 There are several ways to create a client connection in `cloudant-node-sdk`:
@@ -10,11 +10,10 @@ There are several ways to create a client connection in `cloudant-node-sdk`:
 [See the README](https://github.com/IBM/cloudant-node-sdk#code-examples) for code examples on using environment variables.
 
 ## Other differences
-1. For storing credentials in a file, `dotenv` package not needed anymore. Check the new operation [here](https://github.com/IBM/cloudant-node-sdk#authentication-with-external-configuration).
-1. No need to fetch database object in advance to perform operations on Documents. For example, in the case of the document update, this would mean calling first `getDocument` to fetch and after `putDocument` to update.
-1. There are no plugin handling anymore.
-1. Authentication mode can be set [this way](https://github.com/IBM/cloudant-node-sdk/tree/master#authentication).
-1. Retries currently not supported.
+1. The way of storing credentials in a file has changed, the usage of `dotenv` package is not suggested. See the [external file configuration section](https://github.com/IBM/cloudant-node-sdk#authentication-with-external-configuration) in our API docs about the new handling.
+1. Fetching the database object first before performing operations on it is not required. For example, in the case of updating a document, this would mean calling first `getDocument` to fetch and after `putDocument` to update.
+1. Plugins are not supported, but several of the plugin features exist in the new library e.g. IAM.
+1. The plugin for retrying failed requests is not supported.
 
 ## Request mapping
 Here's a list of the top 5 most frequently used `nodejs-cloudant` operations and the `cloudant-node-sdk` equivalent API operation documentation link:
