@@ -1311,7 +1311,7 @@ suite, just run `npm test`.
 You can also run the tests with verbose output using `npm test-verbose`
 
 ## Migrating to `cloudant-node-sdk` library
-We have a newly supported Cloudant Node SDK named [cloudant-node-sdk](https://github.com/IBM/cloudant-node-sdk).
+We have a newly supported Cloudant Node.js SDK named [cloudant-node-sdk](https://github.com/IBM/cloudant-node-sdk).
 For advice on migrating from this module see [MIGRATION.md](MIGRATION.md).
 
 ## License
