@@ -1,5 +1,5 @@
 # Migrating to the `cloudant-node-sdk` library
-This document is to assist in migrating from the `nodejs-cloudant` (package: `@cloudant/cloudant`) to the newly supported [`cloudant-node-sdk`](https://github.com/IBM/cloudant-node-sdk) (package: `@ibm-cloud/cloudant`) that is compatible with Javascript and TypeScript.
+This document is to assist in migrating from the `nodejs-cloudant` (package: `@cloudant/cloudant`) to the newly supported [`cloudant-node-sdk`](https://github.com/IBM/cloudant-node-sdk) (package: `@ibm-cloud/cloudant`) that is JavaScript and TypeScript compliant.
 
 ## Initializing the client connection
 There are several ways to create a client connection in `cloudant-node-sdk`:
@@ -10,8 +10,8 @@ There are several ways to create a client connection in `cloudant-node-sdk`:
 [See the README](https://github.com/IBM/cloudant-node-sdk#code-examples) for code examples on using environment variables.
 
 ## Other differences
-1. The way of storing credentials in a file has changed, the usage of `dotenv` package is not suggested. See the [external file configuration section](https://github.com/IBM/cloudant-node-sdk#authentication-with-external-configuration) in our API docs about the new handling.
-1. Fetching the database object first before performing operations on it is not required. For example, in the case of updating a document, this would mean calling first `getDocument` to fetch and after `putDocument` to update.
+1. Using the `dotenv` package to store credentials in a file is not recommended. See the [external file configuration section](https://github.com/IBM/cloudant-node-sdk#authentication-with-external-configuration) in our API docs for handling this feature in our new library.
+1. Fetching the database object first before performing additional operations is not required. For example, in the case of updating a document you would first call `getDocument` to fetch and then `putDocument` to update.
 1. Plugins are not supported, but several of the plugin features exist in the new library e.g. IAM.
 1. The plugin for retrying failed requests is not supported.
 
@@ -55,9 +55,9 @@ The table below contains a list of `nodejs-cloudant` functions and the `cloudant
 |`db.bulk()`|[postBulkDocs](https://cloud.ibm.com/apidocs/cloudant?code=node#postbulkdocs)|
 |`db.bulk_get()`|[postBulkGet](https://cloud.ibm.com/apidocs/cloudant?code=node#postbulkget)|
 |`db.changes()`|[postChanges](https://cloud.ibm.com/apidocs/cloudant?code=node#postchanges)|
-|`db.destroy()`|[deleteDesignDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#deletedesigndocument)|
-|`db.get()`|[getDesignDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#getdesigndocument)|
-|`db.insert()`|[putDesignDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#putdesigndocument)|
+|`db.destroy() with _design path`|[deleteDesignDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#deletedesigndocument)|
+|`db.get() with _design path`|[getDesignDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#getdesigndocument)|
+|`db.insert() with _design path`|[putDesignDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#putdesigndocument)|
 |`db.search()/db.searchAsStream()`|[postSearch](https://cloud.ibm.com/apidocs/cloudant?code=node#postsearch)|
 |`db.view()`|[postView](https://cloud.ibm.com/apidocs/cloudant?code=node#postview)|
 |`db.list() (with a filter)`|[postDesignDocs](https://cloud.ibm.com/apidocs/cloudant?code=node#postdesigndocs)|
