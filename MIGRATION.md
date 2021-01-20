@@ -1,5 +1,5 @@
 # Migrating to the `cloudant-node-sdk` library
-This document is to assist in migrating from the `nodejs-cloudant` (package: `@cloudant/cloudant`) to the newly supported [`cloudant-node-sdk`](https://github.com/IBM/cloudant-node-sdk) (package: `@ibm-cloud/cloudant`) that is JavaScript and TypeScript compliant.
+This document is to assist in migrating from the `nodejs-cloudant` (package: `@cloudant/cloudant`) to the newly supported [`cloudant-node-sdk`](https://github.com/IBM/cloudant-node-sdk) (package: `@ibm-cloud/cloudant`) that compatible with JavaScript and TypeScript.
 
 ## Initializing the client connection
 There are several ways to create a client connection in `cloudant-node-sdk`:
