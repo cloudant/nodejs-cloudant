@@ -43,8 +43,10 @@ The table below contains a list of `nodejs-cloudant` functions and the `cloudant
 |`ping()`|[getServerInformation ](https://cloud.ibm.com/apidocs/cloudant?code=node#getserverinformation)|
 |`listDbs()/listDbsAsStream()`|[getAllDbs](https://cloud.ibm.com/apidocs/cloudant?code=node#getalldbs)|
 |`updates()/followUpdates()`|[getDbUpdates](https://cloud.ibm.com/apidocs/cloudant?code=node#getdbupdates)|
-|`replicate()/replicateDb()/enableReplication()`|[postReplicate](https://cloud.ibm.com/apidocs/cloudant?code=node#postreplicate)|
-|`disableReplication()`|[deleteReplicationDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#deletereplicationdocument)|
+|`replicate()`/`replicateDb()`|[`postReplicate`](https://cloud.ibm.com/apidocs/cloudant?code=node#postreplicate)|
+|`enableReplication()`/`replication.enable()`|[`putReplicationDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#putreplicationdocument)|
+|`queryReplication()`/`replication.query()`|[`getSchedulerDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#getschedulerdocument)|
+|`disableReplication()`/`replication.delete()`|[`deleteReplicationDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#deletereplicationdocument)|
 |`session()`|[getSessionInformation](https://cloud.ibm.com/apidocs/cloudant?code=node#getsessioninformation)|
 |`uuids()`|[getUuids](https://cloud.ibm.com/apidocs/cloudant?code=node#getuuids)|
 |`db.destroy()`|[deleteDatabase](https://cloud.ibm.com/apidocs/cloudant?code=node#deletedatabase)|
