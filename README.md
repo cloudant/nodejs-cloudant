@@ -56,17 +56,19 @@ errors:
 
 ### Getting Started
 
-Initialize your Cloudant connection by supplying your *account* and *password*.
+Initialize your Cloudant connection by supplying your `url` and credentials.
 
 ~~~ js
 // Load the Cloudant library.
 var Cloudant = require('@cloudant/cloudant');
 
-var me = 'nodejs'; // Set this to your own account.
+// Get account details from environment variables
+var url = process.env.cloudant_url;
+var username = process.env.cloudant_username;
 var password = process.env.cloudant_password;
 
-// Initialize the library with my account.
-var cloudant = Cloudant({ account: me, password: password });
+// Initialize the library with url and credentials.
+var cloudant = Cloudant({ url: url, username: username, password: password });
 ~~~
 
 If you omit the `password` in your configuration then you get an "anonymous"
@@ -79,7 +81,8 @@ NPM, then create a `.env` file with your Cloudant credentials. For example:
 ~~~
 npm install dotenv                               # Install ./node_modules/dotenv
 echo "/.env"                       >> .gitignore # Do not track .env in the revision history
-echo "cloudant_username=myaccount" >  .env       # Replace myaccount with your account name
+echo "cloudant_url=https://myaccountid.cloudantnosqldb.appdomain.cloud " >  .env       # Replace myaccountid with your account name
+echo "cloudant_username=myuser" >  .env       # Replace myuser with your username
 echo "cloudant_password='secret'"  >> .env       # Replace secret with your password
 ~~~
 
@@ -92,9 +95,10 @@ require('dotenv').load();
 var Cloudant = require('@cloudant/cloudant');
 
 // Initialize Cloudant with settings from .env
-var username = process.env.cloudant_username || "nodejs";
+var url = process.env.cloudant_url;
+var username = process.env.cloudant_username;
 var password = process.env.cloudant_password;
-var cloudant = Cloudant({ account:username, password:password });
+var cloudant = Cloudant({ url:url, username:username, password:password });
 
 // Using the async/await style.
 
@@ -165,7 +169,7 @@ var Cloudant = require('@cloudant/cloudant');
 var cloudant = Cloudant("http://MYUSERNAME:MYPASSWORD@localhost:5984");
 ~~~
 
-**Note**: It is preferred to pass credentials using the `account`/`username` and
+**Note**: It is preferred to pass credentials using the `url` and `username` and
 `password` configuration options rather than as part of the URL. However, if you
 choose to pass credentials in the user information subcomponent of the URL then
 they must be [percent encoded](https://tools.ietf.org/html/rfc3986#section-3.2.1).
@@ -192,16 +196,20 @@ var cloudant = Cloudant({ username:'myusername', password:'mypassword', url:'htt
 
 ##### 2.1. Connecting to Cloudant
 
-You can just pass your account name and password:
+You can just pass your account, username and password:
 
 ~~~ js
 var Cloudant = require('@cloudant/cloudant');
-var cloudant = Cloudant({ account: me, password: password });
+var cloudant = Cloudant({ account: acct, username: me, password: password });
 ~~~
 
-By default, when you connect to your cloudant account (i.e. "me.cloudant.com"),
-you authenticate as the account owner (i.e. "me"). However, you can use Cloudant
-with any username and password. Just provide an additional "username" option
+_Notes:_
+* If you use the `account` option then the account is appended with `.cloudant.com`.
+  The `url` option is preferred as `cloudant.com` is no longer the preferred domain.
+* If you omit `username` then the `account` will be used as the `username`. This is not
+  recommended as the default username for newer Cloudant accounts does not match the account name.
+
+You can use Cloudant with an alternative username and password. Just provide an additional `username` option
 when you initialize Cloudant. This will connect to your account, but using the
 username as the authenticated user. (And of course, use the appropriate
 password.)
@@ -254,10 +262,11 @@ callback parameter:
 
 ~~~ js
 var Cloudant = require('@cloudant/cloudant');
-var me = 'nodejs'; // Replace with your account.
+var url = process.env.cloudant_url;
+var username = process.env.cloudant_username;
 var password = process.env.cloudant_password;
 
-Cloudant({ account: me, password: password }, function(err, cloudant, pong) {
+Cloudant({ url: url, username: username, password: password }, function(err, cloudant, pong) {
   if (err) {
     return console.log('Failed to initialize Cloudant: ' + err.message);
   }
@@ -413,7 +422,7 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
 
    For example:
    ```js
-   var cloudant = Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugins: 'cookieauth' });
+   var cloudant = Cloudant({ url: myurl, username: username, password: password, plugins: 'cookieauth' });
    ```
 
    The plugin will transparently call `POST /_session` to exchange your
@@ -428,7 +437,7 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
 
    You can turn off automatically refreshing cookie with the following configuration:
    ```js
-   var cloudant = Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugins: [ { cookieauth: { autoRenew: false } } ] });
+   var cloudant = Cloudant({ url: myurl, username: username, password: password, plugins: [ { cookieauth: { autoRenew: false } } ] });
    ```
 
 2. `iamauth`
@@ -442,7 +451,7 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
 
    For example:
    ```js
-   var cloudant = Cloudant({ url: 'https://examples.cloudant.com', plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx' } } });
+   var cloudant = Cloudant({ url: myurl, plugins: { iamauth: { iamApiKey: 'xxxxxxxxxx' } } });
    ```
 
    The production IAM token service at https://iam.cloud.ibm.com/identity/token is
@@ -464,7 +473,7 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
 
    You can turn off automatically refreshing token with the following configuration:
    ```js
-   var cloudant = Cloudant({ url: 'https://user:pass@examples.cloudant.com', plugins: [ { iamauth: { iamApiKey: 'xxxxxxxxxx', autoRenew: false } } ] });
+   var cloudant = Cloudant({ url: myurl, plugins: [ { iamauth: { iamApiKey: 'xxxxxxxxxx', autoRenew: false } } ] });
    ```
 
 3. `retry`
@@ -559,9 +568,10 @@ others access to your data, without giving them the keys to the castle.
 
 ~~~ js
 var Cloudant = require('@cloudant/cloudant');
-var me = 'nodejs'; // Replace with your account.
+var url = process.env.cloudant_url;
+var username = process.env.cloudant_username;
 var password = process.env.cloudant_password;
-var cloudant = Cloudant({ account:me, password:password });
+var cloudant = Cloudant({ url: url, username: username, password:password });
 
 cloudant.generate_api_key(function(err, api) {
   if (err) {
@@ -629,7 +639,7 @@ appropriate password associated with the Cloudant API key.)
 
 ~~~ js
 var Cloudant = require('@cloudant/cloudant');
-var cloudant = Cloudant({ account:"me", key:api.key, password:api.password });
+var cloudant = Cloudant({ url: url, key:api.key, password:api.password });
 ~~~
 
 ## CORS
@@ -1183,7 +1193,7 @@ that credentials are also logged.
 
 ### Advanced Configuration
 
-Besides the account and password options, you can add an optional
+Besides the `url`, `username` and `password` options, you can add an optional
 `requestDefaults` value, which will initialize Request (the underlying HTTP
 library) as you need it.
 
@@ -1191,7 +1201,8 @@ library) as you need it.
 
 // Use an HTTP proxy to connect to Cloudant.
 var options =
-  { "account"         : "my_account"
+  { "url"         : "https://myaccountid.cloudantnosqldb.appdomain.cloud"
+  , "username"    : "myuser"
   , "password"        : "secret"
   , "requestDefaults": { "proxy": "http://localhost:8080" }
   }
@@ -1228,7 +1239,7 @@ var myagent = new protocol.Agent({
   keepAliveMsecs: 30000,
   maxSockets: 50
 });
-var cloudant = require('@cloudant/cloudant')({ account:"me", password:"secret", requestDefaults: { agent: myagent } });
+var cloudant = require('@cloudant/cloudant')({ url: "https://myaccountid.cloudantnosqldb.appdomain.cloud", username: "myuser", password:"secret", requestDefaults: { agent: myagent } });
 // Using Cloudant with myagent...
 ~~~
 
