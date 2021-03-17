@@ -1,3 +1,8 @@
+# 4.3.1 (2021-03-17)
+- [NEW] Add migration guide to the newly supported cloudant-node-sdk
+  (package: @ibm-cloud/cloudant).
+- [FIXED] Update README to prefer url to account.
+
 # 4.3.0 (2020-08-17)
 - [FIXED] Stopped constant token auto renewal in the absence of a cookie
   header Max-Age.
