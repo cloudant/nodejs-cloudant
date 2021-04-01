@@ -95,6 +95,7 @@ describe('Token Manger', (done) => {
     setTimeout(() => {
       // one renew every 0.5 seconds
       assert.equal(t.getTokenCallCount, 4);
+      clearTimeout(t._renewTimeout);
       done();
     }, 2000);
   });
@@ -106,6 +107,7 @@ describe('Token Manger', (done) => {
     setTimeout(() => {
       // one renew every 1 seconds
       assert.equal(t.getTokenCallCount, 2);
+      clearTimeout(t._renewTimeout);
       done();
     }, 2000);
   });
