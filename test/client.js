@@ -31,6 +31,9 @@ const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${SERVER_NO_PROTOCOL}`;
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 const DOCID = 'doc1';
 
+const MOCK_COOKIE = 'AuthSession=Y2xbZWr0bQlpcc19ZQN8OeU4OWFCNYcZOxgdhy-QRDp4i6JQrfkForX5OU5P';
+const MOCK_SET_COOKIE_HEADER = { 'set-cookie': `${MOCK_COOKIE}; Version=1; Max-Age=86400; Path=/; HttpOnly` };
+
 describe('CloudantClient', function() {
   before(function(done) {
     var mocks = nock(SERVER)
@@ -112,10 +115,28 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._plugins.length, 1);
     });
 
-    it('adds cookie authentication plugin if no other plugins are specified', function() {
+    it('adds cookie authentication plugin if no other plugins are specified', function(done) {
+      var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true }, MOCK_SET_COOKIE_HEADER)
+        .get(DBNAME)
+        .reply(201, {ok: true});
+      
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS } });
       assert.equal(cloudantClient._plugins.length, 1);
       assert.equal(cloudantClient._plugins[0].id, 'cookieauth');
+      
+      var req = {
+        url: SERVER + DBNAME,
+        method: 'GET'
+      };
+      cloudantClient.request(req, function(err, resp) {
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 201);
+        mocks.done();
+        clearTimeout(cloudantClient._plugins[0]._tokenManager._renewTimeout);
+        done();
+      });
     });
 
     it('allows plugins to be added separately', function() {
