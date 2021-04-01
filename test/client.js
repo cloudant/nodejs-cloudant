@@ -174,7 +174,7 @@ describe('CloudantClient', function() {
       assert.equal(cloudantClient._plugins.length, 1);
     });
 
-    it('allows an array of plugins to be added via "plugins" options', function() {
+    it('allows an array of plugins to be added via "plugins" options', function(done) {
       var mocks = nock(SERVER)
         .post('/_session')
         .reply(200, { ok: true }, MOCK_SET_COOKIE_HEADER)
