@@ -121,11 +121,11 @@ describe('CloudantClient', function() {
         .reply(200, { ok: true }, MOCK_SET_COOKIE_HEADER)
         .get(DBNAME)
         .reply(201, {ok: true});
-      
+
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS } });
       assert.equal(cloudantClient._plugins.length, 1);
       assert.equal(cloudantClient._plugins[0].id, 'cookieauth');
-      
+
       var req = {
         url: SERVER + DBNAME,
         method: 'GET'
@@ -133,8 +133,8 @@ describe('CloudantClient', function() {
       cloudantClient.request(req, function(err, resp) {
         assert.equal(err, null);
         assert.equal(resp.statusCode, 201);
-        mocks.done();
         clearTimeout(cloudantClient._plugins[0]._tokenManager._renewTimeout);
+        mocks.done();
         done();
       });
     });
@@ -175,6 +175,12 @@ describe('CloudantClient', function() {
     });
 
     it('allows an array of plugins to be added via "plugins" options', function() {
+      var mocks = nock(SERVER)
+        .post('/_session')
+        .reply(200, { ok: true }, MOCK_SET_COOKIE_HEADER)
+        .get(DBNAME)
+        .reply(201, {ok: true});
+
       var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS },
         plugins: [
           'retry', // plugin 1
@@ -183,6 +189,19 @@ describe('CloudantClient', function() {
           'base' // ignored
         ]
       });
+
+      var req = {
+        url: SERVER + DBNAME,
+        method: 'GET'
+      };
+      cloudantClient.request(req, function(err, resp) {
+        assert.equal(err, null);
+        assert.equal(resp.statusCode, 201);
+        clearTimeout(cloudantClient._plugins[1]._tokenManager._renewTimeout);
+        mocks.done();
+        done();
+      });
+
       assert.equal(cloudantClient._plugins.length, 2);
     });
 
