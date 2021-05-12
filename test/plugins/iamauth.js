@@ -27,7 +27,8 @@ const IAM_API_KEY = process.env.cloudant_iam_api_key || 'CqbrIYzdO3btWV-5t4teJLY
 const SERVER = process.env.SERVER_URL || `https://${ME}.cloudant.com`;
 const SERVER_NO_PROTOCOL = SERVER.replace(/^https?:\/\//, '');
 const SERVER_WITH_CREDS = `https://${ME}:${PASSWORD}@${SERVER_NO_PROTOCOL}`;
-const TOKEN_SERVER = 'https://iam.cloud.ibm.com';
+const TOKEN_SERVER = process.env.cloudant_iam_token_server || 'https://iam.cloud.ibm.com';
+const TOKEN_SERVER_URL = `${TOKEN_SERVER}/identity/token`;
 const DBNAME = `/nodejs-cloudant-${uuidv4()}`;
 
 // mocks
@@ -134,7 +135,7 @@ describe('#db IAMAuth Plugin', function() {
       .get(DBNAME)
       .reply(200, {doc_count: 0});
 
-    var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER_WITH_CREDS }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY, iamTokenUrl: TOKEN_SERVER_URL } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -217,7 +218,7 @@ describe('#db IAMAuth Plugin', function() {
     var end1 = false;
     var end2 = false;
 
-    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
+    var cloudantClient = new Client({ creds: { outUrl: SERVER }, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY, iamTokenUrl: TOKEN_SERVER_URL } } });
     var req = { url: SERVER + DBNAME, method: 'GET' };
     cloudantClient.request(req, function(err, resp, data) {
       assert.equal(err, null);
@@ -510,11 +511,17 @@ describe('#db IAMAuth Plugin', function() {
     var cloudant = new Cloudant({
       vcapServices: {
         cloudantNoSQLDB: [
-          { credentials: { apikey: IAM_API_KEY, host: `${ME}.cloudant.com` } }
+          { credentials: { apikey: IAM_API_KEY, host: SERVER_NO_PROTOCOL } }
         ]
       },
       plugins: 'promises'
     });
+
+    // Retrospectively modify the IAM token server URL to whatever is configured for the tests
+    // since the VCAP blob always expects the production IAM token server
+    const iamPlugin = cloudant.cc._plugins[cloudant.cc._pluginIds.indexOf('iamauth')];
+    iamPlugin._tokenManager._iamTokenUrl = TOKEN_SERVER_URL;
+    iamPlugin._cfg._iamTokenUrl = TOKEN_SERVER_URL;
 
     cloudant.use(DBNAME.substring(1)).info().then((data) => {
       assert.equal(data.doc_count, 0);
