@@ -24,6 +24,8 @@ def getEnvForSuite(suiteName) {
   switch(suiteName) {
     case 'test':
       envVars.add("NOCK_OFF=true")
+      envVars.add("SERVER_URL=${env.SDKS_TEST_SERVER_URL}")
+      envVars.add("cloudant_iam_token_server=${env.SDKS_TEST_IAM_SERVER}")
       break
     default:
       error("Unknown test suite environment ${suiteName}")
@@ -40,7 +42,7 @@ def setupNodeAndTest(version, testSuite='test') {
     unstash name: 'built'
 
     // Run tests using creds
-    withCredentials([usernamePassword(credentialsId: 'clientlibs-test', usernameVariable: 'cloudant_username', passwordVariable: 'cloudant_password'), string(credentialsId: 'clientlibs-test-iam', variable: 'cloudant_iam_api_key')]) {
+    withCredentials([usernamePassword(credentialsId: 'testServerLegacy', usernameVariable: 'cloudant_username', passwordVariable: 'cloudant_password'), string(credentialsId: 'testServerIamApiKey', variable: 'cloudant_iam_api_key')]) {
       withEnv(getEnvForSuite("${testSuite}")) {
         try {
           // Actions:
