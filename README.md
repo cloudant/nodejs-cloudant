@@ -553,7 +553,7 @@ This library adds documentation for the following:
 
 Cloudant API keys are part of the legacy access controls. They are different from
 the access control mechanisms offered by IBM Cloud IAM. See
-[here](https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-work-with-your-account#authentication-iam)
+[here](https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-work-with-your-account#api-keys)
 for more details.
 
 This feature interfaces with the Cloudant [authorization API][Authorization].
