@@ -254,8 +254,7 @@ Note, if you only have a single Cloudant service then specifying the
 
 You can optionally provide a callback to the Cloudant initialization
 function. This will make the library automatically
-[ping](https://cloud.ibm.com/docs/services/Cloudant/api?topic=cloudant-account#ping)
-Cloudant to confirm the connection and that your credentials work.
+ping Cloudant to confirm the connection and that your credentials work.
 
 Here is a simple example of initializing asynchronously, using its optional
 callback parameter:
@@ -284,8 +283,7 @@ Cloudant({ url: url, username: username, password: password }, function(err, clo
 initialization callback will always add the `cookieauth` plugin to the list of
 configured plugins. If you do not want to use `cookieauth` then you should not
 use this initialization callback, instead initalize the client without a
-callback and then call the [ping function](https://cloud.ibm.com/docs/services/Cloudant/api?topic=cloudant-account#ping)
-e.g.:
+callback and then call the ping function e.g.:
 
 ```js
 const c = new Cloudant({
@@ -469,7 +467,7 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
    (either because the IAM token service is down or the IAM API key is
    incorrect) then an error is returned to the client.
 
-   See [IBM Cloud Identity and Access Management](https://cloud.ibm.com/docs/services/Cloudant/guides?topic=cloudant-ibm-cloud-identity-and-access-management-iam-) for more information.
+   See [IBM Cloud Identity and Access Management](https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-work-with-your-account#authentication-iam) for more information.
 
    You can turn off automatically refreshing token with the following configuration:
    ```js
@@ -555,7 +553,7 @@ This library adds documentation for the following:
 
 Cloudant API keys are part of the legacy access controls. They are different from
 the access control mechanisms offered by IBM Cloud IAM. See
-[here](https://cloud.ibm.com/docs/services/Cloudant/guides?topic=cloudant-ibm-cloud-identity-and-access-management-iam-)
+[here](https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-work-with-your-account#api-keys)
 for more details.
 
 This feature interfaces with the Cloudant [authorization API][Authorization].
@@ -1066,9 +1064,9 @@ await db.partitionedFind('canidae', { 'selector' : { 'name': 'Wolf' }})
 *Create a partitioned search index*
 
 To create a [Cloudant
-Search](https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-search)
+Search](https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-search)
 index that is partitioned, write a [design
-document](https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-design-documents)
+document](https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-design-documents)
 to the database containing the index definition. Use `options.partitioned =
 true` to specify that this is a partitioned index:
 
@@ -1099,7 +1097,7 @@ await db.insert(ddoc)
 *Search within a partition*
 
 To perform a [Cloudant
-Search](https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-search)
+Search](https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-search)
 against a pre-existing Cloudant Search index, use the `partitionedSearch`
 function:
 
@@ -1353,13 +1351,13 @@ specific language governing permissions and limitations under the License.
 * [Issues]
 * [Nano Library]
 
-[Authentication]: https://cloud.ibm.com/docs/services/Cloudant/api?topic=cloudant-authentication
-[Authorization]: https://cloud.ibm.com/docs/services/Cloudant/api?topic=cloudant-authorization
-[CORS]: https://cloud.ibm.com/docs/services/Cloudant/api?topic=cloudant-cors
-[Cloudant Documentation]: https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-overview
-[Cloudant Geospatial]: https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-cloudant-nosql-db-geospatial
-[Cloudant Query]: https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-query
-[Cloudant Search]: https://cloud.ibm.com/docs/services/Cloudant?topic=cloudant-search
+[Authentication]: https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-faq-authenticating-cloudant
+[Authorization]: https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-managing-access-for-cloudant
+[CORS]: https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-cors
+[Cloudant Documentation]: https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-getting-started-with-cloudant
+[Cloudant Geospatial]: https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-cloudant-nosql-db-geospatial
+[Cloudant Query]: https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-query
+[Cloudant Search]: https://cloud.ibm.com/docs/Cloudant?topic=Cloudant-search
 [Follow library]: https://github.com/cloudant-labs/cloudant-follow
 [Issues]: https://github.com/cloudant/nodejs-cloudant/issues
 [Nano Library]: https://github.com/apache/couchdb-nano
