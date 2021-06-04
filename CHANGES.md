@@ -1,3 +1,6 @@
+# UNRELEASED
+- [DEPRECATED] This library is now deprecated and will be EOL on Dec 31 2021.
+
 # 4.4.0 (2021-06-18)
 - [FIXED] Parsing of max-age from Set-Cookie headers.
 - [FIXED] Double callback if plugin errors when updating state.
