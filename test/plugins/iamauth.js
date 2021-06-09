@@ -1,4 +1,4 @@
-// Copyright © 2017, 2019 IBM Corp. All rights reserved.
+// Copyright © 2017, 2021 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -66,6 +66,9 @@ const MOCK_IAM_TOKEN_RESPONSE = {
 const MOCK_IAM_SESSION = 'IAMSession=dFNyccpWQd1iZF0zWTCwFDEEFTESPk8X21cygDdoe1RrVNgH7hgfemgOLr5fx_sdje-47o_dpfUgThyybh';
 const MOCK_SET_IAM_SESSION_HEADER = {
   'set-cookie': `${MOCK_IAM_SESSION}; Version=1; Max-Age=3599; Secure; Path=/; HttpOnly; Secure`
+};
+const MOCK_SET_IAM_SESSION_HEADER_SHORT = {
+  'set-cookie': `${MOCK_IAM_SESSION}; Version=1; Max-Age=2; Secure; Path=/; HttpOnly; Secure`
 };
 
 describe('#db IAMAuth Plugin', function() {
@@ -313,6 +316,84 @@ describe('#db IAMAuth Plugin', function() {
       cloudantMocks.done();
       done();
     });
+  });
+
+  it('iam_session returns error', function() {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
+
+    var iamMocks = nock(TOKEN_SERVER)
+      .post('/identity/token', {
+        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
+        'response_type': 'cloud_iam',
+        'apikey': IAM_API_KEY
+      })
+      .times(3)
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
+
+    var cloudantMocks = nock(SERVER)
+      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
+      .times(3)
+      .replyWithError({code: 'ECONNRESET', message: 'socket hang up'});
+
+    var cloudantClient = new Cloudant({ url: SERVER, plugins: { iamauth: { autoRenew: false, iamApiKey: IAM_API_KEY } } });
+    return assert.rejects(
+      cloudantClient.db.get(DBNAME),
+      {
+        code: 'ECONNRESET',
+        description: 'socket hang up'
+      },
+      'Should have rejected with a socket hang up error').finally(() => {
+      iamMocks.done();
+      cloudantMocks.done();
+    });
+  });
+
+  it('iam_session returns error on renew', function() {
+    if (process.env.NOCK_OFF) {
+      this.skip();
+    }
+
+    var iamMocks = nock(TOKEN_SERVER)
+      .post('/identity/token', {
+        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
+        'response_type': 'cloud_iam',
+        'apikey': IAM_API_KEY
+      })
+      .times(2)
+      .reply(200, MOCK_IAM_TOKEN_RESPONSE);
+
+    var cloudantMocks = nock(SERVER)
+      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
+      .reply(200, {ok: true}, MOCK_SET_IAM_SESSION_HEADER_SHORT)
+      .get(DBNAME)
+      .reply(200, {doc_count: 0})
+      .post('/_iam_session', {access_token: MOCK_ACCESS_TOKEN})
+      .replyWithError({code: 'ECONNRESET', message: 'socket hang up'})
+      .get(DBNAME)
+      .reply(401, {error: 'unauthorized', reason: 'Unauthorized'});
+
+    var cloudantClient = new Cloudant({ url: SERVER, maxAttempt: 1, plugins: { iamauth: { iamApiKey: IAM_API_KEY } } });
+    return cloudantClient.db.get(DBNAME.substring(1)) /* Remove leading slash */
+      .then(() => {
+        // Wait for long enough for the background renewal to fail and the token to expire
+        return new Promise(resolve => setTimeout(resolve, 2100));
+      })
+      .then(() => {
+        return assert.rejects(
+          cloudantClient.db.get(DBNAME.substring(1)),
+          {
+            error: 'unauthorized',
+            reason: 'Unauthorized',
+            statusCode: 401
+          },
+          'Should have rejected unauthorized after background renewal failure');
+      })
+      .finally(() => {
+        iamMocks.done();
+        cloudantMocks.done();
+      });
   });
 
   it('retries access token post on error and returns 200 response', function(done) {
