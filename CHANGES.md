@@ -1,5 +1,6 @@
 # Unreleased
 - [FIXED] Parsing of max-age from Set-Cookie headers.
+- [FIXED] Double callback if plugin errors when updating state.
 
 # 4.3.1 (2021-03-17)
 - [NEW] Add migration guide to the newly supported cloudant-node-sdk

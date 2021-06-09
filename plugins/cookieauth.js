@@ -1,4 +1,4 @@
-// Copyright © 2015, 2019 IBM Corp. All rights reserved.
+// Copyright © 2015, 2021 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -68,16 +68,13 @@ class CookiePlugin extends BasePlugin {
     delete req.url;
     req.uri = u.format(new u.URL(req.uri), {auth: false});
 
-    self._tokenManager.renewIfRequired().then(() => {
-      callback(state);
-    }).catch((error) => {
+    self._tokenManager.renewIfRequired().catch((error) => {
       if (state.attempt < state.maxAttempt) {
         state.retry = true;
       } else {
         state.abortWithResponse = [ error ]; // return error to client
       }
-      callback(state);
-    });
+    }).finally(() => callback(state));
   }
 
   onResponse(state, response, callback) {
