@@ -63,6 +63,6 @@
   "main": "./cloudant.js",
   "types": "types",
   "engines": {
-    "node": ">=6.13.0"
+    "node": ">=12"
   }
 }
