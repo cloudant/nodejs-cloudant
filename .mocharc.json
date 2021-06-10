@@ -1,0 +1,5 @@
+{
+"exclude": "test/typescript/*.js",
+"recursive": true,
+"timeout": 60000
+}
