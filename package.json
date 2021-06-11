@@ -47,7 +47,7 @@
     "eslint-plugin-standard": "^3.0.1",
     "md5-file": "^3.2.3",
     "mocha": "^7.1.2",
-    "nock": "^9.2.5",
+    "nock": "^13",
     "should": "6.0.3",
     "typescript": "^2.8.3",
     "uuid": "^3.0.1"
@@ -58,11 +58,12 @@
     "test-live": "NOCK_OFF=true mocha",
     "test-live-verbose": "env DEBUG='*,-mocha:*' npm run test-live",
     "tslint": "tslint --project types",
-    "type-check": "tsc --project types/tsconfig.json"
+    "type-check": "tsc --project types/tsconfig.json",
+    "mocha": "mocha"
   },
   "main": "./cloudant.js",
   "types": "types",
   "engines": {
-    "node": ">=6.13.0"
+    "node": ">=12"
   }
 }

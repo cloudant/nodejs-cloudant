@@ -76,13 +76,13 @@ stage('Build') {
 
 stage('QA') {
   parallel([
-    Node8x : {
-      //8.x LTS
-      setupNodeAndTest('lts/carbon')
+    Node12x : {
+      //12.x LTS
+      setupNodeAndTest('lts/erbium')
     },
-    Node10x : {
-      //10.x LTS
-      setupNodeAndTest('lts/dubnium')
+    Node14x : {
+      //14.x LTS
+      setupNodeAndTest('lts/fermium')
     },
     Node : {
       // Current

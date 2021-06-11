@@ -1,3 +1,8 @@
+# Unreleased
+- [FIXED] Parsing of max-age from Set-Cookie headers.
+- [FIXED] Double callback if plugin errors when updating state.
+- [NOTE] Updated engines to remove EOL Node.js versions (minimum is now Node.js 12).
+
 # 4.3.1 (2021-03-17)
 - [NEW] Add migration guide to the newly supported cloudant-node-sdk
   (package: @ibm-cloud/cloudant).
