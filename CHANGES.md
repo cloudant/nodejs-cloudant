@@ -1,4 +1,4 @@
-# Unreleased
+# 4.4.0 (2021-06-18)
 - [FIXED] Parsing of max-age from Set-Cookie headers.
 - [FIXED] Double callback if plugin errors when updating state.
 - [NOTE] Updated engines to remove EOL Node.js versions (minimum is now Node.js 12).
