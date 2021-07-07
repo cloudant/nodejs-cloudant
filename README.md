@@ -511,7 +511,10 @@ var cloudant = Cloudant({ url: myurl, maxAttempt: 5, plugins: [ { iamauth: { iam
     - `retryErrors`
 
       Automatically retry a request on error (e.g. connection reset errors)
-      _(default: true)_.
+      _(default: true)_. Note that this will only retry errors encountered
+      _before_ the library starts to read response body data. After that point
+      any errors (e.g. socket timeout reading from the server) will be returned
+      to the caller (via callback or emitted `error` depending on the usage). 
 
     - `retryInitialDelayMsecs`
 
