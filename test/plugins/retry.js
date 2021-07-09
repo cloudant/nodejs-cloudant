@@ -860,6 +860,38 @@ describe('Retry Plugin', function() {
   });
 
   describe('retries on error', function() {
+    function dataPhaseErrorMockServer(port, timesToError, successBody, lifetime, done) {
+      // nock is unable to mock the timeout in the response phase so create a mock http server
+      const http = require('http');
+      var counter = 0;
+      const mockServer = http.createServer({}, function(req, res) {
+        counter++;
+        console.log(`DPE MOCK SERVER: received request ${counter} for URL: ${req.url}`);
+        if (counter <= timesToError) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.write(successBody);
+          // We intentionally fail to end the request so that the client side will timeout in the data phase
+          // res.end();
+        } else {
+          // respond successfully promptly
+          res.end(successBody);
+        }
+      }).listen(port, '127.0.0.1');
+      // set a timeout so we don't hang the test (mocha's timeout won't kill the http server)
+      const serverTimeout = setTimeout(() => {
+        console.log('DPE MOCK SERVER: timeout');
+        if (mockServer.listening) {
+          console.log('DPE MOCK SERVER: close requested from timeout');
+          mockServer.close(() => done(new Error('Test server timeout; client hang!')));
+        }
+      }, lifetime);
+      return {server: mockServer,
+        close: () => {
+          clearTimeout(serverTimeout);
+          mockServer.close(done);
+        }};
+    }
+
     describe('with callback only', function() {
       it('performs request and returns response', function(done) {
         // NOTE: Use NOCK_OFF=true to test using a real CouchDB instance.
@@ -943,6 +975,31 @@ describe('Retry Plugin', function() {
 
           mocks.done();
           done();
+        });
+      });
+
+      it('does not retry in response data phase', function(done) {
+        // mock server on 6984 that errors for 1 request then returns the DB info block for other reqs
+        // and finally stops listening after 1s if it wasn't already closed
+        const mock = dataPhaseErrorMockServer(6984, 1, '{"doc_count":0}', 1000, done);
+        // A client that will timeout after 100 ms and make only 2 attempts with a retry 10 ms after receiving an error
+        var cloudantClient = new Client({
+          https: false,
+          maxAttempt: 2,
+          requestDefaults: {timeout: 100},
+          plugins: { retry: { retryInitialDelayMsecs: 10, retryStatusCodes: [] } }
+        });
+
+        var req = {
+          url: 'http://127.0.0.1:6984/foo',
+          auth: { username: ME, password: PASSWORD },
+          method: 'GET'
+        };
+
+        cloudantClient.request(req, function(err, resp, data) {
+          assert.ok(err, 'Should get called back with an error.');
+          assert.equal('ESOCKETTIMEDOUT', err.code);
+          mock.close();
         });
       });
     });
@@ -1082,6 +1139,54 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             assert.fail('Unexpected data from server');
+          });
+      });
+
+      it('does not retry in response data phase', function(done) {
+        // mock server on 6985 that errors for 1 request then returns the DB info block for other reqs
+        // and finally stops listening after 1s if it wasn't already closed
+        const mock = dataPhaseErrorMockServer(6985, 1, '{"doc_count":0}', 1000, done);
+
+        // A client that will timeout after 100 ms and make only 2 attempts with a retry 10 ms after receiving an error
+        var cloudantClient = new Client({
+          https: false,
+          maxAttempt: 2,
+          requestDefaults: {timeout: 100},
+          plugins: { retry: { retryInitialDelayMsecs: 10, retryStatusCodes: [] } }
+        });
+
+        var req = {
+          url: 'http://127.0.0.1:6985/foo',
+          auth: { username: ME, password: PASSWORD },
+          method: 'GET'
+        };
+
+        var responseCount = 0;
+        var errors = [];
+        var responseData = '';
+
+        cloudantClient.request(req)
+          .on('error', (err) => {
+            errors.push(err);
+          })
+          .on('response', function(resp) {
+            responseCount++;
+            assert.equal(resp.statusCode, 200);
+          })
+          .on('data', function(data) {
+            responseData += data;
+          })
+          .on('end', function() {
+            let expectedErrors = 1;
+            if (process.version.startsWith('v16.')) {
+              // Node 16 has an additional `aborted` error
+              // https://github.com/nodejs/node/issues/28172
+              expectedErrors++;
+            }
+            assert.ok(responseData.toString('utf8').indexOf('"doc_count":0') > -1);
+            assert.equal(responseCount, 1);
+            assert.equal(errors.length, expectedErrors);
+            mock.close(done);
           });
       });
     });
@@ -1233,6 +1338,55 @@ describe('Retry Plugin', function() {
           })
           .on('data', function(data) {
             assert.fail('Unexpected data from server');
+          });
+      });
+
+      it('does not retry in response data phase', function(done) {
+        // mock server on 6986 that errors for 1 request then returns the DB info block for other reqs
+        // and finally stops listening after 1s if it wasn't already closed
+        const mock = dataPhaseErrorMockServer(6986, 1, '{"doc_count":0}', 1000, done);
+        // A client that will timeout after 100 ms and make only 2 attempts with a retry 10 ms after receiving an error
+        var cloudantClient = new Client({
+          https: false,
+          maxAttempt: 2,
+          requestDefaults: {timeout: 100},
+          plugins: { retry: { retryInitialDelayMsecs: 10, retryStatusCodes: [] } }
+        });
+
+        var req = {
+          url: 'http://127.0.0.1:6986/foo',
+          auth: { username: ME, password: PASSWORD },
+          method: 'GET'
+        };
+
+        var responseCount = 0;
+        var errors = [];
+        var responseData = '';
+        cloudantClient.request(req, function(err, resp, data) {
+          assert.ok(err, 'Should get called back with an error.');
+          assert.equal('ESOCKETTIMEDOUT', err.code);
+          mock.close();
+        })
+          .on('error', (err) => {
+            errors.push(err);
+          })
+          .on('response', function(resp) {
+            responseCount++;
+            assert.equal(resp.statusCode, 200);
+          })
+          .on('data', function(data) {
+            responseData += data;
+          })
+          .on('end', function() {
+            let expectedErrors = 1;
+            if (process.version.startsWith('v16.')) {
+              // Node 16 has an additional `aborted` error
+              // https://github.com/nodejs/node/issues/28172
+              expectedErrors++;
+            }
+            assert.ok(responseData.toString('utf8').indexOf('"doc_count":0') > -1);
+            assert.equal(responseCount, 1);
+            assert.equal(errors.length, expectedErrors);
           });
       });
     });

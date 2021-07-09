@@ -14,7 +14,7 @@
 'use strict';
 
 const BasePlugin = require('./base.js');
-
+const debug = require('debug')('cloudant:plugins:retry');
 /**
  * Retry plugin.
  */
@@ -38,24 +38,28 @@ class RetryPlugin extends BasePlugin {
 
   onResponse(state, response, callback) {
     if (this._cfg.retryStatusCodes.indexOf(response.statusCode) !== -1) {
+      debug(`Received status code ${response.statusCode}; setting retry state.`);
       state.retry = true;
       if (state.attempt === 1) {
         state.retryDelayMsecs = this._cfg.retryInitialDelayMsecs;
       } else {
         state.retryDelayMsecs *= this._cfg.retryDelayMultiplier;
       }
+      debug(`Asking for retry after ${state.retryDelayMsecs}`);
     }
     callback(state);
   }
 
   onError(state, error, callback) {
     if (this._cfg.retryErrors) {
+      debug(`Received error ${error.code} ${error.message}; setting retry state.`);
       state.retry = true;
       if (state.attempt === 1) {
         state.retryDelayMsecs = this._cfg.retryInitialDelayMsecs;
       } else {
         state.retryDelayMsecs *= this._cfg.retryDelayMultiplier;
       }
+      debug(`Asking for retry after ${state.retryDelayMsecs}`);
     }
     callback(state);
   }
