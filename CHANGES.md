@@ -1,4 +1,4 @@
-# UNRELEASED
+# 4.4.1 (2021-08-02)
 - [FIXED] Hang caused by plugins (i.e. retry plugin) preventing callback execution
   by attempting to retry on errors received after starting to return the response body.
 - [DEPRECATED] This library is now deprecated and will be EOL on Dec 31 2021.
