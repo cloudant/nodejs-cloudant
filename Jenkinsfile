@@ -16,8 +16,7 @@
 def getEnvForSuite(suiteName) {
   // Base environment variables
   def envVars = [
-    "NVM_DIR=${env.HOME}/.nvm",
-    "MOCHA_TIMEOUT=60000" // 60s
+    "NVM_DIR=${env.HOME}/.nvm"
   ]
 
   // Add test suite specific environment variables
@@ -27,11 +26,32 @@ def getEnvForSuite(suiteName) {
       envVars.add("SERVER_URL=${env.SDKS_TEST_SERVER_URL}")
       envVars.add("cloudant_iam_token_server=${env.SDKS_TEST_IAM_SERVER}")
       break
+    case 'nock-test':
+      break
     default:
       error("Unknown test suite environment ${suiteName}")
   }
 
   return envVars
+}
+
+def installAndTest(version, testSuite) {
+  try {
+    // Actions:
+    //  1. Load NVM
+    //  2. Install/use required Node.js version
+    //  3. Install mocha-jenkins-reporter so that we can get junit style output
+    //  4. Run tests
+    sh """
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+      nvm install ${version}
+      nvm use ${version}
+      npm install mocha-jenkins-reporter --save-dev
+      ./node_modules/mocha/bin/mocha --reporter mocha-jenkins-reporter --reporter-options junit_report_path=./${testSuite}/test-results.xml,junit_report_stack=true,junit_report_name=${testSuite} test --grep 'Virtual Hosts' --invert
+    """
+  } finally {
+    junit '**/test-results.xml'
+  }
 }
 
 def setupNodeAndTest(version, testSuite='test') {
@@ -42,24 +62,15 @@ def setupNodeAndTest(version, testSuite='test') {
     unstash name: 'built'
 
     // Run tests using creds
-    withCredentials([usernamePassword(credentialsId: 'testServerLegacy', usernameVariable: 'cloudant_username', passwordVariable: 'cloudant_password'), string(credentialsId: 'testServerIamApiKey', variable: 'cloudant_iam_api_key')]) {
-      withEnv(getEnvForSuite("${testSuite}")) {
-        try {
-          // Actions:
-          //  1. Load NVM
-          //  2. Install/use required Node.js version
-          //  3. Install mocha-jenkins-reporter so that we can get junit style output
-          //  4. Run tests
-          sh """
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-            nvm install ${version}
-            nvm use ${version}
-            npm install mocha-jenkins-reporter --save-dev
-            ./node_modules/mocha/bin/mocha --timeout $MOCHA_TIMEOUT --reporter mocha-jenkins-reporter --reporter-options junit_report_path=./${testSuite}/test-results.xml,junit_report_stack=true,junit_report_name=${testSuite} ${testSuite} --grep 'Virtual Hosts' --invert
-          """
-        } finally {
-          junit '**/test-results.xml'
+    if(testSuite == 'test') {
+      withCredentials([usernamePassword(credentialsId: 'testServerLegacy', usernameVariable: 'cloudant_username', passwordVariable: 'cloudant_password'), string(credentialsId: 'testServerIamApiKey', variable: 'cloudant_iam_api_key')]) {
+        withEnv(getEnvForSuite("${testSuite}")) {
+          installAndTest(version, testSuite)
         }
+      }
+    } else {
+      withEnv(getEnvForSuite("${testSuite}")) {
+        installAndTest(version, testSuite)
       }
     }
   }
@@ -80,6 +91,9 @@ stage('QA') {
       //12.x LTS
       setupNodeAndTest('lts/erbium')
     },
+    Node12xWithNock : {
+      setupNodeAndTest('lts/erbium', 'nock-test')
+    },
     Node14x : {
       //14.x LTS
       setupNodeAndTest('lts/fermium')
@@ -87,6 +101,10 @@ stage('QA') {
     Node : {
       // Current
       setupNodeAndTest('node')
+    },
+    NodeWithNock : {
+      // Current
+      setupNodeAndTest('node', 'nock-test')
     },
   ])
 }

@@ -1,4 +1,4 @@
-// Copyright © 2015, 2019 IBM Corp. All rights reserved.
+// Copyright © 2015, 2021 IBM Corp. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ var nanodebug = require('debug')('nano');
 
 const Client = require('./lib/client.js');
 const BasePlugin = require('./plugins/base.js');
+const INVALID_DOC_ID_MSG = 'Invalid document ID';
+const INVALID_ATT_MSG = 'Invalid attachment name';
 
 Cloudant.BasePlugin = BasePlugin; // expose base plugin
 
@@ -165,6 +167,136 @@ function Cloudant(options, callback) {
         body: query}, callback);
     };
 
+    // Encode '/' path separator if it exists within the document ID
+    // or attachment name e.g. _design//foo will result in _design/%2Ffoo
+    function encodePathSeparator(docName) {
+      if (docName.includes('/')) {
+        return docName.replace(/\//g, encodeURIComponent('/'));
+      }
+      return docName;
+    }
+
+    // Validate document ID during document requests.
+    // Raises an error if the ID is an `_` prefixed name
+    // that isn't either `_design` or `_local`.
+    function assertDocumentTypeId(docName) {
+      if (docName && docName.startsWith('_')) {
+        const possibleDocPrefixes = ['_local/', '_design/'];
+
+        for (let docPrefix of possibleDocPrefixes) {
+          if (docName.startsWith(docPrefix) && docName !== docPrefix) {
+            // encode '/' if it exists after the document prefix
+            return docPrefix + encodePathSeparator(docName.slice(docPrefix.length));
+          }
+        }
+        return new Error(`${INVALID_DOC_ID_MSG}: ${docName}`);
+      }
+      return docName;
+    }
+
+    // Validate attachment name during attachment requests.
+    // Raises an error if the name has a `_` prefixed name
+    function assertValidAttachmentName(attName) {
+      if (attName && attName.startsWith('_')) {
+        const error = new Error(`${INVALID_ATT_MSG}: ${attName}`);
+        return error;
+      } else if (attName && attName.includes('/')) {
+        // URI encode slashes in attachment name
+        attName = encodePathSeparator(attName);
+        return attName;
+      }
+      return attName;
+    }
+
+    function callbackError(result, callback) {
+      if (callback) {
+        return callback(result, null);
+      }
+      return Promise.reject(result);
+    }
+
+    var getDoc = function getDoc(docName, qs0, callback0) {
+      const {opts, callback} = getCallback(qs0, callback0);
+      var docResult = assertDocumentTypeId(docName);
+      if (docResult instanceof Error) {
+        return callbackError(docResult, callback);
+      } else {
+        return nano._use(db).get(docResult, opts, callback);
+      }
+    };
+
+    var headDoc = function headDoc(docName, callback0) {
+      const {callback} = getCallback(callback0);
+      var docResult = assertDocumentTypeId(docName);
+      if (docResult instanceof Error) {
+        return callbackError(docResult, callback);
+      } else {
+        return nano._use(db).head(docResult, callback);
+      }
+    };
+
+    var getAttachment = function getAttachment(docName, attachmentName, qs0, callback0) {
+      const {opts, callback} = getCallback(qs0, callback0);
+      var docResult = assertDocumentTypeId(docName);
+      var attResult = assertValidAttachmentName(attachmentName);
+      if (docResult instanceof Error) {
+        return callbackError(docResult, callback);
+      } else if (attResult instanceof Error) {
+        return callbackError(attResult, callback);
+      } else {
+        return nano._use(db).attachment.get(docResult, attResult, opts, callback);
+      }
+    };
+
+    var deleteDoc = function deleteDoc(docName, qs0, callback0) {
+      const {opts, callback} = getCallback(qs0, callback0);
+      var docResult = assertDocumentTypeId(docName);
+      if (docResult instanceof Error) {
+        return callbackError(docResult, callback);
+      } else {
+        return nano._use(db).destroy(docResult, opts, callback);
+      }
+    };
+
+    var deleteAttachment = function deleteAttachment(docName, attachmentName, qs0, callback0) {
+      const {opts, callback} = getCallback(qs0, callback0);
+      var docResult = assertDocumentTypeId(docName);
+      var attResult = assertValidAttachmentName(attachmentName);
+      if (docResult instanceof Error) {
+        return callbackError(docResult, callback);
+      } else if (attResult instanceof Error) {
+        return callbackError(attResult, callback);
+      } else {
+        return nano._use(db).attachment.destroy(docResult, attResult, opts, callback);
+      }
+    };
+
+    var putAttachment = function putAttachment(docName, attachmentName, att, contentType, qs0, callback0) {
+      const {opts, callback} = getCallback(qs0, callback0);
+      var docResult = assertDocumentTypeId(docName);
+      var attResult = assertValidAttachmentName(attachmentName);
+      if (docResult instanceof Error) {
+        return callbackError(docResult, callback);
+      } else if (attResult instanceof Error) {
+        return callbackError(attResult, callback);
+      } else {
+        return nano._use(db).attachment.insert(docResult, attResult, att, contentType, opts, callback);
+      }
+    };
+
+    var putDoc = function putDoc(docBody, qs0, callback0) {
+      const {opts, callback} = getCallback(qs0, callback0);
+      if (typeof opts === 'string') {
+        var docResult = assertDocumentTypeId(opts);
+        if (docResult instanceof Error) {
+          return callbackError(docResult, callback);
+        } else {
+          return nano._use(db).insert(docBody, docResult, callback);
+        }
+      }
+      return nano._use(db).insert(docBody, opts, callback);
+    };
+
     // Partitioned Databases
     // ---------------------
 
@@ -247,6 +379,13 @@ function Cloudant(options, callback) {
     obj.index = index;
     obj.index.del = index_del; // eslint-disable-line camelcase
     obj.find = find;
+    obj.destroy = deleteDoc;
+    obj.get = getDoc;
+    obj.head = headDoc;
+    obj.insert = putDoc;
+    obj.attachment.destroy = deleteAttachment;
+    obj.attachment.get = getAttachment;
+    obj.attachment.insert = putAttachment;
 
     obj.partitionInfo = partitionInfo;
     obj.partitionedFind = partitionedFind;
