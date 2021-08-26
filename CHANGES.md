@@ -1,12 +1,14 @@
-# 4.4.1 (2021-08-02)
-- [FIXED] Hang caused by plugins (i.e. retry plugin) preventing callback execution
-  by attempting to retry on errors received after starting to return the response body.
-- [DEPRECATED] This library is now deprecated and will be EOL on Dec 31 2021.
+# 4.5.0 (2021-08-26)
 - [IMPROVED] - Document IDs and attachment names are now rejected if they could cause an unexpected
   Cloudant request. We have seen that some applications pass unsantized document IDs to SDK functions
   (e.g. direct from user requests). In response to this we have updated many functions to reject
   obviously invalid paths. However, for complete safety applications must still validate that
   document IDs and attachment names match expected patterns.
+
+# 4.4.1 (2021-08-02)
+- [FIXED] Hang caused by plugins (i.e. retry plugin) preventing callback execution
+  by attempting to retry on errors received after starting to return the response body.
+- [DEPRECATED] This library is now deprecated and will be EOL on Dec 31 2021.
 
 # 4.4.0 (2021-06-18)
 - [FIXED] Parsing of max-age from Set-Cookie headers.
