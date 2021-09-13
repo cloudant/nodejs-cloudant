@@ -17,6 +17,7 @@
 
 const assert = require('assert');
 const Client = require('../../lib/client.js');
+const Cloudant = require('../../cloudant.js');
 const nock = require('../nock.js');
 const uuidv4 = require('uuid/v4'); // random
 
@@ -31,10 +32,10 @@ const COOKIEAUTH_PLUGIN = [ { cookieauth: { autoRenew: false } } ];
 // mock cookies
 
 const MOCK_COOKIE = 'AuthSession=Y2xbZWr0bQlpcc19ZQN8OeU4OWFCNYcZOxgdhy-QRDp4i6JQrfkForX5OU5P';
-const MOCK_SET_COOKIE_HEADER = { 'set-cookie': `${MOCK_COOKIE}; Version=1; Max-Age=86400; Path=/; HttpOnly` };
+const MOCK_SET_COOKIE_HEADER = { 'set-cookie': `${MOCK_COOKIE}; Version=1; Max-Age=1; Path=/; HttpOnly` };
 
 const MOCK_COOKIE_2 = 'AuthSession=Q2fbIWc0kQspdc39OQL89eS4PWECcYEZDxgdgy-0RCp2i0dcrDkfoWX7OI5A';
-const MOCK_SET_COOKIE_HEADER_2 = { 'set-cookie': `${MOCK_COOKIE_2}; Version=1; Max-Age=86400; Path=/; HttpOnly` };
+const MOCK_SET_COOKIE_HEADER_2 = { 'set-cookie': `${MOCK_COOKIE_2}; Version=1; Max-Age=1; Path=/; HttpOnly` };
 
 describe('#db CookieAuth Plugin', function() {
   before(function(done) {
@@ -357,6 +358,45 @@ describe('#db CookieAuth Plugin', function() {
         mocks.done();
         done();
       });
+    });
+
+    it('pre-emptive renewal outlasts original session', function() {
+      if (process.env.NOCK_OFF) {
+        this.skip();
+      }
+
+      var mocks = nock(SERVER)
+        .post('/_session', {name: ME, password: PASSWORD})
+        .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER)
+        .get(DBNAME)
+        .matchHeader('cookie', MOCK_COOKIE)
+        .reply(200, {doc_count: 0})
+        // pre-emptive renewals every 500 ms
+        .post('/_session', {name: ME, password: PASSWORD})
+        .times(2)
+        .reply(200, {ok: true}, MOCK_SET_COOKIE_HEADER_2)
+        .get(DBNAME)
+        .matchHeader('cookie', MOCK_COOKIE_2)
+        .reply(200, {doc_count: 0});
+
+      var cloudantClient = new Cloudant({
+        url: SERVER,
+        username: ME,
+        password: PASSWORD,
+        maxAttempt: 1
+        // Note using default cookieauth plugin
+      });
+      return cloudantClient.db.get(DBNAME.substring(1)) /* Remove leading slash */
+        .then(() => {
+          // Wait long enough for a pre-emptive renewal and orignal session to lapse
+          return new Promise(resolve => setTimeout(resolve, 1000));
+        })
+        .then(() => {
+          return cloudantClient.db.get(DBNAME.substring(1));
+        })
+        .finally(() => {
+          mocks.done();
+        });
     });
   });
 });
