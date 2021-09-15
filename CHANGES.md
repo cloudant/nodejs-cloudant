@@ -1,3 +1,7 @@
+# Unreleased
+- [FIXED] Issue where new session cookies from pre-emptive renewal would not persist beyond the original session
+  lifetime.
+
 # 4.5.0 (2021-08-26)
 - [IMPROVED] - Document IDs and attachment names are now rejected if they could cause an unexpected
   Cloudant request. We have seen that some applications pass unsantized document IDs to SDK functions
