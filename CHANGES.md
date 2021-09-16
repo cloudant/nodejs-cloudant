@@ -1,4 +1,4 @@
-# Unreleased
+# 4.5.1 (2021-09-16)
 - [FIXED] Issue where new session cookies from pre-emptive renewal would not persist beyond the original session
   lifetime.
 
