@@ -62,7 +62,7 @@ The table below contains a list of `nodejs-cloudant` functions and the `cloudant
 |`db.insert() with _design path`|[putDesignDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#putdesigndocument)|
 |`db.search()/db.searchAsStream()`|[postSearch](https://cloud.ibm.com/apidocs/cloudant?code=node#postsearch)|
 |`db.view()`|[postView](https://cloud.ibm.com/apidocs/cloudant?code=node#postview)|
-|`db.list() (with a filter)`|[postDesignDocs](https://cloud.ibm.com/apidocs/cloudant?code=node#postdesigndocs)|
+|`db.list() (only design documents)`|[postDesignDocs](https://cloud.ibm.com/apidocs/cloudant?code=node#postdesigndocs)|
 |`db.find()`|[postFind](https://cloud.ibm.com/apidocs/cloudant?code=node#postfind)|
 |`db.createIndex()`|[postIndex](https://cloud.ibm.com/apidocs/cloudant?code=node#postindex)|
 |`db.index.del()`|[deleteIndex](https://cloud.ibm.com/apidocs/cloudant?code=node#deleteindex)|
