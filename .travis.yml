@@ -5,7 +5,7 @@ branches:
     - next
     - rewrite
 node_js:
-  - "node"
+  - "16"
   - "14"
   - "12"
 os:

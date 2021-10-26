@@ -88,23 +88,23 @@ stage('Build') {
 stage('QA') {
   parallel([
     Node12x : {
-      //12.x LTS
-      setupNodeAndTest('lts/erbium')
+      // 12.x LTS
+      setupNodeAndTest('12')
     },
     Node12xWithNock : {
-      setupNodeAndTest('lts/erbium', 'nock-test')
+      setupNodeAndTest('12', 'nock-test')
     },
     Node14x : {
-      //14.x LTS
-      setupNodeAndTest('lts/fermium')
+      // 14.x LTS
+      setupNodeAndTest('14')
     },
     Node : {
-      // Current
-      setupNodeAndTest('node')
+      // 16.x
+      setupNodeAndTest('16')
     },
     NodeWithNock : {
-      // Current
-      setupNodeAndTest('node', 'nock-test')
+      // 16.x
+      setupNodeAndTest('16', 'nock-test')
     },
   ])
 }
