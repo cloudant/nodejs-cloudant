@@ -12,7 +12,7 @@ There are several ways to create a client connection in `cloudant-node-sdk`:
 ## Other differences
 1. Using the `dotenv` package to store credentials in a file is not recommended. See the [external file configuration section](https://github.com/IBM/cloudant-node-sdk#authentication-with-external-configuration) in our API docs for handling this feature in our new library.
 1. Fetching the database object first before performing additional operations is not required. For example, in the case of updating a document you would first call `getDocument` to fetch and then `putDocument` to update.
-1. Plugins are not supported, but several of the plugin features exist in the new library e.g. IAM, automatic retries for failed requests.
+1. Plugins are not supported, but several of the plugin features exist in the new library e.g. IAM, [automatic retries](https://github.com/IBM/ibm-cloud-sdk-common/#automatic-retries) for failed requests.
 1. Error handling is not transferable from `@cloudant/cloudant` to `@ibm-cloud/cloudant`. For more information go to the [Error handling section](https://cloud.ibm.com/apidocs/cloudant?code=node#error-handling) in our API docs.
 
 ## Request mapping
