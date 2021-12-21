@@ -12,8 +12,9 @@ There are several ways to create a client connection in `cloudant-node-sdk`:
 ## Other differences
 1. Using the `dotenv` package to store credentials in a file is not recommended. See the [external file configuration section](https://github.com/IBM/cloudant-node-sdk#authentication-with-external-configuration) in our API docs for handling this feature in our new library.
 1. Fetching the database object first before performing additional operations is not required. For example, in the case of updating a document you would first call `getDocument` to fetch and then `putDocument` to update.
-1. Plugins are not supported, but several of the plugin features exist in the new library e.g. IAM.
-1. The plugin for retrying failed requests is not supported.
+1. Plugins are not supported, but several of the plugin features exist in the new library e.g. IAM, [automatic retries](https://github.com/IBM/ibm-cloud-sdk-common/#automatic-retries) for failed requests.
+1. Error handling is not transferable from `@cloudant/cloudant` to `@ibm-cloud/cloudant`. For more information go to the [Error handling section](https://cloud.ibm.com/apidocs/cloudant?code=node#error-handling) in our API docs.
+1. Custom HTTP client configurations in `@cloudant/cloudant` are not transferable to are not transferable to `@ibm-cloud/cloudant`. For more information go to the [Configuring the HTTP client section](https://github.com/IBM/ibm-cloud-sdk-common/#configuring-the-http-client) in the IBM Cloud SDK Common README.
 
 ## Request mapping
 Here's a list of the top 5 most frequently used `nodejs-cloudant` operations and the `cloudant-node-sdk` equivalent API operation documentation link:
@@ -40,51 +41,50 @@ The table below contains a list of `nodejs-cloudant` functions and the `cloudant
 
 |nodejs-cloudant function | cloudant-node-sdk function reference |
 |-------------------------|--------------------------------------|
-|`ping()`|[getServerInformation ](https://cloud.ibm.com/apidocs/cloudant?code=node#getserverinformation)|
-|`listDbs()/listDbsAsStream()`|[getAllDbs](https://cloud.ibm.com/apidocs/cloudant?code=node#getalldbs)|
-|`updates()/followUpdates()`|[getDbUpdates](https://cloud.ibm.com/apidocs/cloudant?code=node#getdbupdates)|
-|`replicate()`/`replicateDb()`|[`postReplicate`](https://cloud.ibm.com/apidocs/cloudant?code=node#postreplicate)|
-|`enableReplication()`/`replication.enable()`|[`putReplicationDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#putreplicationdocument)|
+|`ping()`|[`getServerInformation`](https://cloud.ibm.com/apidocs/cloudant?code=node#getserverinformation)|
+|`listDbs()/listDbsAsStream()`|[`getAllDbs`](https://cloud.ibm.com/apidocs/cloudant?code=node#getalldbs)|
+|`updates()/followUpdates()`|[`getDbUpdates`](https://cloud.ibm.com/apidocs/cloudant?code=node#getdbupdates)|
+|`replicate()`/`replicateDb()`/`enableReplication()`/`replication.enable()`|[`putReplicationDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#putreplicationdocument)|
 |`queryReplication()`/`replication.query()`|[`getSchedulerDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#getschedulerdocument)|
 |`disableReplication()`/`replication.delete()`|[`deleteReplicationDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#deletereplicationdocument)|
-|`session()`|[getSessionInformation](https://cloud.ibm.com/apidocs/cloudant?code=node#getsessioninformation)|
-|`uuids()`|[getUuids](https://cloud.ibm.com/apidocs/cloudant?code=node#getuuids)|
-|`db.destroy()`|[deleteDatabase](https://cloud.ibm.com/apidocs/cloudant?code=node#deletedatabase)|
-|`db.info()`|[getDatabaseInformation](https://cloud.ibm.com/apidocs/cloudant?code=node#getdatabaseinformation)|
-|`db.insert()`|[postDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#postdocument)|
-|`db.create(db_name)`|[putDatabase](https://cloud.ibm.com/apidocs/cloudant?code=node#putdatabase)|
-|`db.fetch()/db.list()/db.listAsStream()`|[postAllDocs](https://cloud.ibm.com/apidocs/cloudant?code=node#postalldocs)|
-|`db.bulk()`|[postBulkDocs](https://cloud.ibm.com/apidocs/cloudant?code=node#postbulkdocs)|
-|`db.bulk_get()`|[postBulkGet](https://cloud.ibm.com/apidocs/cloudant?code=node#postbulkget)|
-|`db.changes()`|[postChanges](https://cloud.ibm.com/apidocs/cloudant?code=node#postchanges)|
-|`db.destroy() with _design path`|[deleteDesignDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#deletedesigndocument)|
-|`db.get() with _design path`|[getDesignDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#getdesigndocument)|
-|`db.insert() with _design path`|[putDesignDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#putdesigndocument)|
-|`db.search()/db.searchAsStream()`|[postSearch](https://cloud.ibm.com/apidocs/cloudant?code=node#postsearch)|
-|`db.view()`|[postView](https://cloud.ibm.com/apidocs/cloudant?code=node#postview)|
-|`db.list() (only design documents)`|[postDesignDocs](https://cloud.ibm.com/apidocs/cloudant?code=node#postdesigndocs)|
-|`db.find()`|[postFind](https://cloud.ibm.com/apidocs/cloudant?code=node#postfind)|
-|`db.createIndex()`|[postIndex](https://cloud.ibm.com/apidocs/cloudant?code=node#postindex)|
-|`db.index.del()`|[deleteIndex](https://cloud.ibm.com/apidocs/cloudant?code=node#deleteindex)|
-|`db.destroy() with _local path`|[deleteLocalDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#deletelocaldocument)|
-|`db.get() with _local path`|[getLocalDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#getlocaldocument)|
-|`db.insert() with _local path`|[putLocalDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#putlocaldocument)|
-|`db.partitionInfo()`|[getPartitionInformation](https://cloud.ibm.com/apidocs/cloudant?code=node#getpartitioninformation)|
-|`db.partitionedList()/partitionedListAsStream()`|[postPartitionAllDocs](https://cloud.ibm.com/apidocs/cloudant?code=node#postpartitionalldocs)|
-|`db.partitionedSearch()/partitionedSearchAsStream()`|[postPartitionSearch](https://cloud.ibm.com/apidocs/cloudant?code=node#postpartitionsearch)|
-|`db.partitionedView()/partitionedViewAsStream()`|[postPartitionView](https://cloud.ibm.com/apidocs/cloudant?code=node#postpartitionview)|
-|`db.partitionedFind()/partitionedFindAsStream()`|[postPartitionFind](https://cloud.ibm.com/apidocs/cloudant?code=node#postpartitionfind)|
-|`db.get_security()`|[getSecurity](https://cloud.ibm.com/apidocs/cloudant?code=node#getsecurity)|
-|`db.set_security()`|[putSecurity](https://cloud.ibm.com/apidocs/cloudant?code=node#putsecurity)|
-|`db.destroy()`|[deleteDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#deletedocument)|
-|`db.get()`|[getDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#getdocument)|
-|`db.head()`|[headDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#headdocument)|
-|`db.insert()`|[putDocument](https://cloud.ibm.com/apidocs/cloudant?code=node#putdocument)|
-|`db.attachment.destroy()`|[deleteAttachment](https://cloud.ibm.com/apidocs/cloudant?code=node#deleteattachment)|
-|`db.attachment.get/getAsStream`|[getAttachment](https://cloud.ibm.com/apidocs/cloudant?code=node#getattachment)|
-|`db.attachment.insert/insertAsStream`|[putAttachment](https://cloud.ibm.com/apidocs/cloudant?code=node#putattachment)|
-|`generate_api_key()`|[postApiKeys](https://cloud.ibm.com/apidocs/cloudant?code=node#postapikeys)|
-|`db.set_security()`|[putCloudantSecurityConfiguration](https://cloud.ibm.com/apidocs/cloudant?code=node#putcloudantsecurity)|
-|`get_cors()`|[getCorsInformation](https://cloud.ibm.com/apidocs/cloudant?code=node#getcorsinformation)|
-|`set_cors()`|[putCorsConfiguration](https://cloud.ibm.com/apidocs/cloudant?code=node#putcorsconfiguration)|
-|`db.geo()`|[getGeo](https://cloud.ibm.com/apidocs/cloudant?code=node#getgeo)|
+|`session()`|[`getSessionInformation`](https://cloud.ibm.com/apidocs/cloudant?code=node#getsessioninformation)|
+|`uuids()`|[`getUuids`](https://cloud.ibm.com/apidocs/cloudant?code=node#getuuids)|
+|`db.destroy()`|[`deleteDatabase`](https://cloud.ibm.com/apidocs/cloudant?code=node#deletedatabase)|
+|`db.info()`|[`getDatabaseInformation`](https://cloud.ibm.com/apidocs/cloudant?code=node#getdatabaseinformation)|
+|`db.insert()`|[`postDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#postdocument)|
+|`db.create(db_name)`|[`putDatabase`](https://cloud.ibm.com/apidocs/cloudant?code=node#putdatabase)|
+|`db.fetch()/db.list()/db.listAsStream()`|[`postAllDocs`, `postAllDocsAsStream`](https://cloud.ibm.com/apidocs/cloudant?code=node#postalldocs)|
+|`db.bulk()`|[`postBulkDocs`](https://cloud.ibm.com/apidocs/cloudant?code=node#postbulkdocs)|
+|`db.bulk_get()`|[`postBulkGet`](https://cloud.ibm.com/apidocs/cloudant?code=node#postbulkget)|
+|`db.changes()`|[`postChanges`](https://cloud.ibm.com/apidocs/cloudant?code=node#postchanges-databases)|
+|`db.destroy() with _design path`|[`deleteDesignDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#deletedesigndocument)|
+|`db.get() with _design path`|[`getDesignDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#getdesigndocument)|
+|`db.insert() with _design path`|[`putDesignDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#putdesigndocument)|
+|`db.search()/db.searchAsStream()`|[`postSearch`, `postSearchAsStream`](https://cloud.ibm.com/apidocs/cloudant?code=node#postsearch)|
+|`db.view()`|[`postView`](https://cloud.ibm.com/apidocs/cloudant?code=node#postview)|
+|`db.list() (only design documents)`|[`postDesignDocs`](https://cloud.ibm.com/apidocs/cloudant?code=node#postdesigndocs)|
+|`db.find()`|[`postFind`](https://cloud.ibm.com/apidocs/cloudant?code=node#postfind)|
+|`db.createIndex()`|[`postIndex`](https://cloud.ibm.com/apidocs/cloudant?code=node#postindex)|
+|`db.index.del()`|[`deleteIndex`](https://cloud.ibm.com/apidocs/cloudant?code=node#deleteindex)|
+|`db.destroy() with _local path`|[`deleteLocalDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#deletelocaldocument)|
+|`db.get() with _local path`|[`getLocalDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#getlocaldocument)|
+|`db.insert() with _local path`|[`putLocalDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#putlocaldocument)|
+|`db.partitionInfo()`|[`getPartitionInformation`](https://cloud.ibm.com/apidocs/cloudant?code=node#getpartitioninformation)|
+|`db.partitionedList()/partitionedListAsStream()`|[`postPartitionAllDocs`, `postPartitionAllDocsAsStream`](https://cloud.ibm.com/apidocs/cloudant?code=node#postpartitionalldocs)|
+|`db.partitionedSearch()/partitionedSearchAsStream()`|[`postPartitionSearch`, `postPartitionSearchAsStream`](https://cloud.ibm.com/apidocs/cloudant?code=node#postpartitionsearch)|
+|`db.partitionedView()/partitionedViewAsStream()`|[`postPartitionView`, `postPartitionViewAsStream`](https://cloud.ibm.com/apidocs/cloudant?code=node#postpartitionview)|
+|`db.partitionedFind()/partitionedFindAsStream()`|[`postPartitionFind`, `postPartitionFindAsStream`](https://cloud.ibm.com/apidocs/cloudant?code=node#postpartitionfind-queries)|
+|`db.get_security()`|[`getSecurity`](https://cloud.ibm.com/apidocs/cloudant?code=node#getsecurity)|
+|`db.set_security()`|[`putSecurity`](https://cloud.ibm.com/apidocs/cloudant?code=node#putsecurity)|
+|`db.destroy()`|[`deleteDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#deletedocument)|
+|`db.get()`|[`getDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#getdocument)|
+|`db.head()`|[`headDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#headdocument)|
+|`db.insert()`|[`putDocument`](https://cloud.ibm.com/apidocs/cloudant?code=node#putdocument)|
+|`db.attachment.destroy()`|[`deleteAttachment`](https://cloud.ibm.com/apidocs/cloudant?code=node#deleteattachment)|
+|`db.attachment.get/getAsStream`|[`getAttachment`](https://cloud.ibm.com/apidocs/cloudant?code=node#getattachment)|
+|`db.attachment.insert/insertAsStream`|[`putAttachment`](https://cloud.ibm.com/apidocs/cloudant?code=node#putattachment)|
+|`generate_api_key()`|[`postApiKeys`](https://cloud.ibm.com/apidocs/cloudant?code=node#postapikeys)|
+|`db.set_security()`|[`putCloudantSecurityConfiguration`](https://cloud.ibm.com/apidocs/cloudant?code=node#putcloudantsecurity)|
+|`get_cors()`|[`getCorsInformation`](https://cloud.ibm.com/apidocs/cloudant?code=node#getcorsinformation)|
+|`set_cors()`|[`putCorsConfiguration`](https://cloud.ibm.com/apidocs/cloudant?code=node#putcorsconfiguration)|
+|`db.geo()`|[`getGeo`](https://cloud.ibm.com/apidocs/cloudant?code=node#getgeo)|
