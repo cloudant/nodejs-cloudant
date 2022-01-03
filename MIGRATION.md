@@ -21,6 +21,10 @@ There are several ways to create a client connection in `cloudant-node-sdk`:
 1. Error handling is not transferable from `@cloudant/cloudant` to `@ibm-cloud/cloudant`. For more information go to the [Error handling section](https://cloud.ibm.com/apidocs/cloudant?code=node#error-handling) in our API docs.
 1. Custom HTTP client configurations in `@cloudant/cloudant` are not transferable to 
    `@ibm-cloud/cloudant`. For more information go to the [Configuring the HTTP client section](https://github.com/IBM/ibm-cloud-sdk-common/#configuring-the-http-client) in the IBM Cloud SDK Common README.
+1. Authentication errors turn out at the time of instantiation of a client, while errors 
+   with the server can be found during calling the first operation against it. We suggest to 
+   check server errors with [`getServerInformation`](https://cloud.ibm.com/apidocs/cloudant?
+   code=node#getserverinformation) which is the new alternative of `ping`.
 
 ## Request mapping
 Here's a list of the top 5 most frequently used `nodejs-cloudant` operations and the `cloudant-node-sdk` equivalent API operation documentation link:
