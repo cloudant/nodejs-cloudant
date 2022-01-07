@@ -23,8 +23,11 @@ There are several ways to create a client connection in `cloudant-node-sdk`:
    `@ibm-cloud/cloudant`. For more information go to the [Configuring the HTTP client section]
    (https://github.com/IBM/ibm-cloud-sdk-common/#configuring-the-http-client) in the IBM Cloud 
    SDK Common README.
-1. Authentication errors turn out at the time of instantiation of a client, while errors
-   with the server can be found during calling the first operation against it. We suggest to
+1. Authentication errors occur during service instantiation. For example, the code `const
+   service = CloudantV1.newInstance({ serviceName: 'EXAMPLE' });` will fail with `` At least one
+   of `iamProfileName` or `iamProfileId` must be specified. `` if required environment variables
+   prefixed with `EXAMPLE` are not set.
+1. Server errors occur when running a request against the service. We suggest to
    check server errors with [`getServerInformation`](https://cloud.ibm.com/apidocs/cloudant?
    code=node#getserverinformation) which is the new alternative of `ping`.
 
