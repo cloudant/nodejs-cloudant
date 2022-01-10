@@ -15,8 +15,8 @@ There are several ways to create a client connection in `cloudant-node-sdk`:
     not associated with any sub-scope like the database. There is no need to instantiate a
     database object to interact with documents - the database name is included as part of
     document operations. For example, in the case of updating a document you would first call
-    `` getDocument({ db: `${dbName}`, docId:`${docId}`}) `` to fetch and then `` putDocument({ 
-    db: `${dbName}`, docId:`${docId}`}) `` to update. As a result of which the `use`
+    `getDocument({ db: dbName, docId: docId})` to fetch and then `putDocument({ 
+    db: dbName, docId: docId})` to update. As a result of which the `use`
     operation also became obsoleted.
 1. Plugins are not supported, but several of the plugin features exist in the new library e.g. IAM, [automatic retries](https://github.com/IBM/ibm-cloud-sdk-common/#automatic-retries) for failed requests.
 1. Error handling is not transferable from `@cloudant/cloudant` to `@ibm-cloud/cloudant`. For more information go to the [Error handling section](https://cloud.ibm.com/apidocs/cloudant?code=node#error-handling) in our API docs.
