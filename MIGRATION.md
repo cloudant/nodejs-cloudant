@@ -20,7 +20,7 @@ There are several ways to create a client connection in `cloudant-node-sdk`:
     operation also became obsoleted.
 1. Plugins are not supported, but several of the plugin features exist in the new library e.g. IAM, [automatic retries](https://github.com/IBM/ibm-cloud-sdk-common/#automatic-retries) for failed requests.
 1. Error handling is not transferable from `@cloudant/cloudant` to `@ibm-cloud/cloudant`. For more information go to the [Error handling section](https://cloud.ibm.com/apidocs/cloudant?code=node#error-handling) in our API docs.
-1. Custom HTTP client configurations in `@cloudant/cloudant` are not transferable to
+1. Custom HTTP client configurations in `@cloudant/cloudant` can be set differently in
    `@ibm-cloud/cloudant`. For more information go to the
    [Configuring the HTTP client section](https://github.com/IBM/ibm-cloud-sdk-common/#configuring-the-http-client)
    in the IBM Cloud SDK Common README.
