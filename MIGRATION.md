@@ -11,10 +11,29 @@ There are several ways to create a client connection in `cloudant-node-sdk`:
 
 ## Other differences
 1. Using the `dotenv` package to store credentials in a file is not recommended. See the [external file configuration section](https://github.com/IBM/cloudant-node-sdk#authentication-with-external-configuration) in our API docs for handling this feature in our new library.
-1. Fetching the database object first before performing additional operations is not required. For example, in the case of updating a document you would first call `getDocument` to fetch and then `putDocument` to update.
+1.  In `cloudant-node-sdk` all operations are performed from the scope of the client instance and
+    not associated with any sub-scope like the database. There is no need to instantiate a
+    database object to interact with documents - the database name is included as part of
+    document operations. For example, in the case of updating a document you would first call
+    `getDocument({ db: dbName, docId: docId})` to fetch and then `putDocument({ 
+    db: dbName, docId: docId})` to update. As a result of which the `use`
+    operation also became obsoleted.
 1. Plugins are not supported, but several of the plugin features exist in the new library e.g. IAM, [automatic retries](https://github.com/IBM/ibm-cloud-sdk-common/#automatic-retries) for failed requests.
 1. Error handling is not transferable from `@cloudant/cloudant` to `@ibm-cloud/cloudant`. For more information go to the [Error handling section](https://cloud.ibm.com/apidocs/cloudant?code=node#error-handling) in our API docs.
-1. Custom HTTP client configurations in `@cloudant/cloudant` are not transferable to are not transferable to `@ibm-cloud/cloudant`. For more information go to the [Configuring the HTTP client section](https://github.com/IBM/ibm-cloud-sdk-common/#configuring-the-http-client) in the IBM Cloud SDK Common README.
+1. Custom HTTP client configurations in `@cloudant/cloudant` can be set differently in
+   `@ibm-cloud/cloudant`. For more information go to the
+   [Configuring the HTTP client section](https://github.com/IBM/ibm-cloud-sdk-common/#configuring-the-http-client)
+   in the IBM Cloud SDK Common README.
+   
+### Troubleshooting
+1. Authentication errors occur during service instantiation. For example, the code `const
+   service = CloudantV1.newInstance({ serviceName: 'EXAMPLE' });` will fail with `` At least one
+   of `iamProfileName` or `iamProfileId` must be specified. `` if required environment variables
+   prefixed with `EXAMPLE` are not set.
+1. Server errors occur when running a request against the service. We suggest to
+   check server errors with
+   [`getServerInformation`](https://cloud.ibm.com/apidocs/cloudant?code=node#getserverinformation)
+   which is the new alternative of `ping`.
 
 ## Request mapping
 Here's a list of the top 5 most frequently used `nodejs-cloudant` operations and the `cloudant-node-sdk` equivalent API operation documentation link:
