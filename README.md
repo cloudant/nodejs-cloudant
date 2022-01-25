@@ -1,9 +1,6 @@
 # DEPRECATED
 
-**This library is now deprecated and will be end-of-life on Dec 31 2021.**
-
-The library remains supported until the end-of-life date,
-but will receive only _critical_ maintenance updates.
+**This library is end-of-life and no longer supported.**
 
 Please see the [Migration Guide](./MIGRATION.md) for advice
 about migrating to our replacement library
