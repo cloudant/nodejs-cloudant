@@ -1,6 +1,8 @@
-# DEPRECATED
+# :warning: NO LONGER MAINTAINED :warning:
 
 **This library is end-of-life and no longer supported.**
+
+This repository will not be updated. The repository will be kept available in read-only mode.
 
 Please see the [Migration Guide](./MIGRATION.md) for advice
 about migrating to our replacement library
